@@ -38,5 +38,7 @@ socket.addEventListener('open', function (event) {
 socket.addEventListener('message', function (event) {
     data = JSON.parse(event.data);
     console.log(data);
-    logs.innerHTML += data[0]['name']+": "+data[0]['text']+"<br>";
+    if(data[0]['roomid'] == roomid) {
+        logs.innerHTML += data[0]['name']+": "+data[0]['text']+"<br>";
+    } 
 });
