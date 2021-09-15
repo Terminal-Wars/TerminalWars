@@ -1,8 +1,9 @@
-import { socket } from './url.js';
-socket.addEventListener('error', function (event) {
-  // we are most likely running this live, then.
-  const socket = new WebSocket('wss://ipv4.ioi-xd.net:2191/socket');
-})
+// either one of these needs to be set. As far as I'm concerned, one can't be set automatically. if the other doesn't work.
+// after commenting out the correct variable, you will need to copy or rename this to url.js
+// DELETE THESE COMMENTS AS WELL.
+//const socket = ws://localhost:2191/socket
+//const socket = wss://ipv4.ioi-xd.net:2191/socket
+
 let ingame = 0;
 let roomid, name
 let entry = "";
