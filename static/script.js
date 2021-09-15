@@ -1,4 +1,4 @@
-const socket = new WebSocket('ws://localhost:2191/socket');
+import { socket } from './url.js';
 socket.addEventListener('error', function (event) {
   // we are most likely running this live, then.
   const socket = new WebSocket('wss://ipv4.ioi-xd.net:2191/socket');
