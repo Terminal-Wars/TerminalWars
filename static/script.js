@@ -1,4 +1,4 @@
-const socket = new WebSocket('ws://localhost:8080/socket');
+const socket = new WebSocket('ws://localhost:2191/socket');
 let ingame = 0;
 let roomid, name
 let entry = "";
