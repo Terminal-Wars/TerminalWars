@@ -1,4 +1,8 @@
 const socket = new WebSocket('ws://localhost:2191/socket');
+socket.addEventListener('error', function (event) {
+  // we are most likely running this live, then.
+  const socket = new WebSocket('wss://ipv4.ioi-xd.net:2191/socket');
+})
 let ingame = 0;
 let roomid, name
 let entry = "";
@@ -37,7 +41,6 @@ socket.addEventListener('open', function (event) {
 
 socket.addEventListener('message', function (event) {
     data = JSON.parse(event.data);
-    console.log(data);
     if(data[0]['roomid'] == roomid) {
         logs.innerHTML += data[0]['name']+": "+data[0]['text']+"<br>";
     } 
