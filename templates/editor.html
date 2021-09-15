@@ -2,29 +2,11 @@
 <html lang="en">
 	<head>
 		<!-- Ubuntu Font -->
-		<link rel="stylesheet" href="/static/editor.css" type="text/css">
+		<link rel="stylesheet" href="/static/style.css" type="text/css">
 	</head>
-	<body bgcolor="#7767ab">
-		<input type="text" value="Cool Title" class='title'><br>
-    <div class="content">
-      <div id="editor" class="pell"></div>
-      <div id="buttons"></div>
-      <div style="margin-top:20px;">
-        <h3>HTML output:</h3>
-        <pre id="html-output"></pre>
-      </div>
-    </div>
-
-    <script src="/static/pell.js"></script>
-    <script>
-      var editor = window.pell.init({
-        element: document.getElementById('editor'),
-        defaultParagraphSeparator: 'p',
-        onChange: function (html) {
-          document.getElementById('html-output').textContent = html
-        }
-      })
-    </script>
-
+	<body>
+	<span id="logs">Enter a room ID: </span>
+    <input type="text" id="entry">
+    <script src='/static/script.js'></script>
   </body>
 </html>
