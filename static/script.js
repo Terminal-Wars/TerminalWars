@@ -17,7 +17,7 @@ function command(com, arg1, arg2) {
       /upload - Upload a saved game (unimplemented) <br>
       /newfile - Gives you an example file for a save game which you can fill out in your text editor of choice. <br>
       /upload - Upload a saved game file. (unimplemented) <br>
-      /newgame - Start a new room. You must have a game file uploaded first. <br>
+      /newgame - Start a new room. You must have a game file uploaded first. (unimplemented) <br>
       /help - Display this message. <br>
       Typing something without a slash counts as a regular text message.<br>`
       break;
@@ -33,9 +33,14 @@ function command(com, arg1, arg2) {
           if(arg3 == undefined) {action = -2;} else {
             name = arg3;
             roomid = arg1;
-            logs.innerHTML += `Joined room ${roomid} as ${name}<br>`;
             action = 0;
             ingame = 1;
+            socket.send(`[{
+                  "roomid": "${roomid}",
+                  "name": "${name}",
+                  "text": "${name} has joined ${roomid}<br>",
+                  "action": ${action}
+                }]`);
             clearInterval(timer);
           }
         }, 1000);
