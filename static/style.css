@@ -1,7 +1,11 @@
-/* Ubuntu Font */
 @font-face {font-family: "Terminus"; src: url("/static/font/Terminus.ttf") format("truetype");}
 @font-face {font-family: "TerminusBold"; src: url("/static/font/TerminusBold.ttf") format("truetype");}
 
 html, body {background: black; overflow: hidden;}
 html *, body * {font-size: 2vw; color: #FFBF00; font-family: "Terminus"!important;}
 #entry {background: #222; outline: none;border: 0; width: 100vw; position: absolute;bottom: 0;left: 0; height: 3vw;}
+#logs:after {content: ""; font-size: 2vw; font-weight: bold; animation: cursorblink 1s linear infinite; display: block;}
+@keyframes cursorblink {
+	0%, 100% {content: "|"}
+	50% {content: ""}
+}
