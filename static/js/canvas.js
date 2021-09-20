@@ -1,6 +1,8 @@
 import { objects } from './main.js';
 export let canvas = document.querySelector('.draw');
 export let ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled= false;
+ctx.mozImageSmoothingEnabled = false;
 export const WIDTH = 800; export const HEIGHT = 450;
 export let mx = 0; export let my = 0;
 export let r = 0;
@@ -9,8 +11,21 @@ export let mode = 0;
 export function draw(array) {
 	for(let i = 0; i < objects.length; i++) {
 		let o = objects[i];
-		ctx.fillStyle = o.fillStyle;
-		ctx.fillRect(o["x"]-o["width"], o["y"]-o["height"], o["width"]*2, o["height"]*2);
+		switch(o["type"]) {
+			case "window":
+				ctx.fillStyle = "lightgray";
+				ctx.fillRect(o["x"]-o["width"], o["y"]-o["height"], o["width"]*2, o["height"]*2);
+				var gradient = ctx.createLinearGradient(o["x"]-o["width"]+2, o["y"]-o["height"]+3, o["x"]+o["width"]+2, o["y"]+o["height"]+3);
+				gradient.addColorStop(0, "#dd0000");
+				gradient.addColorStop(1, "#000000");
+				ctx.fillStyle = gradient;
+				ctx.fillRect(o["x"]-o["width"]+2, o["y"]-o["height"]+3, o["width"]*2-4, 19);
+				break;
+			default:
+				ctx.fillStyle = o.fillStyle;
+				ctx.fillRect(o["x"]-o["width"], o["y"]-o["height"], o["width"]*2, o["height"]*2);
+				break;
+		}
 	}
 }
 export function example() {

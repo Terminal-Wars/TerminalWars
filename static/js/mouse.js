@@ -1,22 +1,33 @@
 import {Objects, objects} from './main.js';
 import {WIDTH, HEIGHT} from './canvas.js';
+// mouse variables
+let mouseDown = 0; let moldx, moldy, mcurx, mcury = 0;
+// modifier based on the width and height of the window.
+let wmod = (WIDTH/window.innerWidth); let hmod = (HEIGHT/window.innerHeight);
+// the currently selected object
+let curObject;
 
-
+document.addEventListener("mousemove", function(e) {if(mouseDown) {
+	mcurx = e.clientX; mcury = e.clientY;
+	let xd = Math.round((mcurx*wmod)-(moldx*wmod)); let yd = Math.round((mcury*hmod)-(moldy*hmod));
+	moldx = mcurx; moldy = mcury;
+	if(curObject["id"] > 0) {curObject["x"] += xd; curObject["y"] += yd};
+	}
+})
 document.addEventListener("mousedown", function(e) {
-	let wmod = (WIDTH/window.innerWidth); let hmod = (HEIGHT/window.innerHeight);
-	let mx = Math.round(e.clientX*wmod); let my = Math.round(e.clientY*hmod);
+	mouseDown = 1;
+	moldx = e.clientX; moldy = e.clientY;
+	let mx = Math.round(moldx*wmod); let my = Math.round(moldy*hmod);
 	let z = Objects.highestZ()["z"];
+	
 	for(let i = z; i >= 0; i--) {
-		let s = objects[1];
-		console.log("========");
-		console.log(mx.toString()+" >= "+(s["x"]-s["width"]/2).toString());
-		console.log(mx.toString()+" <= "+(s["x"]+s["width"]/2).toString());
-		console.log(my.toString()+" >= "+(s["y"]-s["height"]/2).toString());
-		console.log(my.toString()+" <= "+(s["y"]+s["height"]/2).toString());
-		if((mx >= s["x"]-(s["width"]/2) && mx <= s["x"]+(s["width"]/2)) && (my >= s["y"]-(s["height"]/2) && my <= s["y"]+(s["height"]/2))) {
-			console.log(s);
+		let s = objects[i];
+		if((mx >= s["x"]-(s["width"]) && mx <= s["x"]+(s["width"])) && (my >= s["y"]-(s["height"]) && my <= s["y"]+(s["height"]))) {
+			curObject = objects[i];
+			console.log(curObject);
 			i=0;
 			break;
 		}
 	}
-})
+});
+document.addEventListener("mouseup", function(e) {mouseDown = 0;});

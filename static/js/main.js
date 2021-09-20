@@ -15,7 +15,8 @@ export class ObjectClass {
     return objects[i];
   }
 }
-// we do a little trolling because this class just exists for the sake of cleaner code; in fact i could just do Objects_amount() 
+// we do a little trolling because this class just exists for the sake of cleaner code; 
+// in fact i could just do Objects_amount() 
 export let Objects = new ObjectClass;
 
 function loop() {
