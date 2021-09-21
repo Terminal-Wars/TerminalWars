@@ -1,5 +1,6 @@
 // Get the main objects array
 import { objects } from './main.js';
+import { keyboardBuffer } from './keyboard.js';
 // The canvas
 export let canvas = document.querySelector('.draw');
 export let ctx = canvas.getContext('2d');
@@ -72,6 +73,13 @@ export async function draw(array) {
 					case "text":
 						let cursorPosX = 0; let cursorPosY = 0;
 						ctx.font = "10px sans-serif";
+						// anything from the keyboard buffer gets added to the text box in this loop.
+						if(keyboardBuffer.length >= 1) {
+							for(let i = 0; i <= keyboardBuffer.length; i++) {
+								o["texts"][0] += keyboardBuffer[i];
+								keyboardBuffer.pop();
+							}
+						}
 						// big box
 						draw_textbox(o["x"]-o["width"]+6, o["y"]-o["height"]+25, o["width"]*2-10, o["height"]*2-58);
 						ctx.fillStyle = "black";

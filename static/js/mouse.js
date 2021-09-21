@@ -31,11 +31,10 @@ document.addEventListener("mousedown", function(e) {
 		// ...for every object...
 		// (to-do: there might be a faster way of doing this)
 		for(let i = 0; i <= objects.length; i++) {
-			let s = objects[i]; console.log(s["z"]+" == "+z);
+			let s = objects[i];
 			// If the mouse cursor clicked within an object on the z level that we are on, and it's at the z level we're at...
 			if(s["z"] == z && (mx >= s["x"]-(s["width"]) && mx <= s["x"]+(s["width"])) && (my >= s["y"]-(s["height"]) && my <= s["y"]+(s["height"]))) {
 				Objects.setCurrent(objects[i]);
-				console.log(curObject);
 				z=0;
 				break;
 			}
