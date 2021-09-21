@@ -24,4 +24,4 @@ function loop() {
   c.degrade(16);
 }
 loadDefaultObjects();
-setInterval(loop, 1/60);
+setInterval(loop, 1000/60);

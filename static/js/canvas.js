@@ -33,7 +33,7 @@ export function example() {
 	gradient.addColorStop(0, "rgb(255, "+parseInt(0+r)+", 0)");
 	gradient.addColorStop(1, "rgb(127, "+parseInt(0+r)+", 255)");
 	ctx.fillStyle = gradient;
-	ctx.fillRect(0, 0, 800, 450);
+	ctx.fillRect(0, 0, WIDTH, HEIGHT);
 	if(r > 255) {mode = 1};
 	if(r < 0) {mode = 0};
 	if(mode == 0) {r++} else {r--};
