@@ -27,6 +27,11 @@ switch(SWIDTH/gcd(SWIDTH, SHEIGHT)+":"+SHEIGHT/gcd(SWIDTH, SHEIGHT)) {
 	case "21:9":
 		height = 342.86;
 		break;
+	// not standard but my laptop uses it i might as well
+	case "16:10":
+		height = 500;
+		break;
+
 
 }
 console.log(height);
