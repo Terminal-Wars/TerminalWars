@@ -16,23 +16,22 @@ let height = 0;
 // and adjusted, but in the interest of having a simple engine demo out it'll just
 // adjust to the common ones.
 export function gcd(a,b) {if(b==0) {return a;}return gcd(b, a%b);};
+console.log(SWIDTH/gcd(SWIDTH, SHEIGHT)+":"+SHEIGHT/gcd(SWIDTH, SHEIGHT));
 switch(SWIDTH/gcd(SWIDTH, SHEIGHT)+":"+SHEIGHT/gcd(SWIDTH, SHEIGHT)) {
-	default:
-	case "16:9":
-		height = 450;
-		break;
 	case "4:3":
 		height = 600;
 		break;
 	case "21:9":
 		height = 342.86;
 		break;
-	// not standard but my laptop uses it i might as well
-	case "16:10":
+	// 16:10; not standard but my laptop uses it i might as well 
+	case "8:5":
 		height = 500;
 		break;
-
-
+	default:
+	case "16:9":
+		height = 450;
+		break;
 }
 console.log(height);
 // (because i guess we can't just have it be exported from within the switch case)
