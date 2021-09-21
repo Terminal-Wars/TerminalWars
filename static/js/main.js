@@ -1,5 +1,6 @@
 import * as c from './canvas.js';
 import * as m from './mouse.js';
+import * as k from './keyboard.js';
 import { loadDefaultObjects } from './loadDefaultObjects.js';
 export let objects = [];
 
@@ -14,14 +15,18 @@ export class ObjectClass {
     }
     return objects[i];
   }
+  setCurrent(obj) {
+    curObject = obj;
+  }
 }
 // we do a little trolling because this class just exists for the sake of cleaner code; 
 // in fact i could just do Objects_amount() 
 export let Objects = new ObjectClass;
 
-function loop() {
-  c.draw();
-  c.degrade(16);
+async function loop() {
+  await c.draw();
+  await c.degrade(32);
 }
 loadDefaultObjects();
+export let curObject = objects[0];
 setInterval(loop, 1000/60);
