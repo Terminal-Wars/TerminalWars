@@ -80,10 +80,10 @@ export async function draw(array) {
 							switch(k) {
 								case "\n":
 									cursorPosY += 12;
-									cursorPosX = -5;
+									cursorPosX = -8;
 								default:
 									ctx.fillText(k, o["x"]-o["width"]+8+cursorPosX, o["y"]-o["height"]+35+cursorPosY);
-									cursorPosX += 5;
+									cursorPosX += 8;
 							}
 						}
 						// small box
