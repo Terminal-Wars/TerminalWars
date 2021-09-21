@@ -3,23 +3,67 @@ export let canvas = document.querySelector('.draw');
 export let ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled= false;
 ctx.mozImageSmoothingEnabled = false;
-export const WIDTH = 800; export const HEIGHT = 450;
-export let mx = 0; export let my = 0;
-export let r = 0;
-export let mode = 0;
+
+// The monitor width
+export const SWIDTH = screen.width; export const SHEIGHT = screen.height;
+// The default, set width
+export const WIDTH = 800;
+// A temporary variable for the height calculations.
+let height = 0;
+
+// The emulated screen width and height, adjusted based on the monitor ratio.
+// TODO: There is definitely a mathmatical function to have it automatically be calculated
+// and adjusted, but in the interest of having a simple engine demo out it'll just
+// adjust to the common ones.
+export function gcd(a,b) {if(b==0) {return a;}return gcd(b, a%b);};
+switch(SWIDTH/gcd(SWIDTH, SHEIGHT)+":"+SHEIGHT/gcd(SWIDTH, SHEIGHT)) {
+	default:
+	case "16:9":
+		height = 450;
+		break;
+	case "4:3":
+		height = 600;
+		break;
+	case "21:9":
+		height = 342.86;
+		break;
+
+}
+console.log(height);
+// (because i guess we can't just have it be exported from within the switch case)
+export const HEIGHT = height;
 
 export function draw(array) {
 	for(let i = 0; i < objects.length; i++) {
 		let o = objects[i];
 		switch(o["type"]) {
 			case "window":
+				// x, y, width, height
+				ctx.fillStyle = "black";
+				ctx.fillRect(o["x"]-o["width"]+1, o["y"]-o["height"]+1, (o["width"]*2+1), (o["height"]*2)+2-1);
+				ctx.fillStyle = "darkgray";
+				ctx.fillRect(o["x"]-o["width"]+1, o["y"]-o["height"]+1, (o["width"]*2), (o["height"]*2));
+				ctx.fillStyle = "white";
+				ctx.fillRect(o["x"]-o["width"]+1, o["y"]-o["height"]+1, (o["width"]*2)-1, (o["height"]*2)-1);
 				ctx.fillStyle = "lightgray";
-				ctx.fillRect(o["x"]-o["width"], o["y"]-o["height"], o["width"]*2, o["height"]*2);
+				ctx.fillRect(o["x"]-o["width"]+2, o["y"]-o["height"]+2, (o["width"]*2)-2, (o["height"]*2)-2);
 				var gradient = ctx.createLinearGradient(o["x"]-o["width"]+2, o["y"]-o["height"]+3, o["x"]+o["width"]+2, o["y"]+o["height"]+3);
 				gradient.addColorStop(0, "#dd0000");
 				gradient.addColorStop(1, "#000000");
 				ctx.fillStyle = gradient;
-				ctx.fillRect(o["x"]-o["width"]+2, o["y"]-o["height"]+3, o["width"]*2-4, 19);
+				ctx.fillRect(o["x"]-o["width"]+3, o["y"]-o["height"]+3, o["width"]*2-4, 19);
+				ctx.fillStyle = "white";
+				ctx.font = "bold 12px sans-serif";
+				ctx.fillText(o["title"], o["x"]-(o["title"].length*3), o["y"]-o["height"]+16);
+				switch(o["win_type"]) {
+					case "text":
+						ctx.fillStyle = "black";
+						ctx.fillRect(o["x"]-o["width"]+3, o["y"]-o["height"]+24, o["width"]*2-4, o["height"]*2-46);
+						ctx.fillStyle = "gray";
+						ctx.fillRect(o["x"]-o["width"]+4, o["y"]-o["height"]+25, o["width"]*2-5, o["height"]*2-47);
+						ctx.fillStyle = "white";
+						ctx.fillRect(o["x"]-o["width"]+4, o["y"]-o["height"]+25, o["width"]*2-6, o["height"]*2-48);
+				}
 				break;
 			default:
 				ctx.fillStyle = o.fillStyle;
@@ -28,22 +72,6 @@ export function draw(array) {
 		}
 	}
 }
-export function example() {
-	var gradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
-	gradient.addColorStop(0, "rgb(255, "+parseInt(0+r)+", 0)");
-	gradient.addColorStop(1, "rgb(127, "+parseInt(0+r)+", 255)");
-	ctx.fillStyle = gradient;
-	ctx.fillRect(0, 0, WIDTH, HEIGHT);
-	if(r > 255) {mode = 1};
-	if(r < 0) {mode = 0};
-	if(mode == 0) {r++} else {r--};
-	ctx.fillStyle = "rgb(255,0,0)";
-	ctx.fillRect(mx, my, mx+16, my+16);
-}
-
-document.addEventListener("mousemove", function(e) {
-	mx = e.clientX; my = e.clientY;
-})
 
 export function degrade(depth) {
 	// Indexing

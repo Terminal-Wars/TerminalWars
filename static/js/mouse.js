@@ -1,9 +1,9 @@
 import {Objects, objects} from './main.js';
-import {WIDTH, HEIGHT} from './canvas.js';
+import {WIDTH, HEIGHT, SWIDTH, SHEIGHT} from './canvas.js';
 // mouse variables
 let mouseDown = 0; let moldx, moldy, mcurx, mcury = 0;
 // modifier based on the width and height of the window.
-let wmod = (WIDTH/window.innerWidth); let hmod = (HEIGHT/window.innerHeight);
+let wmod = (WIDTH/SWIDTH); let hmod = (HEIGHT/SHEIGHT);
 // the currently selected object
 let curObject;
 
