@@ -5,7 +5,7 @@ ctx.imageSmoothingEnabled= false;
 ctx.mozImageSmoothingEnabled = false;
 
 // The monitor width
-export const SWIDTH = screen.width; export const SHEIGHT = screen.height;
+export const SWIDTH = screen.width; export const SHEIGHT = window.innerHeight;
 // The default, set width
 export const WIDTH = 800;
 // A temporary variable for the height calculations.
@@ -16,8 +16,8 @@ let height = 0;
 // and adjusted, but in the interest of having a simple engine demo out it'll just
 // adjust to the common ones.
 export function gcd(a,b) {if(b==0) {return a;}return gcd(b, a%b);};
-console.log(SWIDTH/gcd(SWIDTH, SHEIGHT)+":"+SHEIGHT/gcd(SWIDTH, SHEIGHT));
-switch(SWIDTH/gcd(SWIDTH, SHEIGHT)+":"+SHEIGHT/gcd(SWIDTH, SHEIGHT)) {
+export const RATIO = gcd(SWIDTH, SHEIGHT);
+switch(SWIDTH/RATIO+":"+SHEIGHT/RATIO) {
 	case "4:3":
 		height = 600;
 		break;
