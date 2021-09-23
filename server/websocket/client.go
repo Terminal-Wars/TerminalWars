@@ -1,8 +1,8 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -33,6 +33,47 @@ type Client struct {
 	send chan []byte
 }
 
+type RequestType string
+
+const (
+	BroadcastRequest RequestType = "broadcast"
+	PutRequest       RequestType = "put"
+	GetRequest       RequestType = "get"
+)
+
+type Request struct {
+	Type RequestType     `json:"type"`
+	Data json.RawMessage `json:"data"`
+}
+
+type PutRequestData struct {
+	RoomID  string          `json:"roomID"`
+	BlockID string          `json:"blockID"`
+	Data    json.RawMessage `json:"data"`
+}
+type GetRequestData struct {
+	RoomID  string `json:"roomID"`
+	BlockID string `json:"blockID"`
+}
+
+type ResponseType string
+
+const (
+	BroadcastResponse ResponseType = "broadcast"
+	GetResponse       ResponseType = "get"
+)
+
+type Response struct {
+	Type ResponseType `json:"type"`
+	Data interface{}  `json:"data"`
+}
+
+type GetDataResponse struct {
+	OK      bool            `json:"ok"`
+	Data    json.RawMessage `json:"data,omitempty"`
+	Created int64           `json:"created,omitempty"`
+}
+
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -50,15 +91,52 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
+				log.Println("unexpected close error from client:", err)
 			}
 			break
 		}
-		c.hub.broadcast <- message
+		var req Request
+		err = json.Unmarshal(message, &req)
+		if err != nil {
+			log.Println("malformed json from client:", err)
+		}
+		switch req.Type {
+		case BroadcastRequest:
+			resp := Response{Type: BroadcastResponse, Data: json.RawMessage(message)}
+			p, err := json.Marshal(resp)
+			if err != nil {
+				log.Println("error marshaling json:", err)
+			}
+			c.hub.broadcast <- p
+		case PutRequest:
+			var data PutRequestData
+			err := json.Unmarshal(req.Data, &data)
+			if err != nil {
+				log.Println("malformed json from client:", err)
+			}
+			c.hub.putData(blockID{data.RoomID, data.BlockID}, data.Data)
+		case GetRequest:
+			var data GetRequestData
+			err := json.Unmarshal(req.Data, &data)
+			if err != nil {
+				log.Println("malformed json from client:", err)
+			}
+			bd, ok := c.hub.getData(blockID{data.RoomID, data.RoomID})
+			resp := Response{Type: GetResponse, Data: GetDataResponse{
+				OK:      ok,
+				Data:    bd.Data,
+				Created: bd.Created,
+			}}
+			p, err := json.Marshal(resp)
+			if err != nil {
+				log.Println("error marshaling json:", err)
+			}
+			go func() {
+				c.send <- p
+			}()
+		}
 	}
 }
-
-var newline = []byte("\n")
 
 // writePump pumps messages from the hub to the websocket connection.
 //
@@ -91,19 +169,4 @@ func (c *Client) writePump() {
 			}
 		}
 	}
-}
-
-// serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		return
-	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
-	client.hub.register <- client
-
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
-	go client.writePump()
-	go client.readPump()
 }
