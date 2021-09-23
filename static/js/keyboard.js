@@ -7,15 +7,14 @@ document.addEventListener("keydown", function(e) {
 	switch(curObject["win_type"]) {
 		// Terminal actions
 		case "text":
-			if(e.key.length <= 2) curObject["texts"][1] += e.key;
+			if(e.key.length <= 1) curObject["texts"][1] += e.key;
 			if(e.key == "Enter") {
 				if(curObject["texts"][1].charAt(0) == "/") {
-					command(curObject["texts"][1].replace("/",""));
+					let cv = curObject["texts"][1].replace("/","").split(" ");
+					command(cv[0], cv[1]);
 				} else {
 					//curObject["texts"][0] += "\n"+curObject["texts"][1];
-					socket.send(`[{
-						"text": \"${curObject["texts"][1]}\\n\"
-					}]`);
+					socket.send(`{"type":"broadcast","data":{"text":\"${curObject["texts"][1]}\\n\"}}`);
 				}
 				curObject["texts"][1] = curObject["texts"][1].replace(/^(.*)$/, "");
 			};
