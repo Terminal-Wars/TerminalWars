@@ -22,9 +22,9 @@ type Hub struct {
 	// Unregister requests from clients.
 	unregister chan *Client
 
-	mu                sync.Mutex
-	data              map[blockID]blockData
-	expirationPending map[string]struct{} // room ID
+	mu     sync.Mutex
+	data   map[blockID]blockData
+	expiry map[string]struct{} // room ID
 }
 
 type blockID struct {
@@ -38,10 +38,12 @@ type blockData struct {
 
 func NewHub() *Hub {
 	return &Hub{
+		clients:    make(map[*Client]bool),
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		clients:    make(map[*Client]bool),
+		data:       make(map[blockID]blockData),
+		expiry:     make(map[string]struct{}),
 	}
 }
 
@@ -71,10 +73,9 @@ func (h *Hub) Run() {
 func (h *Hub) putData(id blockID, data json.RawMessage) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	h.data := make(map[string]float64)
 	h.data[id] = blockData{data, time.Now().UnixMilli()}
-	if _, ok := h.expirationPending[id.roomID]; !ok {
-		h.expirationPending[id.roomID] = struct{}{}
+	if _, ok := h.expiry[id.roomID]; !ok {
+		h.expiry[id.roomID] = struct{}{}
 		go func() {
 			time.Sleep(2 * time.Hour)
 			h.mu.Lock()
@@ -84,7 +85,7 @@ func (h *Hub) putData(id blockID, data json.RawMessage) {
 					delete(h.data, i)
 				}
 			}
-			delete(h.expirationPending, id.roomID)
+			delete(h.expiry, id.roomID)
 		}()
 	}
 }
