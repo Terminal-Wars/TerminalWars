@@ -71,6 +71,7 @@ func (h *Hub) Run() {
 func (h *Hub) putData(id blockID, data json.RawMessage) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	h.data := make(map[string]float64)
 	h.data[id] = blockData{data, time.Now().UnixMilli()}
 	if _, ok := h.expirationPending[id.roomID]; !ok {
 		h.expirationPending[id.roomID] = struct{}{}

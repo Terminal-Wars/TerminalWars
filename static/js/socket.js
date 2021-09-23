@@ -11,7 +11,8 @@ socket.addEventListener('open', function (event) {
 
 socket.addEventListener('message', function (event) {
     let data = JSON.parse(event.data);
-    keyboardBuffer.push(data[0]["text"]);
+    console.log(data);
+    keyboardBuffer.push(data["data"]["data"]["text"]);
     if(data[0]['roomid'] == roomid) {
         
     } 
