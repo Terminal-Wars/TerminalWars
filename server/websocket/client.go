@@ -134,6 +134,8 @@ func (c *Client) readPump() {
 			go func() {
 				c.send <- p
 			}()
+		default:
+			log.Println("request with invalid type")
 		}
 	}
 }
