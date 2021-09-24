@@ -27,20 +27,19 @@ document.addEventListener("mousedown", function(e) {
 	// Get the z of the object with the highest z.
 	let z = Objects.highestZ()["z"];
 	// Starting on the highest z...
-	for(let n = z; n >= 0; n--) {
+	for(let n = z; n > -10; n--) {
 		// ...for every object...
 		// (to-do: there might be a faster way of doing this)
-		for(let i = 0; i <= objects.length; i++) {
+		for(let i = 0; i <= objects.length-1; i++) {
 			let s = objects[i];
 			// If the mouse cursor clicked within an object on the z level that we are on, and it's at the z level we're at...
-			if(s["z"] == z && (mx >= s["x"]-(s["width"]) && mx <= s["x"]+(s["width"])) && (my >= s["y"]-(s["height"]) && my <= s["y"]+(s["height"]))) {
-				Objects.setCurrent(objects[i]);
-				z=0;
+			if(s["z"] == n && (mx >= s["x"]-(s["width"]) && mx <= s["x"]+(s["width"])) && (my >= s["y"]-(s["height"]) && my <= s["y"]+(s["height"]))) {
+				console.log(s);
+				Objects.setCurrent(s);
+				n=0;
 				break;
 			}
 		}
-		// Decrease the z axis we search on.
-		z--;
 	}
 });
 // When the mouse button is released.

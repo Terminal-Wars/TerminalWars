@@ -1,6 +1,7 @@
 // Get the main objects array
 import { objects } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
+import { drawChars } from './charmap.js';
 // The canvas
 export let canvas = document.querySelector('.draw');
 export let ctx = canvas.getContext('2d');
@@ -37,9 +38,10 @@ switch(SWIDTH/RATIO+":"+SHEIGHT/RATIO) {
 		break;
 }
 console.log(height);
-// (because i guess we can't just have it be exported from within the switch case)
 export const HEIGHT = height;
-
+canvas.width = WIDTH; canvas.height = HEIGHT;
+canvas.style.width = window.innerWidth+"px"; canvas.style.height = SHEIGHT+"px";
+//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 // The draw function.
 export async function draw(array) {
 	// For each object in the objects array...
@@ -67,7 +69,7 @@ export async function draw(array) {
 				// title (todo: write a custom function for writing fonts)
 				ctx.fillStyle = "white";
 				ctx.font = "bold 12px sans-serif";
-				ctx.fillText(o["title"], o["x"]-(o["title"].length*3), o["y"]-o["height"]+17);
+				drawChars(o["title"], o["x"]-(o["title"].length*3), o["y"]-o["height"]+6, 1, 1);
 				switch(o["win_type"]) {
 					// terminal window
 					case "text":
@@ -90,14 +92,15 @@ export async function draw(array) {
 									cursorPosY += 12;
 									cursorPosX = -8;
 								default:
-									ctx.fillText(k, o["x"]-o["width"]+8+cursorPosX, o["y"]-o["height"]+35+cursorPosY);
+									drawChars(k,o["x"]-o["width"]+8+cursorPosX,o["y"]-o["height"]+35+cursorPosY);
+									//ctx.fillText(k, o["x"]-o["width"]+8+cursorPosX, o["y"]-o["height"]+35+cursorPosY);
 									cursorPosX += 8;
 							}
 						}
 						// small box
 						draw_textbox(o["x"]-o["width"]+6, o["y"]+o["height"]-26, o["width"]*2-10, 18);
 						ctx.fillStyle = "black";
-						ctx.fillText(o["texts"][1], o["x"]-o["width"]+8, o["y"]+o["height"]-15);
+						drawChars(o["texts"][1], o["x"]-o["width"]+8, o["y"]+o["height"]-24);
 				}
 				break;
 			default:
