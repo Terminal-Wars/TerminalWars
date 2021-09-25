@@ -10,37 +10,14 @@ ctx.mozImageSmoothingEnabled = false;
 
 // The monitor width
 export const SWIDTH = screen.width; export const SHEIGHT = window.innerHeight;
-// The default, set width
+// The default, set width and height.
 export const WIDTH = 800;
-// A temporary variable for the height calculations.
-let height = 0;
+export const HEIGHT = 600;
+// The scale multiplier.
+export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
-// The emulated screen width and height, adjusted based on the monitor ratio.
-// TODO: There is definitely a mathmatical function to have it automatically be calculated
-// and adjusted, but in the interest of having a simple engine demo out it'll just
-// adjust to the common ones.
-export function gcd(a,b) {if(b==0) {return a;}return gcd(b, a%b);};
-export const RATIO = gcd(SWIDTH, SHEIGHT);
-switch(SWIDTH/RATIO+":"+SHEIGHT/RATIO) {
-	case "4:3":
-		height = 600;
-		break;
-	case "21:9":
-		height = 342.86;
-		break;
-	// 16:10; not standard but my laptop uses it i might as well 
-	case "8:5":
-		height = 500;
-		break;
-	default:
-	case "16:9":
-		height = 450;
-		break;
-}
-console.log(height);
-export const HEIGHT = height;
 canvas.width = WIDTH; canvas.height = HEIGHT;
-canvas.style.width = window.innerWidth+"px"; canvas.style.height = SHEIGHT+"px";
+canvas.style.width, canvas.style.maxWidth = WIDTH*MUL+"px"; canvas.style.height, canvas.style.maxHeight = HEIGHT*MUL+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 // The draw function.
 export async function draw(array) {
@@ -95,6 +72,7 @@ export async function draw(array) {
 									drawChars(k,o["x"]-o["width"]+8+cursorPosX,o["y"]-o["height"]+35+cursorPosY);
 									//ctx.fillText(k, o["x"]-o["width"]+8+cursorPosX, o["y"]-o["height"]+35+cursorPosY);
 									cursorPosX += 8;
+									if(cursorPosX >= 384) {cursorPosX = 0; cursorPosY += 12;}
 							}
 						}
 						// small box

@@ -1,4 +1,6 @@
 import {socket} from './socket.js';
+import {keyboardBuffer} from './keyboard.js';
+export let userID = ""; export let roomID = "";
 
 export function command(cmd, arg1="", arg2="") {
 	switch(cmd) {
@@ -8,5 +10,14 @@ export function command(cmd, arg1="", arg2="") {
 		case "get":
 			socket.send(`{"type":"get","data":{"roomID":"test","blockID":"test"}}}`);
 			break;
+		case "nick":
+			userID = arg1;
+			break;
+		case "join":
+			roomID = arg1;
+			break;
+		default: 
+			keyboardBuffer.push("Invalid or unimplemented command");
+
 	}
 }

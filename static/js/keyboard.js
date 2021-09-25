@@ -1,6 +1,6 @@
 import {objects, Objects, curObject} from './main.js';
 import {socket} from './socket.js';
-import {command} from './commands.js';
+import {command, userID, roomID} from './commands.js';
 export let keyboardBuffer = [];
 
 document.addEventListener("keydown", function(e) {
@@ -13,11 +13,14 @@ document.addEventListener("keydown", function(e) {
 					let cv = curObject["texts"][1].replace("/","").split(" ");
 					command(cv[0], cv[1]);
 				} else {
-					//curObject["texts"][0] += "\n"+curObject["texts"][1];
-					socket.send(`{"type":"broadcast","data":{"text":\"${curObject["texts"][1]}\\n\"}}`);
+					console.log(userID);
+					if(userID == "") {keyboardBuffer.push("You haven't chosen a username. Use /nick to set one.\n");}
+					else if(roomID == "") {keyboardBuffer.push("You haven't joined a room. Use /room to set one.\n");}
+					else {socket.send(`{"type":"broadcast","data":{"text":\"${curObject["texts"][1]}\\n\"}}`);}
+					console.log(keyboardBuffer);
 				}
 				curObject["texts"][1] = curObject["texts"][1].replace(/^(.*)$/, "");
 			};
 			if(e.key == "Backspace") {curObject["texts"][1] = curObject["texts"][1].replace(/(.){0,1}$/, "");};
 	}
-})
+});
