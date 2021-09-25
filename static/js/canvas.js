@@ -16,6 +16,14 @@ export const HEIGHT = 600;
 // The scale multiplier.
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
+// Some terminal specific variables which need to be global.
+export let shiftY = 0; export let termHeight = 1;
+
+// And since variables are imported to other files as consts no matter what,
+// we need a function to increase and decrease it from this file.
+// todo: clamp function
+export function shiftYBy(num) {shiftY += num;}
+
 canvas.width = WIDTH; canvas.height = HEIGHT;
 canvas.style.width, canvas.style.maxWidth = WIDTH*MUL+"px"; canvas.style.height, canvas.style.maxHeight = HEIGHT*MUL+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
@@ -53,11 +61,13 @@ export async function draw(array) {
 						let cursorPosX = 0; let cursorPosY = 0;
 						ctx.font = "10px sans-serif";
 						// anything from the keyboard buffer gets added to the text box in this loop.
+						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
+						// only arrays.
 						if(keyboardBuffer.length >= 1) {
-							for(let i = 0; i <= keyboardBuffer.length; i++) {
-								o["texts"][0] += keyboardBuffer[i];
-								keyboardBuffer.pop();
-							}
+							o["texts"][0] += keyboardBuffer[0];
+							keyboardBuffer.shift(0);
+							termHeight++;
+							if(termHeight > 27) {shiftY--;}
 						}
 						// big box
 						draw_textbox(o["x"]-o["width"]+6, o["y"]-o["height"]+25, o["width"]*2-10, o["height"]*2-58);
@@ -69,12 +79,17 @@ export async function draw(array) {
 									cursorPosY += 12;
 									cursorPosX = -8;
 								default:
-									drawChars(k,o["x"]-o["width"]+8+cursorPosX,o["y"]-o["height"]+35+cursorPosY);
+									let tmpCPY = o["y"]-o["height"]+35+cursorPosY+(shiftY*12);
+									if(tmpCPY <= o["y"]-o["height"]+12 || tmpCPY >= o["height"]*2-24)  {continue;}
+									drawChars(k,o["x"]-o["width"]+8+cursorPosX,tmpCPY);
 									//ctx.fillText(k, o["x"]-o["width"]+8+cursorPosX, o["y"]-o["height"]+35+cursorPosY);
 									cursorPosX += 8;
 									if(cursorPosX >= 384) {cursorPosX = 0; cursorPosY += 12;}
 							}
 						}
+						// scrollbar 
+						ctx.fillStyle = 'lightgray';
+						if(termHeight > 27) ctx.fillRect(o["x"]+o["width"]-22,o["y"]-o["height"]+35-(o["height"]*2/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1);
 						// small box
 						draw_textbox(o["x"]-o["width"]+6, o["y"]+o["height"]-26, o["width"]*2-10, 18);
 						ctx.fillStyle = "black";
