@@ -1,4 +1,3 @@
-// Get the main objects array
 import { objects } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
@@ -28,7 +27,7 @@ canvas.width = WIDTH; canvas.height = HEIGHT;
 canvas.style.width, canvas.style.maxWidth = WIDTH*MUL+"px"; canvas.style.height, canvas.style.maxHeight = HEIGHT*MUL+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 // The draw function.
-export async function draw(array) {
+export async function drawGFX() {
 	// For each object in the objects array...
 	for(let i = 0; i < objects.length; i++) {
 		let o = objects[i];

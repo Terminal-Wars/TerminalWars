@@ -1,5 +1,8 @@
 import {socket} from './socket.js';
+import {particles} from './main.js';
 import {keyboardBuffer} from './keyboard.js';
+import {WIDTH, HEIGHT } from './canvas.js';
+import {rand} from './particles.js';
 export let userID = ""; export let roomID = "";
 
 export function command(cmd, arg1="", arg2="") {
@@ -26,6 +29,9 @@ Room-specific commands:
 		case "test":
 			for(let i = 0; i <= 150; i++) {keyboardBuffer.push(i+"\n");}
 			break;
+		case "particle":
+			for(let i = 0; i < 500; i++) {if(particles.length < 6000) particles.push({"x":WIDTH/2,"y":HEIGHT/2,"modx":rand(3)-1,"mody":rand(3)-1,"fill":"rgb("+rand(255)+","+rand(255)+","+rand(255)+")"});}
+				break;
 		default: 
 			keyboardBuffer.push("Invalid or unimplemented command.\n");
 
