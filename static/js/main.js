@@ -1,8 +1,9 @@
 import * as c from './canvas.js';
 import * as m from './mouse.js';
 import * as k from './keyboard.js';
+import * as p from './particles.js';
 import { loadDefaultObjects } from './loadDefaultObjects.js';
-export let objects = [];
+export let objects = []; export let particles = [];
 
 export class ObjectClass {
   amount() {
@@ -24,7 +25,8 @@ export class ObjectClass {
 export let Objects = new ObjectClass;
 
 async function loop() {
-  await c.draw();
+  await c.drawGFX();
+  await p.drawParticles();
   await c.degrade(32);
 }
 loadDefaultObjects();

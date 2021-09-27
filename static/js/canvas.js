@@ -1,6 +1,6 @@
-// Get the main objects array
 import { objects } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
+import { drawChars } from './charmap.js';
 // The canvas
 export let canvas = document.querySelector('.draw');
 export let ctx = canvas.getContext('2d');
@@ -9,39 +9,25 @@ ctx.mozImageSmoothingEnabled = false;
 
 // The monitor width
 export const SWIDTH = screen.width; export const SHEIGHT = window.innerHeight;
-// The default, set width
+// The default, set width and height.
 export const WIDTH = 800;
-// A temporary variable for the height calculations.
-let height = 0;
+export const HEIGHT = 600;
+// The scale multiplier.
+export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
-// The emulated screen width and height, adjusted based on the monitor ratio.
-// TODO: There is definitely a mathmatical function to have it automatically be calculated
-// and adjusted, but in the interest of having a simple engine demo out it'll just
-// adjust to the common ones.
-export function gcd(a,b) {if(b==0) {return a;}return gcd(b, a%b);};
-export const RATIO = gcd(SWIDTH, SHEIGHT);
-switch(SWIDTH/RATIO+":"+SHEIGHT/RATIO) {
-	case "4:3":
-		height = 600;
-		break;
-	case "21:9":
-		height = 342.86;
-		break;
-	// 16:10; not standard but my laptop uses it i might as well 
-	case "8:5":
-		height = 500;
-		break;
-	default:
-	case "16:9":
-		height = 450;
-		break;
-}
-console.log(height);
-// (because i guess we can't just have it be exported from within the switch case)
-export const HEIGHT = height;
+// Some terminal specific variables which need to be global.
+export let shiftY = 0; export let termHeight = 1;
 
+// And since variables are imported to other files as consts no matter what,
+// we need a function to increase and decrease it from this file.
+// todo: clamp function
+export function shiftYBy(num) {shiftY += num;}
+
+canvas.width = WIDTH; canvas.height = HEIGHT;
+canvas.style.width, canvas.style.maxWidth = WIDTH*MUL+"px"; canvas.style.height, canvas.style.maxHeight = HEIGHT*MUL+"px";
+//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 // The draw function.
-export async function draw(array) {
+export async function drawGFX() {
 	// For each object in the objects array...
 	for(let i = 0; i < objects.length; i++) {
 		let o = objects[i];
@@ -67,18 +53,20 @@ export async function draw(array) {
 				// title (todo: write a custom function for writing fonts)
 				ctx.fillStyle = "white";
 				ctx.font = "bold 12px sans-serif";
-				ctx.fillText(o["title"], o["x"]-(o["title"].length*3), o["y"]-o["height"]+17);
+				drawChars(o["title"], o["x"]-(o["title"].length*3), o["y"]-o["height"]+6, 1, 1);
 				switch(o["win_type"]) {
 					// terminal window
 					case "text":
 						let cursorPosX = 0; let cursorPosY = 0;
 						ctx.font = "10px sans-serif";
 						// anything from the keyboard buffer gets added to the text box in this loop.
+						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
+						// only arrays.
 						if(keyboardBuffer.length >= 1) {
-							for(let i = 0; i <= keyboardBuffer.length; i++) {
-								o["texts"][0] += keyboardBuffer[i];
-								keyboardBuffer.pop();
-							}
+							o["texts"][0] += keyboardBuffer[0];
+							keyboardBuffer.shift(0);
+							termHeight++;
+							if(termHeight > 27) {shiftY--;}
 						}
 						// big box
 						draw_textbox(o["x"]-o["width"]+6, o["y"]-o["height"]+25, o["width"]*2-10, o["height"]*2-58);
@@ -90,14 +78,21 @@ export async function draw(array) {
 									cursorPosY += 12;
 									cursorPosX = -8;
 								default:
-									ctx.fillText(k, o["x"]-o["width"]+8+cursorPosX, o["y"]-o["height"]+35+cursorPosY);
+									let tmpCPY = o["y"]-o["height"]+35+cursorPosY+(shiftY*12);
+									if(tmpCPY <= o["y"]-o["height"]+12 || tmpCPY >= o["height"]*2-24)  {continue;}
+									drawChars(k,o["x"]-o["width"]+8+cursorPosX,tmpCPY);
+									//ctx.fillText(k, o["x"]-o["width"]+8+cursorPosX, o["y"]-o["height"]+35+cursorPosY);
 									cursorPosX += 8;
+									if(cursorPosX >= 384) {cursorPosX = 0; cursorPosY += 12;}
 							}
 						}
+						// scrollbar 
+						ctx.fillStyle = 'lightgray';
+						if(termHeight > 27) ctx.fillRect(o["x"]+o["width"]-22,o["y"]-o["height"]+35-(o["height"]*2/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1);
 						// small box
 						draw_textbox(o["x"]-o["width"]+6, o["y"]+o["height"]-26, o["width"]*2-10, 18);
 						ctx.fillStyle = "black";
-						ctx.fillText(o["texts"][1], o["x"]-o["width"]+8, o["y"]+o["height"]-15);
+						drawChars(o["texts"][1], o["x"]-o["width"]+8, o["y"]+o["height"]-24);
 				}
 				break;
 			default:

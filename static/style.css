@@ -1,5 +1,6 @@
 * {margin: 0;}
-canvas {width: 100%; height: 100vh; max-width: 100%; max-height: 100%; display: block; margin:  0 auto!important; 
+body {background: black;}
+canvas {display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     image-rendering: optimizeSpeed!important;
     image-rendering: -moz-crisp-edges!important;
     image-rendering: -o-crisp-edges!important;
