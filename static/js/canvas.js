@@ -8,12 +8,16 @@ ctx.imageSmoothingEnabled= false;
 ctx.mozImageSmoothingEnabled = false;
 
 // The monitor width
-export const SWIDTH = screen.width; export const SHEIGHT = window.innerHeight;
+export const SWIDTH = screen.width; export const SHEIGHT = screen.height;
 // The default, set width and height.
 export const WIDTH = 800;
 export const HEIGHT = 600;
 // The scale multiplier.
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
+
+// Any images we need
+const term_buttons = new Image(16,48);
+term_buttons.src = 'static/gfx/term_buttons.webp';
 
 // Some terminal specific variables which need to be global.
 export let shiftY = 0; export let termHeight = 1;
@@ -24,7 +28,8 @@ export let shiftY = 0; export let termHeight = 1;
 export function shiftYBy(num) {shiftY += num;}
 
 canvas.width = WIDTH; canvas.height = HEIGHT;
-canvas.style.width, canvas.style.maxWidth = WIDTH*MUL+"px"; canvas.style.height, canvas.style.maxHeight = HEIGHT*MUL+"px";
+canvas.style.width = WIDTH*MUL+"px"; canvas.style.maxWidth = WIDTH*MUL+"px"; 
+canvas.style.height= HEIGHT*MUL+"px"; canvas.style.maxHeight = HEIGHT*MUL+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 // The draw function.
 export async function drawGFX() {
@@ -35,14 +40,14 @@ export async function drawGFX() {
 		switch(o["type"]) {
 			case "window":
 				// (x, y, width, height)
-				// gray base
+				// #808080 base
 				ctx.fillStyle = "black";
 				ctx.fillRect(o["x"]-o["width"]+1, o["y"]-o["height"]+1, (o["width"]*2+1), (o["height"]*2)+2-1);
-				ctx.fillStyle = "darkgray";
+				ctx.fillStyle = "dark#808080";
 				ctx.fillRect(o["x"]-o["width"]+1, o["y"]-o["height"]+1, (o["width"]*2), (o["height"]*2));
 				ctx.fillStyle = "white";
 				ctx.fillRect(o["x"]-o["width"]+1, o["y"]-o["height"]+1, (o["width"]*2)-1, (o["height"]*2)-1);
-				ctx.fillStyle = "lightgray";
+				ctx.fillStyle = "#b5b5b5";
 				ctx.fillRect(o["x"]-o["width"]+2, o["y"]-o["height"]+2, (o["width"]*2)-2, (o["height"]*2)-2);
 				// red gradient
 				var gradient = ctx.createLinearGradient(o["x"]-o["width"]+2, o["y"]-o["height"]+3, o["x"]+o["width"]+2, o["y"]+o["height"]+3);
@@ -87,10 +92,14 @@ export async function drawGFX() {
 							}
 						}
 						// scrollbar 
-						ctx.fillStyle = 'lightgray';
+						ctx.fillStyle = '#b5b5b5';
 						if(termHeight > 27) ctx.fillRect(o["x"]+o["width"]-22,o["y"]-o["height"]+35-(o["height"]*2/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1);
 						// small box
-						draw_textbox(o["x"]-o["width"]+6, o["y"]+o["height"]-26, o["width"]*2-10, 18);
+						draw_textbox(o["x"]-o["width"]+6, o["y"]+o["height"]-26, o["width"]*2-68, 18);
+						// the buttons
+						draw_button(o["x"]+o["width"]-58, o["y"]+o["height"]-25, 16, 16, term_buttons, 0);
+						draw_button(o["x"]+o["width"]-39, o["y"]+o["height"]-25, 16, 16, term_buttons, 16);
+						draw_button(o["x"]+o["width"]-20, o["y"]+o["height"]-25, 16, 16, term_buttons, 32);
 						ctx.fillStyle = "black";
 						drawChars(o["texts"][1], o["x"]-o["width"]+8, o["y"]+o["height"]-24);
 				}
@@ -105,12 +114,26 @@ export async function drawGFX() {
 
 // Draw a textbox with the border.
 export function draw_textbox(x,y,width,height) {
-	ctx.fillStyle = "gray";
+	ctx.fillStyle = "#808080";
 	ctx.fillRect(x-1, y-1, width+2, height+2);
 	ctx.fillStyle = "black";
 	ctx.fillRect(x, y, width+1, height+1);
 	ctx.fillStyle = "white";
 	ctx.fillRect(x, y, width, height);
+}
+
+export function draw_button(x,y,width,height,image,img_y) {
+	ctx.fillStyle = "black";
+	ctx.fillRect(x-1, y-1, width+2, height+2);
+	ctx.fillStyle = "white";
+	ctx.fillRect(x-1, y-1, width+1, height+1);
+	ctx.fillStyle = "#dfdfdf";
+	ctx.fillRect(x, y, width, height);
+	ctx.fillStyle = "#808080";
+	ctx.fillRect(x+1, y+1, width-1, height-1);
+	ctx.fillStyle = "#b5b5b5";
+	ctx.fillRect(x+1, y+1, width-2, height-2);
+	ctx.drawImage(image,0,img_y,width,height,x,y,width,height);
 }
 
 // Make sure every pixel on the screen adheres to a certain color depth.

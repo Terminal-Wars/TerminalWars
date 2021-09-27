@@ -1,5 +1,6 @@
 import {Objects, objects, curObject} from './main.js';
 import {WIDTH, HEIGHT, SWIDTH, SHEIGHT} from './canvas.js';
+const OB_WIDTH = SWIDTH-WIDTH; const OB_HEIGHT = SHEIGHT-SHEIGHT;
 // mouse variables
 let mouseDown = 0; let moldx, moldy, mcurx, mcury = 0;
 // modifier based on the width and height of the window.
@@ -10,7 +11,7 @@ document.addEventListener("mousemove", function(e) {if(mouseDown) {
 	// The current mouse position
 	mcurx = e.clientX; mcury = e.clientY;
 	// The distance that we've moved between the last mouse position we have and the current one.
-	let xd = Math.round((mcurx*wmod)-(moldx*wmod)); let yd = Math.round((mcury*hmod)-(moldy*hmod));
+	let xd = Math.round((mcurx+OB_WIDTH)-(moldx+OB_WIDTH)); let yd = Math.round((mcury+OB_HEIGHT)-(moldy+OB_HEIGHT));
 	if(curObject["id"] > 0) {curObject["x"] += xd; curObject["y"] += yd};
 	// Change the last mouse position to the current one.
 	moldx = mcurx; moldy = mcury;
