@@ -18,10 +18,8 @@ func New() (*Server, error) {
 
 	s.ws = websocket.NewHub()
 	mux := chi.NewMux()
+	mux.Get("/", s.getEditor)
 	mux.Get("/editor", s.getEditor)
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/editor", http.StatusTemporaryRedirect)
-	})
 	mux.Method(http.MethodGet, "/socket", s.ws)
 	mux.Handle("/static/*", http.FileServer(http.Dir(".")))
 	s.mux = mux
