@@ -1,6 +1,11 @@
 // export const socket = new WebSocket("ws://localhost:2191/socket");
 // export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
+export let socketBuffer_ = [];
+export async function socketBuffer() {
+  const result = await socketBuffer_;
+  return result;
+}
 
 import {keyboardBuffer} from './keyboard.js';
 
@@ -10,10 +15,8 @@ socket.addEventListener('open', function (event) {
 
 socket.addEventListener('message', function (event) {
     let data = JSON.parse(event.data);
-    console.log(data);
-    if(data["data"]["data"]["text"] != undefined) {
-      keyboardBuffer.push(data["data"]["data"]["userID"]+"> "+data["data"]["data"]["text"]);
-    }
+    socketBuffer_.push(data);
+
 });
 
 

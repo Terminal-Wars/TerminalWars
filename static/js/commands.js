@@ -1,9 +1,9 @@
-import {socket} from './socket.js';
+import {socket, socketBuffer} from './socket.js';
 import {particles} from './main.js';
 import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT } from './canvas.js';
 import {rand} from './particles.js';
-export let userID = ""; export let roomID = "";
+export let userID = "ioi"; export let roomID = "room";
 export let shakeNum = 0;
 
 export function command(cmd, arg1="", arg2="") {
@@ -26,15 +26,19 @@ Room-specific commands:
 		case "nick":
 			userID = arg1;
 			socket.send(`{"type":"put","data":{"roomID":"null","blockID":"user_${userID}","data":{"health": "200"}}}`);
-			socket.send(`{"type":"get","data":{"roomID":"null","blockID":"user_${userID}"}}`);
 			break;
 		case "join":
 			roomID = arg1;
 			socket.send(`{"type":"put","data":{"roomID":"null","blockID":"user_${userID}","data":{"inroom":"${roomID}"}}}`);
-			socket.send(`{"type":"get","data":{"roomID":"null","blockID":"user_${userID}"}}`);
+			socket.send(`{"type":"put","data":{"roomID":"null","blockID":"${roomID}_users","data":{"${userID}":""}}}`);
 			break;
 		case "attack":
-			keyboardBuffer.push(`t`);
+			socket.send(`{"type":"get","data":{"roomID":"null","blockID":"${roomID}_users"}}`);
+			socketBuffer().then(value => value).then(
+					function(v) {
+						console.log(v[0]);
+					}
+				);
 			break;
 		case "bag":
 			break;
