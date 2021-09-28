@@ -12,10 +12,9 @@ socket.addEventListener('open', function (event) {
 socket.addEventListener('message', function (event) {
     let data = JSON.parse(event.data);
     console.log(data);
-    keyboardBuffer.push(data["data"]["data"]["userID"]+"> "+data["data"]["data"]["text"]);
-    if(data[0]['roomid'] == roomid) {
-        
-    } 
+    if(data["data"]["data"]["text"] != undefined) {
+      keyboardBuffer.push(data["data"]["data"]["userID"]+"> "+data["data"]["data"]["text"]);
+    }
 });
 
 
