@@ -121,7 +121,7 @@ func (c *Client) readPump() {
 			if err != nil {
 				log.Println("malformed json from client:", err)
 			}
-			bd, ok := c.hub.getData(blockID{data.RoomID, data.RoomID})
+			bd, ok := c.hub.getData(blockID{data.RoomID, data.BlockID})
 			resp := Response{Type: GetResponse, Data: GetDataResponse{
 				OK:      ok,
 				Data:    bd.Data,
