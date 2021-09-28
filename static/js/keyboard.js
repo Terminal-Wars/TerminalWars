@@ -5,6 +5,8 @@ import {shiftYBy} from './canvas.js';
 export let keyboardBuffer = [];
 
 document.addEventListener("keydown", function(e) {
+	// On Firefox, doing a forward slash causes the search menu to come up
+	if(e.key == "/") {e.preventDefault()}
 	switch(curObject["win_type"]) {
 		// Terminal actions
 		case "text":

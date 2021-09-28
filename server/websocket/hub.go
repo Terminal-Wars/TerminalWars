@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -32,7 +31,7 @@ type blockID struct {
 }
 
 type blockData struct {
-	Data    json.RawMessage
+	Data    map[string]interface{}
 	Created int64
 }
 
@@ -70,10 +69,17 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) putData(id blockID, data json.RawMessage) {
+func (h *Hub) putData(id blockID, data map[string]interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	h.data[id] = blockData{data, time.Now().UnixMilli()}
+	_, ok := h.data[id]
+	if ok {
+		for k, v := range data {
+			h.data[id].Data[k] = v
+		}
+	} else {
+		h.data[id] = blockData{data, time.Now().UnixMilli()}
+	}
 	if _, ok := h.expiry[id.roomID]; !ok {
 		h.expiry[id.roomID] = struct{}{}
 		go func() {

@@ -12,6 +12,4 @@ export async function drawParticles() {
 		ctx.fillStyle = particles[i]["fill"];
 		ctx.fillRect(particles[i]["x"]-5,particles[i]["y"]-5,10,10);
 	}
-	ctx.fillStyle = 'white';
-	ctx.fillText(particles.length,WIDTH/2,HEIGHT-16);
 }

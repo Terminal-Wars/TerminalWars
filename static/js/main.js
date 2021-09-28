@@ -2,7 +2,7 @@ import * as c from './canvas.js';
 import * as m from './mouse.js';
 import * as k from './keyboard.js';
 import * as p from './particles.js';
-import { loadDefaultObjects } from './loadDefaultObjects.js';
+import { loadDefaultObjects } from './commonObjects.js';
 export let objects = []; export let particles = [];
 
 export class ObjectClass {

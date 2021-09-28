@@ -47,9 +47,9 @@ type Request struct {
 }
 
 type PutRequestData struct {
-	RoomID  string          `json:"roomID"`
-	BlockID string          `json:"blockID"`
-	Data    json.RawMessage `json:"data"`
+	RoomID  string                 `json:"roomID"`
+	BlockID string                 `json:"blockID"`
+	Data    map[string]interface{} `json:"data"`
 }
 type GetRequestData struct {
 	RoomID  string `json:"roomID"`
@@ -69,9 +69,9 @@ type Response struct {
 }
 
 type GetDataResponse struct {
-	OK      bool            `json:"ok"`
-	Data    json.RawMessage `json:"data,omitempty"`
-	Created int64           `json:"created,omitempty"`
+	OK      bool                   `json:"ok"`
+	Data    map[string]interface{} `json:"data,omitempty"`
+	Created int64                  `json:"created,omitempty"`
 }
 
 // readPump pumps messages from the websocket connection to the hub.
