@@ -1,7 +1,6 @@
-// either one of these needs to be set. As far as I'm concerned, one can't be set automatically. if the other doesn't work.
-// todo: get this from a config file, maybe?
-export const socket = new WebSocket("ws://localhost:2191/socket");
-// const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
+// export const socket = new WebSocket("ws://localhost:2191/socket");
+// export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
+export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 
 import {keyboardBuffer} from './keyboard.js';
 
