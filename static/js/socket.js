@@ -1,11 +1,48 @@
 // export const socket = new WebSocket("ws://localhost:2191/socket");
 // export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
+import {canvas} from './canvas.js';
+import {userID, roomID} from './commands.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 export let socketBuffer_ = [];
-export async function socketBuffer() {
-  const result = await socketBuffer_;
-  return result;
+
+export async function delay(time) {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      resolve(time);
+    },time);
+  })
 }
+
+async function socketBuffer() {
+  const result = await socketBuffer_[0];
+  if(result != undefined) {
+    socketBuffer_.pop();
+    return result;
+  } else {
+    throw 400;
+  }
+}
+
+export class ActionsClass {
+  async GetUsersOnline(room) {
+      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
+      await delay(35);
+      return await socketBuffer();
+  }
+  async GetUserInfo(user, room) {
+      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
+      await delay(35);
+      return await socketBuffer();
+  }
+  async Attack(foe, user, room, damage) {
+      let userinfo = await this.GetUserInfo(foe, room);
+      socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${userinfo["health"]-damage}"}}}`);
+      socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${roomID}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
+      return await userinfo;
+  }
+}
+export const Actions = new ActionsClass;
+
 
 import {keyboardBuffer} from './keyboard.js';
 
@@ -15,10 +52,23 @@ socket.addEventListener('open', function (event) {
 
 socket.addEventListener('message', function (event) {
     let data = JSON.parse(event.data);
+    if(data["data"]["roomID"] != roomID) {return;}
     socketBuffer_.push(data);
-
+    if(data["type"] == "broadcast") {
+      keyboardBuffer.push(data);
+    } else {
+      switch(data["data"]["BlockID"]) {
+        case userID+"_hits":
+          keyboardBuffer.push(`${userID} takes ${data["data"]["data"]["damage"]} damage!\n`)
+          break;
+      }
+    }
 });
 
+socket.addEventListener('close', function (event) {
+    canvas.remove();
+    alert("The server was closed. Please wait a moment and then reload the page.");
+});
 
 /*
               socket.send(`[{

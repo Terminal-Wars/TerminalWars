@@ -70,6 +70,8 @@ type Response struct {
 
 type GetDataResponse struct {
 	OK      bool                   `json:"ok"`
+	RoomID	string				   `json:roomID`
+	BlockID	string				   `json:blockID`
 	Data    map[string]interface{} `json:"data,omitempty"`
 	Created int64                  `json:"created,omitempty"`
 }
@@ -124,6 +126,8 @@ func (c *Client) readPump() {
 			bd, ok := c.hub.getData(blockID{data.RoomID, data.BlockID})
 			resp := Response{Type: GetResponse, Data: GetDataResponse{
 				OK:      ok,
+				RoomID:	 data.RoomID,
+				BlockID: data.BlockID,
 				Data:    bd.Data,
 				Created: bd.Created,
 			}}

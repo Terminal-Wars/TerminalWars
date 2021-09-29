@@ -22,7 +22,7 @@ export class ObjectClass {
 }
 // we do a little trolling because this class just exists for the sake of cleaner code; 
 // in fact i could just do Objects_amount() 
-export let Objects = new ObjectClass;
+export const Objects = new ObjectClass;
 
 async function loop() {
   await c.drawGFX();
