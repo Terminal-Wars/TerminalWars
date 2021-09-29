@@ -4,7 +4,6 @@ import {canvas} from './canvas.js';
 import {userID, roomID} from './commands.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 export let socketBuffer_ = [];
-import {keyboardBuffer} from './keyboard.js';
 
 export async function delay(time) {
   return new Promise(function(resolve, reject) {
@@ -15,26 +14,37 @@ export async function delay(time) {
 }
 
 async function socketBuffer() {
-  // this should return socketBuffer_ but i give up i need to research how I'm *SUPPOSED* to do it
+  const result = await socketBuffer_[0];
+  if(result != undefined) {
+    socketBuffer_.pop();
+    return result;
+  } else {
+    throw 400;
+  }
 }
 
 export class ActionsClass {
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      return socketBuffer().next();
+      await delay(35);
+      return await socketBuffer();
   }
   async GetUserInfo(user, room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
-      return socketBuffer().next();
+      await delay(35);
+      return await socketBuffer();
   }
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
       socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${userinfo["health"]-damage}"}}}`);
-      socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${roomID}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
+      socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${room}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
       return await userinfo;
   }
 }
 export const Actions = new ActionsClass;
+
+
+import {keyboardBuffer} from './keyboard.js';
 
 socket.addEventListener('open', function (event) {
 
@@ -43,16 +53,9 @@ socket.addEventListener('open', function (event) {
 socket.addEventListener('message', function (event) {
     let data = JSON.parse(event.data);
     socketBuffer_.push(data);
-    if(data["data"]["roomID"] != roomID) {return;}
-    if(data["type"] == "broadcast") {
-      keyboardBuffer.push(data);
-    } else {
-      switch(data["data"]["BlockID"]) {
-        case userID+"_hits":
-          keyboardBuffer.push(`${userID} takes ${data["data"]["data"]["damage"]} damage!\n`)
-          break;
+      if(data["type"] == "broadcast") {
+        keyboardBuffer.push(data["data"]["data"]["text"]);
       }
-    }
 });
 
 socket.addEventListener('close', function (event) {

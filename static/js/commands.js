@@ -3,7 +3,7 @@ import {particles} from './main.js';
 import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT } from './canvas.js';
 import {rand} from './particles.js';
-export let userID = ""; export let roomID = ""; 
+export let userID = ""; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
 export async function command(cmd, arg1="", arg2="") {
@@ -36,9 +36,9 @@ Room-specific commands:
 			break;
 		case "attack":
 			usersInRoom = await Actions.GetUsersOnline(roomID);
-			console.log(usersInRoom);
 			for (const user in usersInRoom["data"]["data"]) {
 				console.log(user);
+				await Actions.Attack(user, userID, roomID, 5);
 			}
 			break;
 		case "bag":
