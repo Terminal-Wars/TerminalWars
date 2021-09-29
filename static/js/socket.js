@@ -2,7 +2,6 @@
 // export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
 import {canvas} from './canvas.js';
 import {userID, roomID} from './commands.js';
-import {co} from './co/co.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 export let socketBuffer_ = [];
 
@@ -14,7 +13,7 @@ export async function delay(time) {
   })
 }
 
-async function socketBufferReturn() {
+async function socketBuffer() {
   const result = await socketBuffer_[0];
   if(result != undefined) {
     socketBuffer_.pop();
@@ -24,18 +23,10 @@ async function socketBufferReturn() {
   }
 }
 
-async function socketBuffer() {
-  co(function*() {
-      "use strict";
-      var result = yield socketBuffer_;
-      console.log(result);
-      return result;
-  })
-}
-
 export class ActionsClass {
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
+      await delay(35);
       return await socketBuffer();
   }
   async GetUserInfo(user, room) {
@@ -46,7 +37,7 @@ export class ActionsClass {
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
       socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${userinfo["health"]-damage}"}}}`);
-      socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${roomID}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
+      socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${room}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
       return await userinfo;
   }
 }
@@ -61,17 +52,10 @@ socket.addEventListener('open', function (event) {
 
 socket.addEventListener('message', function (event) {
     let data = JSON.parse(event.data);
-    if(data["data"]["roomID"] != roomID) {return;}
     socketBuffer_.push(data);
-    if(data["type"] == "broadcast") {
-      keyboardBuffer.push(data);
-    } else {
-      switch(data["data"]["BlockID"]) {
-        case userID+"_hits":
-          keyboardBuffer.push(`${userID} takes ${data["data"]["data"]["damage"]} damage!\n`)
-          break;
+      if(data["type"] == "broadcast") {
+        keyboardBuffer.push(data["data"]["data"]["text"]);
       }
-    }
 });
 
 socket.addEventListener('close', function (event) {
