@@ -5,8 +5,8 @@ import { userID, roomID } from './commands.js';
 // The canvas
 export let canvas = document.querySelector('.draw');
 export let ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled= false;
-ctx.mozImageSmoothingEnabled = false;
+ctx.imageSmoothingEnabled = false;
+//ctx.mozImageSmoothingEnabled = false;
 
 // The monitor width
 export const SWIDTH = screen.width; export const SHEIGHT = window.innerHeight;

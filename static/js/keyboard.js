@@ -17,9 +17,9 @@ document.addEventListener("keydown", function(e) {
 						let cv = curObject["texts"][1].replace("/","").split(" ");
 						command(cv[0], cv[1]);
 					} else {
-						if(userID == "") {keyboardBuffer.push("You haven't chosen a username. Use /nick to set one.\n");}
 						if(roomID == "") {keyboardBuffer.push("You haven't joined a room. Use /join to set one.\n");}
-						if(userID != "" && roomID != "") {socket.send(`{"type":"broadcast","data":{"userID":\"${userID}\", "roomID":\"${roomID}\", "text":\"${curObject["texts"][1]}\\n\"}}`);}
+						if(userID == "") {keyboardBuffer.push("You haven't chosen a username. Use /nick to set one.\n");}
+						if(userID != "" && roomID != "") {socket.send(`{"type":"broadcast","data":{"userID":"${userID}", "roomID":"${roomID}", "text":"${curObject["texts"][1]}\\n"}}`);}
 					}
 					curObject["texts"][1] = curObject["texts"][1].replace(/^(.*)$/, "");
 					break;
