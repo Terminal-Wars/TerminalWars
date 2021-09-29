@@ -2,9 +2,9 @@
 // export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
 import {canvas} from './canvas.js';
 import {userID, roomID} from './commands.js';
-import {co} from './co/co.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 export let socketBuffer_ = [];
+import {keyboardBuffer} from './keyboard.js';
 
 export async function delay(time) {
   return new Promise(function(resolve, reject) {
@@ -14,34 +14,18 @@ export async function delay(time) {
   })
 }
 
-async function socketBufferReturn() {
-  const result = await socketBuffer_[0];
-  if(result != undefined) {
-    socketBuffer_.pop();
-    return result;
-  } else {
-    throw 400;
-  }
-}
-
 async function socketBuffer() {
-  co(function*() {
-      "use strict";
-      var result = yield socketBuffer_;
-      console.log(result);
-      return result;
-  })
+  // this should return socketBuffer_ but i give up i need to research how I'm *SUPPOSED* to do it
 }
 
 export class ActionsClass {
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      return await socketBuffer();
+      return socketBuffer().next();
   }
   async GetUserInfo(user, room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
-      await delay(35);
-      return await socketBuffer();
+      return socketBuffer().next();
   }
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
@@ -52,17 +36,14 @@ export class ActionsClass {
 }
 export const Actions = new ActionsClass;
 
-
-import {keyboardBuffer} from './keyboard.js';
-
 socket.addEventListener('open', function (event) {
 
 });
 
 socket.addEventListener('message', function (event) {
     let data = JSON.parse(event.data);
-    if(data["data"]["roomID"] != roomID) {return;}
     socketBuffer_.push(data);
+    if(data["data"]["roomID"] != roomID) {return;}
     if(data["type"] == "broadcast") {
       keyboardBuffer.push(data);
     } else {
