@@ -1,8 +1,11 @@
-import * as c from './canvas.js';
+import {drawGFX, degrade} from './canvas.js';
+import {drawParticles} from './particles.js';
+// these aren't even used but they need to be imported anyways i guess lol
 import * as m from './mouse.js';
 import * as k from './keyboard.js';
-import * as p from './particles.js';
+
 import { loadDefaultObjects } from './commonObjects.js';
+import { lowerPriorityLoop } from './lowerPriorityFunctions.js';
 export let objects = []; export let particles = [];
 
 export class ObjectClass {
@@ -25,10 +28,12 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  await c.drawGFX();
-  await p.drawParticles();
-  await c.degrade(32);
+  await drawGFX();
+  await drawParticles();
+  await degrade(32);
 }
-loadDefaultObjects();
 export let curObject = objects[0];
+
+loadDefaultObjects();
 setInterval(loop, 1000/60);
+setInterval(lowerPriorityLoop, 1000/30);
