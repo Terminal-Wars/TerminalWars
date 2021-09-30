@@ -2,6 +2,7 @@
 // export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
 import {canvas} from './canvas.js';
 import {userID, roomID} from './commands.js';
+import {ping} from './main.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 export let sockerBuffer = [];
 
@@ -9,6 +10,7 @@ export async function delay(time) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
       resolve(time);
+      console.log(time);
     },time);
   })
 }
@@ -16,21 +18,21 @@ export async function delay(time) {
 export class ActionsClass {
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      await delay(40);
+      await delay(ping);
       let buffer = sockerBuffer[0];
       sockerBuffer.splice(0,buffer.length);
       return await buffer;
   }
   async GetUserInfo(user, room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
-      await delay(40);
+      await delay(ping);
       let buffer = await sockerBuffer[0];
       sockerBuffer.splice(0,buffer.length);
       return buffer["data"];
   }
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
-      await delay(40);
+      await delay(ping);
       let newHealth = userinfo["data"]["health"]-damage;
       socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${newHealth}"}}}`);
       socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${room}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
@@ -38,7 +40,7 @@ export class ActionsClass {
   }
   async GetHalth(user, room) {
       let userinfo = await this.GetUserInfo(user, room);
-      await delay(40);
+      await delay(ping);
       return userinfo["data"]["health"];
   }
 }
