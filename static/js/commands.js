@@ -3,6 +3,7 @@ import {particles} from './main.js';
 import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT } from './canvas.js';
 import {rand} from './particles.js';
+import {ping} from './ping.js';
 export let userID = ""; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
@@ -40,6 +41,9 @@ Room-specific commands:
 			for (const user in usersInRoom["data"]["data"]) {
 				if(user != userID) {await Actions.Attack(user, userID, roomID, 5);}
 			}
+			break;
+		case "ping":
+			keyboardBuffer.push("Pong! "+ping+"\n");
 			break;
 		case "bag":
 			break;

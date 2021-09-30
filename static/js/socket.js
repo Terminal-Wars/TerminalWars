@@ -2,7 +2,7 @@
 // export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
 import {canvas} from './canvas.js';
 import {userID, roomID} from './commands.js';
-import {ping} from './main.js';
+import {ping} from './ping.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 export let sockerBuffer = [];
 

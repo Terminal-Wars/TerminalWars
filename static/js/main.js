@@ -6,8 +6,8 @@ import * as k from './keyboard.js';
 
 import { loadDefaultObjects } from './commonObjects.js';
 import { lowerPriorityLoop } from './lowerPriorityFunctions.js';
+import { pingSite } from './ping.js';
 export let objects = []; export let particles = [];
-export let ping = 0;
 
 export class ObjectClass {
   amount() {
@@ -28,18 +28,6 @@ export class ObjectClass {
 // in fact i could just do Objects_amount() 
 export const Objects = new ObjectClass;
 
-export async function pingSite() {
-  let start = new Date().getTime();
-  let http = new XMLHttpRequest();
-  http.open("GET", window.location);
-  http.onreadystatechange = function() {
-    if(http.readyState == 4) {
-      let end = new Date().getTime(); 
-      return (end-start)+20;
-    }
-  }
-}
-
 async function loop() {
   await drawGFX();
   await drawParticles();
@@ -47,7 +35,7 @@ async function loop() {
 }
 export let curObject = objects[0];
 
-ping = pingSite();
 loadDefaultObjects();
 setInterval(loop, 1000/60);
-setInterval(lowerPriorityLoop, 1000/30);
+setInterval(pingSite, 1000);
+//setInterval(lowerPriorityLoop, 1000/30);
