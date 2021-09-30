@@ -38,5 +38,5 @@ export let curObject = objects[0];
 loadDefaultObjects();
 pingSite();
 setInterval(loop, 1000/60);
-//setInterval(pingSite, 1000);
+setInterval(pingSite, 3000);
 //setInterval(lowerPriorityLoop, 1000/30);

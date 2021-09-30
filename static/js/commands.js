@@ -1,4 +1,4 @@
-import {socket, Actions, delay} from './socket.js';
+import {socket, Actions} from './socket.js';
 import {particles} from './main.js';
 import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT } from './canvas.js';
@@ -43,8 +43,9 @@ Room-specific commands:
 			}
 			break;
 		case "ping":
-			pingSite();
-			keyboardBuffer.push("Pong! "+ping+"\n");
+			pingSite().then(function() {
+				keyboardBuffer.push("Pong! "+ping+"\n");
+			});
 			break;
 		case "bag":
 			break;

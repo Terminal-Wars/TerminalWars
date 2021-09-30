@@ -4,44 +4,45 @@ import {canvas} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
-export let sockerBuffer = [];
+export let sockerBuffer = []; let buffer, newHealth;
 
 export async function delay(time) {
   return new Promise(function(resolve, reject) {
-    setTimeout(function() {
-      resolve(time);
-      console.log(time);
-    },time);
+    setTimeout(function() {resolve(time);},time);
   })
 }
 
 export class ActionsClass {
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      await delay(ping);
-      let buffer = sockerBuffer[0];
-      sockerBuffer.splice(0,buffer.length);
-      return await buffer;
+      let result = await delay(ping).then(function() {;
+        buffer = sockerBuffer[0];
+        sockerBuffer.splice(0,buffer.length);
+        return buffer;
+      });
+      return result;
   }
   async GetUserInfo(user, room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
-      await delay(ping);
-      let buffer = await sockerBuffer[0];
-      sockerBuffer.splice(0,buffer.length);
-      return buffer["data"];
+      let result = await delay(ping).then(function() {
+        buffer = sockerBuffer[0];
+        sockerBuffer.splice(0,buffer.length);
+        return buffer["data"];
+      });
+      return result;
   }
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
-      await delay(ping);
-      let newHealth = userinfo["data"]["health"]-damage;
+      newHealth = userinfo["data"]["health"]-damage;
       socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${newHealth}"}}}`);
       socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${room}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
       return 0;
   }
-  async GetHalth(user, room) {
+  async GetHealth(user, room) {
       let userinfo = await this.GetUserInfo(user, room);
-      await delay(ping);
-      return userinfo["data"]["health"];
+      await delay(ping).then(function() {
+        return userinfo["data"]["health"];
+      })
   }
 }
 export const Actions = new ActionsClass;
