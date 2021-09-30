@@ -3,7 +3,7 @@ import {particles} from './main.js';
 import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT } from './canvas.js';
 import {rand} from './particles.js';
-import {ping} from './ping.js';
+import {ping, pingSite} from './ping.js';
 export let userID = ""; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
@@ -43,6 +43,7 @@ Room-specific commands:
 			}
 			break;
 		case "ping":
+			pingSite();
 			keyboardBuffer.push("Pong! "+ping+"\n");
 			break;
 		case "bag":
