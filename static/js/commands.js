@@ -36,9 +36,9 @@ Room-specific commands:
 			break;
 		case "attack":
 			usersInRoom = await Actions.GetUsersOnline(roomID);
+			console.log(usersInRoom);
 			for (const user in usersInRoom["data"]["data"]) {
-				console.log(user);
-				await Actions.Attack(user, userID, roomID, 5);
+				if(user != userID) {await Actions.Attack(user, userID, roomID, 5);}
 			}
 			break;
 		case "bag":
