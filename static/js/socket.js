@@ -15,21 +15,17 @@ export async function delay(time) {
 export class ActionsClass {
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      let result = await delay(ping).then(function() {;
-        buffer = sockerBuffer[0];
-        sockerBuffer.splice(0,buffer.length);
-        return buffer;
-      });
-      return result;
+      await delay(ping);
+      buffer = sockerBuffer[0];
+      sockerBuffer.splice(0,buffer.length);
+      return buffer;
   }
   async GetUserInfo(user, room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
-      let result = await delay(ping).then(function() {
-        buffer = sockerBuffer[0];
-        sockerBuffer.splice(0,buffer.length);
-        return buffer["data"];
-      });
-      return result;
+      await delay(ping);
+      buffer = sockerBuffer[0];
+      sockerBuffer.splice(0,buffer.length);
+      return buffer["data"];
   }
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
