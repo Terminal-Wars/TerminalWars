@@ -50,7 +50,7 @@ document.addEventListener("mousedown", function(e) {
 				// detection for window objects
 				if(s["type"] == "window" && my >= s["y"]-s["height"] && my <= s["y"]-s["height"]+22) {winMoveMode = 1} else {winMoveMode = 0}
 				// Get some more information about the window.
-				for(let i = 0; i < s["event_num"]; i++) {
+				for(i in s["events"]) {
 					let e = s["events"][i];
 					// Bit of a bizarre way of doing things, but it's less messy.
 					if(e["anchor"] == "positive") {xa = s["x"]+s["width"]; ya = s["y"]+s["height"];}
@@ -61,7 +61,6 @@ document.addEventListener("mousedown", function(e) {
 					}
 				}
 				n=0;
-				break;
 			}
 		}
 	}

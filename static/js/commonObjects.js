@@ -2,7 +2,7 @@ import { objects } from './main.js';
 import * as c from './canvas.js';
 
 export function loadDefaultObjects() {
-	objects.push({"id":"0","type":"desktop","x":0,"y":0,"width":800,"height":600,"color1":"#3a53ab","color2":"#2a3c7d","z":0});
+	objects.push({"id":"0","type":"desktop","x":0,"y":0,"width":800,"height":600,"color1":"#3a53ab","color2":"#3a53ab","z":0});
 	objects.push({"id":"1","type":"window","title":"Terminal","win_type":"text","x":400,"y":225,"width":200,"height":200,"z":1,
 				  "texts":{0: "", 1: ""}, "event_num":3,
 				  "events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"image":c.term_buttons,"ox":0,"oy":0,

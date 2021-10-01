@@ -1,11 +1,13 @@
-import {drawGFX, degrade} from './canvas.js';
+import {drawGFX, frameCount} from './canvas.js';
+import {degrade} from './degrade.js';
 import {drawParticles} from './particles.js';
-// these aren't even used but if they aren't here then nothing works.
+
+// initialize the event handlers in the these files
 import * as k from './keyboard.js';
 import * as m from './mouse.js';
+import * as d from './degrade.js';
 
 import { loadDefaultObjects } from './commonObjects.js';
-import { lowerPriorityLoop } from './lowerPriorityFunctions.js';
 import { pingSite } from './ping.js';
 export let objects = []; export let particles = [];
 // this should be in mouse.js but for some reason that literally cannot be imported anywhere except here,
@@ -35,13 +37,19 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
+  // For each object in the objects array...
   await drawGFX();
-  await drawParticles();
-  await degrade(32);
+  await degrade(16);
 }
 export let curObject = objects[0];
 
+async function frameCounter() {
+  debugBox.innerHTML = "Frames drawn in the last second: "+frameCount[0];
+  frameCount[0] = 0;
+}
+
 loadDefaultObjects();
-setInterval(pingSite(),10000);
+setInterval(pingSite,10000);
 setInterval(loop, 1000/60);
+setInterval(frameCounter, 1000);
 //setInterval(lowerPriorityLoop, 1000/30);
