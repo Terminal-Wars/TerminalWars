@@ -1,4 +1,4 @@
-import { objects } from './main.js';
+import { objects, debugBox } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
@@ -48,30 +48,40 @@ class DrawClass {
 		ctx.fillStyle = "white";
 		ctx.fillRect(x, y, width, height);
 	}
-	button(x, y, width, height, image, ox, oy,active) {
+	button(x, y, width, height, content, ox, oy,active,type) {
 		// Buttons cannot be pressed until the user is logged in.
 		if(userID == "" || roomID == "") {ox += 16;}
-		ctx.fillStyle = "black";
-		ctx.fillRect(x-1, y-1, width+2, height+2);
-		if(active == 0) {
-			ctx.fillStyle = "white";
-			ctx.fillRect(x-1, y-1, width+1, height+1);
-			ctx.fillStyle = "#dfdfdf";
-			ctx.fillRect(x, y, width, height);
-			ctx.fillStyle = "#808080";
-			ctx.fillRect(x+1, y+1, width-1, height-1);
-		} else {
-			ctx.fillStyle = "#808080";
-			ctx.fillRect(x, y, width, height);
+		if(type == "button") {
+			ctx.fillStyle = "black";
+			ctx.fillRect(x-1, y-1, width+2, height+2);
+			if(active == 0) {
+				ctx.fillStyle = "white";
+				ctx.fillRect(x-1, y-1, width+1, height+1);
+				ctx.fillStyle = "#dfdfdf";
+				ctx.fillRect(x, y, width, height);
+				ctx.fillStyle = "#808080";
+				ctx.fillRect(x+1, y+1, width-1, height-1);
+			} else {
+				ctx.fillStyle = "#808080";
+				ctx.fillRect(x, y, width, height);
+			}
+			ctx.fillStyle = "#b5b5b5";
+			ctx.fillRect(x+1, y+1, width-2, height-2);
 		}
-		ctx.fillStyle = "#b5b5b5";
-		ctx.fillRect(x+1, y+1, width-2, height-2);
-		ctx.drawImage(image,ox,oy,width,height,x,y,width,height);
+		// Draw either an image or some text
+		switch(content.constructor.name) {
+			case "HTMLImageElement":
+				ctx.drawImage(content,ox,oy,width,height,x,y,width,height);
+				break;
+			case "String":
+				drawChars(content,x,y);
+				break;
+		}
 	}
 	base(x, y, w, h) {
 		ctx.fillStyle = "black";
-		ctx.fillRect(x+1, y+1, (w+1), (h)+2-1);
-		ctx.fillStyle = "#b5b5b5";
+		ctx.fillRect(x+1, y+1, (w+1), (h)+1);
+		ctx.fillStyle = "#808080";
 		ctx.fillRect(x+1, y+1, (w), (h));
 		ctx.fillStyle = "white";
 		ctx.fillRect(x+1, y+1, (w)-1, (h)-1);
@@ -153,7 +163,7 @@ export async function drawGFX() {
 			// Bit of a bizarre way of doing things, but it's less messy.
 			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
-			Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],e["image"],e["ox"],e["oy"],e["active"]);
+			Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]),e["ox"],e["oy"],e["active"],e["type"]);
 		}
 	}
 }

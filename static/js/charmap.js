@@ -9,7 +9,7 @@ function drawChar(char, x, y, white=false, bold=false) {
 		ctx.drawImage(charmap,8*characters.indexOf(char[i]),0+(16*mod),8,16,x+(i*8),y,8,16);
 	}
 }
-export function drawChars(string,x,y,white=false,bold=false,maxX=WIDTH,minY=-1*HEIGHT,maxY=HEIGHT) {
+export function drawChars(string,x,y,white=false,bold=false,maxX=Infinity,minY=-1*Infinity,maxY=Infinity) {
 	let offset = x;
 	for(let i in string) {
 		let k = string.charAt(i);

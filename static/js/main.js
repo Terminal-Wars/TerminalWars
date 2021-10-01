@@ -12,6 +12,9 @@ export let objects = []; export let particles = [];
 // and if i don't import it here then mouse movement just doesn't work.
 export let mousePos = [{"x":0,"y":0}];
 
+// for any debug messages.
+export let debugBox = document.querySelector(".debug");
+
 export class ObjectClass {
   amount() {
     return objects.length;
