@@ -21,12 +21,20 @@ export class ObjectClass {
   amount() {
     return objects.length;
   }
+  // todo: create a function to replace objects.push, and just have that function set the highest Z
   highestZ() {
     let i = 0;
     for(let n = 0; n < objects.length; n++) {
       if(objects[n]["z"] >= i) {i=n;}
     }
     return objects[i];
+  }
+  async destroyAll(type) {
+    for(let n in objects) {
+      if(objects[n]["type"] == type) {
+        objects.splice(n,n);
+      }
+    }
   }
   setCurrent(obj) {
     curObject = obj;
@@ -49,6 +57,7 @@ async function frameCounter() {
 }
 
 loadDefaultObjects();
+pingSite();
 setInterval(pingSite,10000);
 setInterval(loop, 1000/60);
 setInterval(frameCounter, 1000);
