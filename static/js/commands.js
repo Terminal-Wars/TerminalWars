@@ -1,11 +1,17 @@
-import {socket, Actions} from './socket.js';
-import {particles} from './main.js';
+import {socket, Actions, delay} from './socket.js';
 import {keyboardBuffer} from './keyboard.js';
-import {WIDTH, HEIGHT } from './canvas.js';
-import {rand} from './particles.js';
+import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
-export let userID = ""; export let roomID = "room"; 
+import {dropdown} from './commonObjects.js';
+import {mousePos} from './main.js';
+export let userID = "ioi"; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
+
+// some example attacks
+let exampleAttacks = [{"name":"Punch","damage":5},
+	{"name":"Kick","damage":3},
+	{"name":"Kablammo Zammo","damage":10,"magic":10},
+	{"name":"Alakafuckyou","damage":20,"magic":20}];
 
 export async function command(cmd, arg1="", arg2="") {
 	switch(cmd) {
@@ -36,16 +42,18 @@ Room-specific commands:
 			roomID = arg1;
 			break;
 		case "attack":
-			usersInRoom = await Actions.GetUsersOnline(roomID);
+			// Create a dropdown.
+			// Importing the mouse x/y into this file causes an import loop, so just let dropdown.js handle it.
+			dropdown(mousePos["x"],mousePos["y"],"attacks",exampleAttacks);
+			/*usersInRoom = await Actions.GetUsersOnline(roomID);
 			console.log(usersInRoom);
 			for (const user in usersInRoom["data"]["data"]) {
 				if(user != userID) {await Actions.Attack(user, userID, roomID, 5);}
-			}
+			}*/
 			break;
 		case "ping":
-			pingSite().then(function() {
-				keyboardBuffer.push("Pong! "+ping+"\n");
-			});
+			pingSite();
+			keyboardBuffer.push("Pong! "+ping+"\n");
 			break;
 		case "bag":
 			break;
@@ -62,9 +70,6 @@ Room-specific commands:
 			break;
 		case "testt":
 			for(let i = 0; i <= 150; i++) {keyboardBuffer.push(i+"\n");}
-			break;
-		case "particle":
-			for(let i = 0; i < 500; i++) {if(particles.length < 6000) particles.push({"x":WIDTH/2,"y":HEIGHT/2,"modx":rand(3)-1,"mody":rand(3)-1,"fill":"rgb("+rand(255)+","+rand(255)+","+rand(255)+")"});}
 			break;
 		default: 
 			keyboardBuffer.push("Invalid or unimplemented command.\n");

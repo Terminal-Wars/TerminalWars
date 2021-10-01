@@ -1,36 +1,40 @@
-import {Objects, objects, curObject} from './main.js';
+import {Objects, objects, curObject, mousePos} from './main.js';
 import {WIDTH, HEIGHT, SWIDTH, SHEIGHT} from './canvas.js';
 import { command, userID, roomID} from './commands.js';
 
+// The mouse position for other files to use.
+let mousePosTemp = [{"x":0,"y":0}];
+
 const OB_WIDTH = ((SWIDTH-WIDTH)/2); const OB_HEIGHT = ((SHEIGHT-HEIGHT)/2);
 // mouse variables
-let mouseDown = 0; let moldx, moldy, mcurx, mcury = 0; let winMoveMode = 0;
+let mouseDown = 0; let winMoveMode = 0;
 // modifier based on the width and height of the window.
 let wmod = (WIDTH/SWIDTH); let hmod = (HEIGHT/SHEIGHT);
 // x and y anchor (for event positioning)
 let xa, ya = 0;
 // On every mouse movement
-document.addEventListener("mousemove", function(e) {if(mouseDown) {
+document.addEventListener("mousemove", function(e) {
 	// The current mouse position
-	mcurx = e.clientX-OB_WIDTH; mcury = e.clientY-OB_HEIGHT;
+	mousePos["x"] = Math.round(e.clientX-OB_WIDTH); mousePos["y"] = Math.round(e.clientY-OB_HEIGHT);
+	if(mouseDown) {
 	// The distance that we've moved between the last mouse position we have and the current one.
-	let xd = Math.round(mcurx-moldx); let yd = Math.round(mcury-moldy);
+	let xd = Math.round(mousePos["x"]-mousePosTemp["x"]); let yd = Math.round(mousePos["y"]-mousePosTemp["y"]);
 	// Are we dragging the topmost part of the window?
 	if(winMoveMode) {
 		// If so, move the window.
 		if(curObject["id"] > 0) {curObject["x"] += xd; curObject["y"] += yd};
 	} // Otherwise do nothing. 
 	// Change the last mouse position to the current one.
-	moldx = mcurx; moldy = mcury;
+	mousePosTemp["x"] = mousePos["x"]; mousePosTemp["y"] = mousePos["y"];
 	}
 })
 // When a mouse button is clicked.
 document.addEventListener("mousedown", function(e) {
 	mouseDown = 1;
 	// The "old" mouse position variables get set.
-	moldx = e.clientX-OB_WIDTH; moldy = e.clientY-OB_HEIGHT;
+	mousePosTemp["x"] = e.clientX-OB_WIDTH; mousePosTemp["y"] = e.clientY-OB_HEIGHT;
 	// We then need the mouse position variables but adjusted based on the screen width/height.
-	let mx = Math.round(moldx); let my = Math.round(moldy);
+	let mx = Math.round(mousePosTemp["x"]); let my = Math.round(mousePosTemp["y"]);
 
 	// Get the z of the object with the highest z.
 	let z = Objects.highestZ()["z"];
@@ -43,7 +47,8 @@ document.addEventListener("mousedown", function(e) {
 			// If the mouse cursor clicked within an object on the z level that we are on, and it's at the z level we're at...
 			if(s["z"] == n && (mx >= s["x"]-(s["width"]) && mx <= s["x"]+(s["width"])) && (my >= s["y"]-(s["height"]) && my <= s["y"]+(s["height"]))) {
 				Objects.setCurrent(s);
-				if(my >= s["y"]-s["height"] && my <= s["y"]-s["height"]+22) {winMoveMode = 1} else {winMoveMode = 0}
+				// detection for window objects
+				if(s["type"] == "window" && my >= s["y"]-s["height"] && my <= s["y"]-s["height"]+22) {winMoveMode = 1} else {winMoveMode = 0}
 				// Get some more information about the window.
 				for(let i = 0; i < s["event_num"]; i++) {
 					let e = s["events"][i];

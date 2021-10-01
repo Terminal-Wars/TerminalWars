@@ -1,13 +1,16 @@
 import {drawGFX, degrade} from './canvas.js';
 import {drawParticles} from './particles.js';
-// these aren't even used but they need to be imported anyways i guess lol
-import * as m from './mouse.js';
+// these aren't even used but if they aren't here then nothing works.
 import * as k from './keyboard.js';
+import * as m from './mouse.js';
 
 import { loadDefaultObjects } from './commonObjects.js';
 import { lowerPriorityLoop } from './lowerPriorityFunctions.js';
 import { pingSite } from './ping.js';
 export let objects = []; export let particles = [];
+// this should be in mouse.js but for some reason that literally cannot be imported anywhere except here,
+// and if i don't import it here then mouse movement just doesn't work.
+export let mousePos = [{"x":0,"y":0}];
 
 export class ObjectClass {
   amount() {
@@ -36,7 +39,6 @@ async function loop() {
 export let curObject = objects[0];
 
 loadDefaultObjects();
-pingSite();
+setInterval(pingSite(),10000);
 setInterval(loop, 1000/60);
-setInterval(pingSite, 3000);
 //setInterval(lowerPriorityLoop, 1000/30);
