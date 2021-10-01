@@ -43,7 +43,7 @@ canvasObject.style.height= HEIGHT*MUL+"px"; canvasObject.style.maxHeight = HEIGH
 
 // Common UI elements
 class DrawClass {
-	textbox(x, y, width, height) {
+	async textbox(x, y, width, height) {
 		ctx.fillStyle = "#808080";
 		ctx.fillRect(x-1, y-1, width+2, height+2);
 		ctx.fillStyle = "black";
@@ -51,7 +51,7 @@ class DrawClass {
 		ctx.fillStyle = "white";
 		ctx.fillRect(x, y, width, height);
 	}
-	button(x, y, width, height, content, ox, oy,active,type) {
+	async button(x, y, width, height, content, ox, oy,active,type) {
 		// Buttons cannot be pressed until the user is logged in.
 		if(userID == "" || roomID == "") {ox += 16;}
 		if(type == "button") {
@@ -81,7 +81,7 @@ class DrawClass {
 				break;
 		}
 	}
-	base(x, y, w, h) {
+	async base(x, y, w, h) {
 		ctx.fillStyle = "black";
 		ctx.fillRect(x+1, y+1, (w+1), (h)+1);
 		ctx.fillStyle = "#808080";
@@ -90,6 +90,18 @@ class DrawClass {
 		ctx.fillRect(x+1, y+1, (w)-1, (h)-1);
 		ctx.fillStyle = "#b5b5b5";
 		ctx.fillRect(x+2, y+2, (w)-2, (h)-2);
+	}
+	async box(x,y,width,height,fillStyle) {
+		// This is actually a bit redundant, but having this here lets us execute this asynchronously.
+		ctx.fillStyle = fillStyle;
+		ctx.fillRect(x,y,width,height);
+	}
+	async gradient(x1,y1,x2,y2,width,height,color1,color2) {
+		let gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+		gradient.addColorStop(0, color1);
+		gradient.addColorStop(1, color2);
+		ctx.fillStyle = gradient;
+		ctx.fillRect(x1, y1, width, height);
 	}
 }
 const Draw = new DrawClass();
@@ -105,56 +117,48 @@ export async function draw(o) {
 		switch(o["type"]) {
 			case "window":
 				// gray base
-				Draw.base(xa_n,ya_n,rw,rh);
+				await Draw.base(xa_n,ya_n,rw,rh);
 				// red gradient
-				var gradient = ctx.createLinearGradient(xa_n+2, ya_n+3, xa_p+2, ya_n+3);
-				gradient.addColorStop(0, "#cc0000");
-				gradient.addColorStop(1, "#000000");
-				ctx.fillStyle = gradient;
-				ctx.fillRect(xa_n+4, ya_n+4, rw-6, 19);
+				await Draw.gradient(xa_n+2, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000")
 				// title
-				drawChars(o["title"], o["x"]-(o["title"].length*3), ya_n+6,true,true);
+				await drawChars(o["title"], o["x"]-(o["title"].length*3), ya_n+6,true,true);
 				switch(o["win_type"]) {
 					// terminal window
 					case "text":
 						// anything from the keyboard buffer gets added to the text box in this loop.
 						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
 						// only arrays.
-						if(keyboardBuffer.length >= 1) {
+						// also this is an impromptu async function for performance reasons.
+						async function temp() {if(keyboardBuffer.length >= 1) {
 							o["texts"][0] += keyboardBuffer[0];
 							keyboardBuffer.shift(0);
 							// we assume that every line in the keyboard buffer ends in a newline, and they pretty much always do.
 							termHeight++;
 							if(termHeight > 27) {shiftY--;}
-						}
+						}}
+						await temp();
 						// big box
-						Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
-						ctx.fillStyle = "black";
-						drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),false,false,384,ya_n+12,rh-24);
+						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
+						await drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),false,false,384,ya_n+12,rh-24);
 						// scrollbar 
-						ctx.fillStyle = '#b5b5b5';
-						if(termHeight > 27) ctx.fillRect(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1);
+						if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
 						// small box
-						Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
-						drawChars(o["texts"][1], xa_n+8,ya_p-24);
+						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
+						await drawChars(o["texts"][1], xa_n+8,ya_p-24);
 				}
 				break;
 			case "desktop":
-				var gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-				gradient.addColorStop(0, o["color1"]);
-				gradient.addColorStop(1, o["color2"]);
-				ctx.fillStyle = o["color1"];
-				ctx.fillRect(0, 0, WIDTH, HEIGHT);
+				await Draw.box(0,0,WIDTH,HEIGHT,o["color1"]);
+				//await Draw.gradient(0,0,0,HEIGHT,WIDTH,HEIGHT,o["color1"],o["color2"])
 				break;
 			case "dropdown":
-				Draw.base(xa_n, ya_n, rw, rh);
-				drawChars(o.text,xa_n+3,ya_n);
+				await Draw.base(xa_n, ya_n, rw, rh);
+				await drawChars(o.text,xa_n+3,ya_n);
 				break;
 			default:
-				ctx.fillStyle = o.fillStyle;
-				ctx.fillRect(xa_n, ya_n, rw, rh);
+				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {
-					drawChars(o.text,xa_n+3,ya_n+3);
+					await drawChars(o.text,xa_n+3,ya_n+3);
 				}
 				break;
 		}

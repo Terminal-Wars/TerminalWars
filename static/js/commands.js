@@ -44,7 +44,7 @@ Room-specific commands:
 		case "attack":
 			// Create a dropdown.
 			// Importing the mouse x/y into this file causes an import loop, so just let dropdown.js handle it.
-			dropdown(mousePos["x"],mousePos["y"],"attacks",exampleAttacks);
+			await dropdown(mousePos["x"],mousePos["y"],"attacks",exampleAttacks);
 			/*usersInRoom = await Actions.GetUsersOnline(roomID);
 			console.log(usersInRoom);
 			for (const user in usersInRoom["data"]["data"]) {
@@ -52,8 +52,9 @@ Room-specific commands:
 			}*/
 			break;
 		case "ping":
-			pingSite();
-			keyboardBuffer.push("Pong! "+ping+"\n");
+			await pingSite().then(function() {
+				keyboardBuffer.push("Pong! "+ping+"\n");
+			});
 			break;
 		case "bag":
 			break;
@@ -61,9 +62,10 @@ Room-specific commands:
 			break;
 		case "list":
 			usersInRoom = await Actions.GetUsersOnline(roomID);
-			for (const user in usersInRoom["data"]["data"]) {
+			async function temp() {for (const user in usersInRoom["data"]["data"]) {
 				keyboardBuffer.push(user+"\n");
-			}
+			}};
+			await temp();
 			break;
 		case "shake":
 			shakeNum = 10;
