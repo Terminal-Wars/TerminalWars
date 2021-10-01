@@ -1,11 +1,11 @@
-import { objects } from './main.js';
+import { objects, debugBox } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
 
 // The canvas
-export let canvas = document.querySelector('.draw');
-export let ctx = canvas.getContext('2d');
+export let canvasObject = document.querySelector('.draw');
+export let ctx = canvasObject.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 //ctx.mozImageSmoothingEnabled = false;
 
@@ -32,9 +32,12 @@ export let shiftY = 0; export let termHeight = 1;
 // todo: clamp function
 export function shiftYBy(num) {shiftY += num;}
 
-canvas.width = WIDTH; canvas.height = HEIGHT;
-canvas.style.width = WIDTH*MUL+"px"; canvas.style.maxWidth = WIDTH*MUL+"px"; 
-canvas.style.height= HEIGHT*MUL+"px"; canvas.style.maxHeight = HEIGHT*MUL+"px";
+// The frame counter. This is an array so that we can modify it from other files.
+export let frameCount = [0];
+
+canvasObject.width = WIDTH; canvasObject.height = HEIGHT;
+canvasObject.style.width = WIDTH*MUL+"px"; canvasObject.style.maxWidth = WIDTH*MUL+"px"; 
+canvasObject.style.height= HEIGHT*MUL+"px"; canvasObject.style.maxHeight = HEIGHT*MUL+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 
 
@@ -48,30 +51,40 @@ class DrawClass {
 		ctx.fillStyle = "white";
 		ctx.fillRect(x, y, width, height);
 	}
-	button(x, y, width, height, image, ox, oy,active) {
+	button(x, y, width, height, content, ox, oy,active,type) {
 		// Buttons cannot be pressed until the user is logged in.
 		if(userID == "" || roomID == "") {ox += 16;}
-		ctx.fillStyle = "black";
-		ctx.fillRect(x-1, y-1, width+2, height+2);
-		if(active == 0) {
-			ctx.fillStyle = "white";
-			ctx.fillRect(x-1, y-1, width+1, height+1);
-			ctx.fillStyle = "#dfdfdf";
-			ctx.fillRect(x, y, width, height);
-			ctx.fillStyle = "#808080";
-			ctx.fillRect(x+1, y+1, width-1, height-1);
-		} else {
-			ctx.fillStyle = "#808080";
-			ctx.fillRect(x, y, width, height);
+		if(type == "button") {
+			ctx.fillStyle = "black";
+			ctx.fillRect(x-1, y-1, width+2, height+2);
+			if(active == 0) {
+				ctx.fillStyle = "white";
+				ctx.fillRect(x-1, y-1, width+1, height+1);
+				ctx.fillStyle = "#dfdfdf";
+				ctx.fillRect(x, y, width, height);
+				ctx.fillStyle = "#808080";
+				ctx.fillRect(x+1, y+1, width-1, height-1);
+			} else {
+				ctx.fillStyle = "#808080";
+				ctx.fillRect(x, y, width, height);
+			}
+			ctx.fillStyle = "#b5b5b5";
+			ctx.fillRect(x+1, y+1, width-2, height-2);
 		}
-		ctx.fillStyle = "#b5b5b5";
-		ctx.fillRect(x+1, y+1, width-2, height-2);
-		ctx.drawImage(image,ox,oy,width,height,x,y,width,height);
+		// Draw either an image or some text
+		switch(content.constructor.name) {
+			case "HTMLImageElement":
+				ctx.drawImage(content,ox,oy,width,height,x,y,width,height);
+				break;
+			case "String":
+				drawChars(content,x,y);
+				break;
+		}
 	}
 	base(x, y, w, h) {
 		ctx.fillStyle = "black";
-		ctx.fillRect(x+1, y+1, (w+1), (h)+2-1);
-		ctx.fillStyle = "#b5b5b5";
+		ctx.fillRect(x+1, y+1, (w+1), (h)+1);
+		ctx.fillStyle = "#808080";
 		ctx.fillRect(x+1, y+1, (w), (h));
 		ctx.fillStyle = "white";
 		ctx.fillRect(x+1, y+1, (w)-1, (h)-1);
@@ -81,11 +94,9 @@ class DrawClass {
 }
 const Draw = new DrawClass();
 
-// The main draw function.
-export async function drawGFX() {
-	// For each object in the objects array...
-	for(let i = 0; i < objects.length; i++) {
-		let o = objects[i];
+// The function for drawing objects.
+export async function draw(o) {
+		frameCount[0]++; 
 		// Some common variables
 		let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
 		let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
@@ -98,7 +109,7 @@ export async function drawGFX() {
 				// red gradient
 				var gradient = ctx.createLinearGradient(xa_n+2, ya_n+3, xa_p+2, ya_n+3);
 				gradient.addColorStop(0, "#cc0000");
-				gradient.addColorStop(1, "#770000");
+				gradient.addColorStop(1, "#000000");
 				ctx.fillStyle = gradient;
 				ctx.fillRect(xa_n+4, ya_n+4, rw-6, 19);
 				// title
@@ -132,7 +143,7 @@ export async function drawGFX() {
 				var gradient = ctx.createLinearGradient(0, 0, 0, HEIGHT);
 				gradient.addColorStop(0, o["color1"]);
 				gradient.addColorStop(1, o["color2"]);
-				ctx.fillStyle = gradient;
+				ctx.fillStyle = o["color1"];
 				ctx.fillRect(0, 0, WIDTH, HEIGHT);
 				break;
 			case "dropdown":
@@ -153,21 +164,13 @@ export async function drawGFX() {
 			// Bit of a bizarre way of doing things, but it's less messy.
 			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
-			Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],e["image"],e["ox"],e["oy"],e["active"]);
+			Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]),e["ox"],e["oy"],e["active"],e["type"]);
 		}
+}
+
+export async function drawGFX() {
+	for(let i = 0; i < objects.length; i++) {
+	    await draw(objects[i]);
 	}
 }
 
-// Make sure every pixel on the screen adheres to a certain color depth.
-export async function degrade(depth) {
-	// Indexing
-	let pixels = ctx.getImageData(0, 0, WIDTH, HEIGHT); 
-	let pixeldata = pixels.data;
-	// The 4 here is arbritrary. By changing every fourth pixel, we (somehow) still achieve the effect,
-	// and it's faster on older hardware.
-	// to-do: why the fuck does this work
-	for(let i = 0; i < pixeldata.length; i += 4) {
-		pixeldata[i] = Math.floor(pixeldata[i] / (255 / depth)) * (255 / depth);
-	}
-	ctx.putImageData(pixels, 0, 0);
-}
