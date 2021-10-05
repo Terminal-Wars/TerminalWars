@@ -49,7 +49,7 @@ socket.addEventListener('open', function (event) {
 
 });
 
-socket.addEventListener('message', function (event) {
+socket.addEventListener('message', async function (event) {
     let data = JSON.parse(event.data);
       if(data["type"] == "broadcast") {
         keyboardBuffer.push(data["data"]["data"]["text"]);
@@ -59,7 +59,7 @@ socket.addEventListener('message', function (event) {
       }
 });
 
-socket.addEventListener('close', function (event) {
+socket.addEventListener('close', async function (event) {
     canvasObject.remove();
     alert("The server was closed. Please wait a moment and then reload the page.");
 });

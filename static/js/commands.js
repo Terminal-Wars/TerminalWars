@@ -3,7 +3,7 @@ import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown} from './commonObjects.js';
-import {mousePos} from './main.js';
+import {mousePos, Objects} from './main.js';
 export let userID = "ioi"; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
@@ -41,19 +41,20 @@ Room-specific commands:
 		case "join":
 			roomID = arg1;
 			break;
+		case "attackDropdown":
+			await dropdown(mousePos["x"],mousePos["y"],"attacks",exampleAttacks);
+			break;
 		case "attack":
-			// Create a dropdown.
-			// Importing the mouse x/y into this file causes an import loop, so just let dropdown.js handle it.
-			dropdown(mousePos["x"],mousePos["y"],"attacks",exampleAttacks);
-			/*usersInRoom = await Actions.GetUsersOnline(roomID);
-			console.log(usersInRoom);
+			Objects.destroyAll("dropdown");
+			usersInRoom = await Actions.GetUsersOnline(roomID);
 			for (const user in usersInRoom["data"]["data"]) {
-				if(user != userID) {await Actions.Attack(user, userID, roomID, 5);}
-			}*/
+				if(user != userID) {await Actions.Attack(user, userID, roomID, arg1);}
+			}
 			break;
 		case "ping":
-			pingSite();
-			keyboardBuffer.push("Pong! "+ping+"\n");
+			await pingSite().then(function() {
+				keyboardBuffer.push("Pong! "+ping+"\n");
+			});
 			break;
 		case "bag":
 			break;
@@ -61,9 +62,10 @@ Room-specific commands:
 			break;
 		case "list":
 			usersInRoom = await Actions.GetUsersOnline(roomID);
-			for (const user in usersInRoom["data"]["data"]) {
+			async function temp() {for (const user in usersInRoom["data"]["data"]) {
 				keyboardBuffer.push(user+"\n");
-			}
+			}};
+			await temp();
 			break;
 		case "shake":
 			shakeNum = 10;
