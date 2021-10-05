@@ -18,10 +18,14 @@ export const HEIGHT = 600;
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
 // Any images we need
-export const term_buttons = new Image(32,48);
+export const term_buttons = new Image();
 term_buttons.src = 'static/gfx/term_buttons.webp';
+export const diceblock = new Image();
+diceblock.src = 'static/gfx/diceblock.webp';
+export const dice_font = new Image();
+dice_font.src = 'static/gfx/dice_font.webp';
 
-// X and Y anchors, seperate from the ones from within the drawGFX function.
+// X and Y anchors, seperate from the ones from within the switch case in the drawGFX function.
 let xa, ya = 0;
 
 // Some terminal specific variables which need to be global.
@@ -34,6 +38,9 @@ export function shiftYBy(num) {shiftY += num;}
 
 // The frame counter. This is an array so that we can modify it from other files.
 export let frameCount = [0];
+
+// The ID of the terminal window, for dice rolls.
+export let terminalWinID = 0;
 
 canvasObject.width = WIDTH; canvasObject.height = HEIGHT;
 canvasObject.style.width = WIDTH*MUL+"px"; canvasObject.style.maxWidth = WIDTH*MUL+"px"; 
@@ -64,10 +71,10 @@ class DrawClass {
 			await this.box(x+1, y+1, width-2, height-2,"#b5b5b5");
 		}
 		if(type == "flat") { // flat
-			mode = 4;
+			mode = 0;
 			if(hover == 1) {
 				await this.box(x,y,width,height,"#15539e");
-				mode = 6;
+				mode = 2;
 			}
 		}
 		// Draw either an image or some text
@@ -99,8 +106,10 @@ class DrawClass {
 		ctx.fillStyle = gradient;
 		ctx.fillRect(x1, y1, width, height);
 	}
-	async image(image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null) {
+	async image(image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null,opacity=1) {
+		ctx.globalAlpha = opacity;
 		ctx.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
+		ctx.globalAlpha = 1;
 	}
 }
 const Draw = new DrawClass();
@@ -144,19 +153,32 @@ export async function draw(o) {
 						// small box
 						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
 						await drawChars(o["texts"][1], xa_n+8,ya_p-24);
+						terminalWinID = o["id"];
 				}
 				break;
 			case "desktop":
 				await Draw.box(0,0,WIDTH,HEIGHT,o["color1"]);
 				//await Draw.gradient(0,0,0,HEIGHT,WIDTH,HEIGHT,o["color1"],o["color2"])
 				break;
+			case "gif":
+				break;
 			case "dropdown":
 				await Draw.base(xa_n, ya_n, rw, rh);
 				break;
+			case "dice":
+				let terminal = objects[terminalWinID];
+				async function tmp() {
+					Draw.image(diceblock,0,0,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
+					ctx.globalCompositeOperation = "soft-light";
+					drawChars(`${o["value"]}`,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),1,Infinity,-1*Infinity,Infinity,o["opacity"]).then(function() {
+						ctx.globalCompositeOperation = "source-over";
+					});
+				}
+				await tmp();
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {
-					await drawChars(o.text,xa_n+3,ya_n+3);
+					await drawChars(o.text,xa_n+3,ya_n+3,Infinity,-1*Infinity,Infinity,o["opacity"]);
 				}
 				break;
 		}

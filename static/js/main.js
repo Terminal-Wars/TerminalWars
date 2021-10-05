@@ -1,4 +1,5 @@
 import {drawGFX, frameCount} from './canvas.js';
+import {diceUpdate} from './dice.js';
 import {degrade} from './degrade.js';
 import {drawParticles} from './particles.js';
 
@@ -45,9 +46,11 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  // For each object in the objects array...
   await drawGFX();
-  await degrade(16);
+  await degrade(16); 
+}
+async function loop60() {
+  await diceUpdate();
 }
 export let curObject = objects[0];
 
@@ -56,9 +59,11 @@ async function frameCounter() {
   frameCount[0] = 0;
 }
 
-loadDefaultObjects();
-pingSite();
-setInterval(pingSite,10000);
-setInterval(loop, 1000/60);
-setInterval(frameCounter, 1000);
+await loadDefaultObjects();
+await pingSite();
+await setInterval(pingSite,10000);
+await setInterval(frameCounter, 1000);
+// todo: make this dynamic or togglable for the final release
+await setInterval(loop, 5);
+await setInterval(loop60, 1000/15);
 //setInterval(lowerPriorityLoop, 1000/30);

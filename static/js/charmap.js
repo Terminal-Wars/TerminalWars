@@ -1,11 +1,8 @@
 import {ctx} from './canvas.js';
 import {WIDTH, HEIGHT} from './canvas.js';
 export const characters = ["`","1","2","3","4","5","6","7","8","9","0","-","=","~","!","@","#","$","%","^","&","*","(",")","_","+","[","]","\\","{","}","|",";","\'",":","\"",",",".","/","<",">","?","q","w","e","r","t","y","u","i","o","p","a","s","d","f","g","h","j","k","l","z","x","c","v","b","n","m","Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M","à","è","ì","ò","ù","À","È","Ì","Ò","Ù","á","é","í","ó","ú","ý","Á","É","Í","Ó","Ú","Ý","â","ê","î","ô","û","Â","Ê","Î","Ô","Û","ã","ñ","õ","Ã","Ñ","Õ","ä","ë","ï","ö","ü","ÿ","Ä","Ë","Ï","Ö","Ü","Ÿ","å","Å","æ","Æ","œ","Œ","ç","Ç","ð","Ð","ø","Ø","¿","¡","ß",""];
-const charmapNormal = new Image(1288,64);
-const charmapSmall = new Image(1288,40);
-charmapNormal.src = 'static/gfx/charmap_normal.webp';
-charmapSmall.src = 'static/gfx/charmap_small.webp';
-let charmap;
+const charmap = new Image(1288,64);
+charmap.src = 'static/gfx/charmap.webp';
 let lineHeight;
 
 // Mode Table:
@@ -18,13 +15,14 @@ let lineHeight;
 // 6: white 10px normal
 // 7: white 10px bold
 
-async function drawChar(char, x, y, mode=0) {
-	if(mode >= 4) {lineHeight = 10; charmap = charmapSmall; mode -= 4;} else {lineHeight = 16; charmap = charmapNormal;}
+async function drawChar(char, x, y, mode=0,opacity) {
+	ctx.globalAlpha = opacity;
 	for(let i = 0; i <= char.length; i++) {
-		ctx.drawImage(charmap,8*characters.indexOf(char[i]),0+(lineHeight*mode),8,lineHeight,x+(i*8),y,8,lineHeight);
+		ctx.drawImage(charmap,8*characters.indexOf(char[i]),0+(16*mode),8,16,x+(i*8),y,8,16);
 	}
+	ctx.globalAlpha = 1;
 }
-export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity,maxY=Infinity) {
+export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity,maxY=Infinity, opacity=1) {
 	let offset = x;
 	for(let i in string) {
 		let k = string.charAt(i);
@@ -34,7 +32,7 @@ export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity
 				x = -8+offset;
 			default:
 				if(y <= minY+12 || y >= maxY-24)  {continue;}
-				await drawChar(k,x,y,mode);
+				await drawChar(k,x,y,mode,opacity);
 				x += 8;
 			if(x >= offset+maxX) {x = offset; y += 12;}
 		}

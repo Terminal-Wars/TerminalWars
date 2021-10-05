@@ -2,7 +2,7 @@ import {socket, Actions, delay} from './socket.js';
 import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
-import {dropdown} from './commonObjects.js';
+import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
 export let userID = "ioi"; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
@@ -66,6 +66,9 @@ Room-specific commands:
 				keyboardBuffer.push(user+"\n");
 			}};
 			await temp();
+			break;
+		case "dice":
+			await dice();
 			break;
 		case "shake":
 			shakeNum = 10;
