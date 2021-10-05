@@ -2,6 +2,7 @@ import { objects, debugBox } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
+import { parseGIF, decompressFrames } from './gifuct/index.js'
 
 // The canvas
 export let canvasObject = document.querySelector('.draw');
@@ -17,13 +18,21 @@ export const HEIGHT = 600;
 // The scale multiplier.
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
+// From here, we'll scale the canvas based on the user's actual screen size.
+canvasObject.width = WIDTH; canvasObject.height = HEIGHT;
+canvasObject.style.width = WIDTH*MUL+"px"; canvasObject.style.maxWidth = WIDTH*MUL+"px"; 
+canvasObject.style.height= HEIGHT*MUL+"px"; canvasObject.style.maxHeight = HEIGHT*MUL+"px";
+//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
+
 // Any images we need
+// todo: make a seperate .json file with all of these in it and just use arrays instead.
 export const term_buttons = new Image();
 term_buttons.src = 'static/gfx/term_buttons.webp';
 export const diceblock = new Image();
 diceblock.src = 'static/gfx/diceblock.webp';
 export const dice_font = new Image();
 dice_font.src = 'static/gfx/dice_font.webp';
+let promisedGif; // some shit for the gif function
 
 // X and Y anchors, seperate from the ones from within the switch case in the drawGFX function.
 let xa, ya = 0;
@@ -31,10 +40,6 @@ let xa, ya = 0;
 // Some terminal specific variables which need to be global.
 export let shiftY = 0; export let termHeight = 1;
 
-// And since variables are imported to other files as consts no matter what,
-// we need a function to increase and decrease it from this file.
-// todo: clamp function
-export function shiftYBy(num) {shiftY += num;}
 
 // The frame counter. This is an array so that we can modify it from other files.
 export let frameCount = [0];
@@ -42,11 +47,10 @@ export let frameCount = [0];
 // The ID of the terminal window, for dice rolls.
 export let terminalWinID = 0;
 
-canvasObject.width = WIDTH; canvasObject.height = HEIGHT;
-canvasObject.style.width = WIDTH*MUL+"px"; canvasObject.style.maxWidth = WIDTH*MUL+"px"; 
-canvasObject.style.height= HEIGHT*MUL+"px"; canvasObject.style.maxHeight = HEIGHT*MUL+"px";
-//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
-
+// And since variables are imported to other files as consts no matter what,
+// we need a function to increase and decrease it from this file.
+// todo: clamp function
+export function shiftYBy(num) {shiftY += num;}
 
 // Common UI elements
 class DrawClass {
@@ -111,6 +115,14 @@ class DrawClass {
 		ctx.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
 		ctx.globalAlpha = 1;
 	}
+	async gif(image=null,x=0,y=0) {
+		console.log(fetch("./static/gfx/diceroll.gif"));
+		promisedGif = fetch("./static/gfx/diceroll.gif")
+		       .then(resp => resp.arrayBuffer())
+		       .then(buff => parseGIF(buff))
+		       .then(gif => decompressFrames(gif, true))
+			   .then(gif => console.log(gif));
+	}
 }
 const Draw = new DrawClass();
 
@@ -160,8 +172,6 @@ export async function draw(o) {
 				await Draw.box(0,0,WIDTH,HEIGHT,o["color1"]);
 				//await Draw.gradient(0,0,0,HEIGHT,WIDTH,HEIGHT,o["color1"],o["color2"])
 				break;
-			case "gif":
-				break;
 			case "dropdown":
 				await Draw.base(xa_n, ya_n, rw, rh);
 				break;
@@ -175,6 +185,12 @@ export async function draw(o) {
 					});
 				}
 				await tmp();
+			case "image":
+				if(o["source"] != undefined && o["playing"] == 0) { // && o["source"].src.endsWith(".gif")
+					// Set playing to 1, because we're now gonna pass control to another draw function.
+					o["playing"] = 1;
+					Draw.gif(o["source"],o["x"],o["y"]);
+				}
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {

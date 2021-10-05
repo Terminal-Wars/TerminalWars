@@ -49,6 +49,9 @@ export async function dice() {
 		objects[1]["opacity"] = 1;
 		objects[1]["x"] = Math.round(Math.random() * 200) - 100;objects[1]["y"] = 0;
 	} else {
-		objects.push("id":objects.length,"type":"gif","x":0,"y":0);
+		//"static/gfx/diceroll.gif"
+		let diceroll = new Image(640,480);
+		diceroll.src = "./static/gfx/diceroll.gif";
+		objects.push({id:objects.length,type:"image","x":0,"y":0,"source":"./static/gfx/diceroll.gif","playing":0});
 	}
 }
