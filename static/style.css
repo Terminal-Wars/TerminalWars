@@ -1,6 +1,8 @@
-* {margin: 0;}
-body {background: black;}
+* {margin: 0; font-family: Verdana;}
+body {background: url('gfx/background.webp'), black;}
 canvas {display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    box-shadow: 3px 3px 5px 5px rgba(0,0,0,0.5);
+    border: 1px solid black;
     image-rendering: optimizeSpeed!important;
     image-rendering: -moz-crisp-edges!important;
     image-rendering: -o-crisp-edges!important;

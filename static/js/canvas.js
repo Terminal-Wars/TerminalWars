@@ -2,11 +2,16 @@ import { objects, debugBox } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
+import { parseGIF, decompressFrames } from './gifuct/index.js'
 
 // The canvas
-export let canvasObject = document.querySelector('.draw');
-export let ctx = canvasObject.getContext('2d');
+export let cO = document.querySelector('.draw');
+export let cO2 = document.querySelector('.mpeg'); 
+export let ctx = cO.getContext('2d');
+export let ctx2 = cO2.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+ctx2.imageSmoothingEnabled = false;
+
 //ctx.mozImageSmoothingEnabled = false;
 
 // The monitor width
@@ -17,29 +22,42 @@ export const HEIGHT = 600;
 // The scale multiplier.
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
-// Any images we need
-export const term_buttons = new Image(32,48);
-term_buttons.src = 'static/gfx/term_buttons.webp';
+// From here, we'll scale the canvas based on the user's actual screen size.
+cO.width = WIDTH; cO.height = HEIGHT;
+cO2.width = WIDTH; cO2.height = HEIGHT;
+cO.style.width = WIDTH*MUL+"px"; cO.style.maxWidth = WIDTH*MUL+"px"; 
+cO2.style.width = WIDTH*MUL+"px"; cO2.style.maxWidth = WIDTH*MUL+"px";
+cO.style.height = HEIGHT*MUL+"px"; cO.style.maxHeight = HEIGHT*MUL+"px";
+cO2.style.height = HEIGHT*MUL+"px"; cO2.style.maxHeight = HEIGHT*MUL+"px";
+//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 
-// X and Y anchors, seperate from the ones from within the drawGFX function.
+// Any images we need
+// todo: make a seperate .json file with all of these in it and just use arrays instead.
+export const term_buttons = new Image();
+term_buttons.src = 'static/gfx/term_buttons.webp';
+export const diceblock = new Image();
+diceblock.src = 'static/gfx/diceblock.webp';
+export const dice_font = new Image();
+dice_font.src = 'static/gfx/dice_font.webp';
+let promisedGif; // some shit for the gif function
+
+// X and Y anchors, seperate from the ones from within the switch case in the drawGFX function.
 let xa, ya = 0;
 
 // Some terminal specific variables which need to be global.
 export let shiftY = 0; export let termHeight = 1;
 
-// And since variables are imported to other files as consts no matter what,
-// we need a function to increase and decrease it from this file.
-// todo: clamp function
-export function shiftYBy(num) {shiftY += num;}
 
 // The frame counter. This is an array so that we can modify it from other files.
 export let frameCount = [0];
 
-canvasObject.width = WIDTH; canvasObject.height = HEIGHT;
-canvasObject.style.width = WIDTH*MUL+"px"; canvasObject.style.maxWidth = WIDTH*MUL+"px"; 
-canvasObject.style.height= HEIGHT*MUL+"px"; canvasObject.style.maxHeight = HEIGHT*MUL+"px";
-//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
+// The ID of the terminal window, for dice rolls.
+export let terminalWinID = 0;
 
+// And since variables are imported to other files as consts no matter what,
+// we need a function to increase and decrease it from this file.
+// todo: clamp function
+export function shiftYBy(num) {shiftY += num;}
 
 // Common UI elements
 class DrawClass {
@@ -64,10 +82,10 @@ class DrawClass {
 			await this.box(x+1, y+1, width-2, height-2,"#b5b5b5");
 		}
 		if(type == "flat") { // flat
-			mode = 4;
+			mode = 0;
 			if(hover == 1) {
 				await this.box(x,y,width,height,"#15539e");
-				mode = 6;
+				mode = 2;
 			}
 		}
 		// Draw either an image or some text
@@ -99,8 +117,21 @@ class DrawClass {
 		ctx.fillStyle = gradient;
 		ctx.fillRect(x1, y1, width, height);
 	}
-	async image(image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null) {
+	async image(image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null,opacity=1) {
+		ctx.globalAlpha = opacity;
 		ctx.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
+		ctx.globalAlpha = 1;
+	}
+	async gif(image=null,x=0,y=0,frame=0) {
+		fetch("./static/gfx/diceroll.gif")
+		       .then(resp => resp.arrayBuffer())
+		       .then(buff => parseGIF(buff))
+		       .then(gif => decompressFrames(gif, true))
+			   .then(images => {
+			   	let frameImageData = ctx.createImageData(320, 240);
+			   	frameImageData.data.set(images[Math.round(frame)*4].patch);
+				ctx2.putImageData(frameImageData, x, y);
+			   });
 	}
 }
 const Draw = new DrawClass();
@@ -144,6 +175,7 @@ export async function draw(o) {
 						// small box
 						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
 						await drawChars(o["texts"][1], xa_n+8,ya_p-24);
+						terminalWinID = o["id"];
 				}
 				break;
 			case "desktop":
@@ -153,10 +185,26 @@ export async function draw(o) {
 			case "dropdown":
 				await Draw.base(xa_n, ya_n, rw, rh);
 				break;
+			case "dice":
+				let terminal = objects[terminalWinID];
+				async function tmp() {
+					Draw.image(diceblock,0,0,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
+					ctx.globalCompositeOperation = "soft-light";
+					drawChars(`${o["value"]}`,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),1,Infinity,-1*Infinity,Infinity,o["opacity"]).then(function() {
+						ctx.globalCompositeOperation = "source-over";
+					});
+				}
+				await tmp();
+			case "image":
+				if(o["source"] != undefined && o["source"].endsWith(".gif") && o["playing"] == 0) {
+					// Set playing to 1, because we're now gonna pass control to another draw function.
+					Draw.gif(o["source"],o["x"],o["y"],o["frame"]);
+					if(o["frame"] <= o["frameCount"]) {o["frame"]+=2};
+				}
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {
-					await drawChars(o.text,xa_n+3,ya_n+3);
+					await drawChars(o.text,xa_n+3,ya_n+3,Infinity,-1*Infinity,Infinity,o["opacity"]);
 				}
 				break;
 		}
