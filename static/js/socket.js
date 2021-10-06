@@ -1,6 +1,6 @@
 // export const socket = new WebSocket("ws://localhost:2191/socket");
 // export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
-import {canvasObject} from './canvas.js';
+import {cO} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
@@ -60,7 +60,7 @@ socket.addEventListener('message', async function (event) {
 });
 
 socket.addEventListener('close', async function (event) {
-    canvasObject.remove();
+    cO.remove();
     alert("The server was closed. Please wait a moment and then reload the page.");
 });
 

@@ -8,10 +8,9 @@ import * as _lzw from "./lzw.js";
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-export var parseGIF = function parseGIF(arrayBuffer) {
-  console.log(arrayBuffer);
+export function parseGIF(arrayBuffer) {
   var byteData = new Uint8Array(arrayBuffer);
-  return (0, _jsBinarySchemaParser.parse)((0, _uint.buildStream)(byteData), _gif["default"]);
+  return (0, _jsBinarySchemaParser.parse)((0, _uint.buildStream)(byteData), _gif.schema);
 };
 
 var generatePatch = function generatePatch(image) {

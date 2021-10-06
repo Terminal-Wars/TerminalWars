@@ -5,9 +5,13 @@ import { userID, roomID } from './commands.js';
 import { parseGIF, decompressFrames } from './gifuct/index.js'
 
 // The canvas
-export let canvasObject = document.querySelector('.draw');
-export let ctx = canvasObject.getContext('2d');
+export let cO = document.querySelector('.draw');
+export let cO2 = document.querySelector('.mpeg'); 
+export let ctx = cO.getContext('2d');
+export let ctx2 = cO2.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+ctx2.imageSmoothingEnabled = false;
+
 //ctx.mozImageSmoothingEnabled = false;
 
 // The monitor width
@@ -19,9 +23,12 @@ export const HEIGHT = 600;
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
 // From here, we'll scale the canvas based on the user's actual screen size.
-canvasObject.width = WIDTH; canvasObject.height = HEIGHT;
-canvasObject.style.width = WIDTH*MUL+"px"; canvasObject.style.maxWidth = WIDTH*MUL+"px"; 
-canvasObject.style.height= HEIGHT*MUL+"px"; canvasObject.style.maxHeight = HEIGHT*MUL+"px";
+cO.width = WIDTH; cO.height = HEIGHT;
+cO2.width = WIDTH; cO2.height = HEIGHT;
+cO.style.width = WIDTH*MUL+"px"; cO.style.maxWidth = WIDTH*MUL+"px"; 
+cO2.style.width = WIDTH*MUL+"px"; cO2.style.maxWidth = WIDTH*MUL+"px";
+cO.style.height = HEIGHT*MUL+"px"; cO.style.maxHeight = HEIGHT*MUL+"px";
+cO2.style.height = HEIGHT*MUL+"px"; cO2.style.maxHeight = HEIGHT*MUL+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 
 // Any images we need
@@ -115,13 +122,16 @@ class DrawClass {
 		ctx.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
 		ctx.globalAlpha = 1;
 	}
-	async gif(image=null,x=0,y=0) {
-		console.log(fetch("./static/gfx/diceroll.gif"));
-		promisedGif = fetch("./static/gfx/diceroll.gif")
+	async gif(image=null,x=0,y=0,frame=0) {
+		fetch("./static/gfx/diceroll.gif")
 		       .then(resp => resp.arrayBuffer())
 		       .then(buff => parseGIF(buff))
 		       .then(gif => decompressFrames(gif, true))
-			   .then(gif => console.log(gif));
+			   .then(images => {
+			   	let frameImageData = ctx.createImageData(320, 240);
+			   	frameImageData.data.set(images[Math.round(frame)*4].patch);
+				ctx2.putImageData(frameImageData, x, y);
+			   });
 	}
 }
 const Draw = new DrawClass();
@@ -186,10 +196,10 @@ export async function draw(o) {
 				}
 				await tmp();
 			case "image":
-				if(o["source"] != undefined && o["playing"] == 0) { // && o["source"].src.endsWith(".gif")
+				if(o["source"] != undefined && o["source"].endsWith(".gif") && o["playing"] == 0) {
 					// Set playing to 1, because we're now gonna pass control to another draw function.
-					o["playing"] = 1;
-					Draw.gif(o["source"],o["x"],o["y"]);
+					Draw.gif(o["source"],o["x"],o["y"],o["frame"]);
+					if(o["frame"] <= o["frameCount"]) {o["frame"]+=2};
 				}
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);

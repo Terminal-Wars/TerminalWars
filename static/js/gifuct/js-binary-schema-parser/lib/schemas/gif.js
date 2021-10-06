@@ -8,7 +8,7 @@ import * as _ from "../index.js";
 import * as _uint from "../parsers/uint8.js";
 
 // a set of 0x00 terminated subblocks
-var subBlocksSchema = {
+export var subBlocksSchema = {
   blocks: function blocks(stream) {
     var terminator = 0x00;
     var chunks = [];
@@ -40,7 +40,7 @@ var subBlocksSchema = {
   }
 }; // global control extension
 
-var gceSchema = (0, _.conditional)({
+export var gceSchema = (0, _.conditional)({
   gce: [{
     codes: (0, _uint.readBytes)(2)
   }, {
@@ -74,7 +74,7 @@ var gceSchema = (0, _.conditional)({
   return codes[0] === 0x21 && codes[1] === 0xf9;
 }); // image pipeline block
 
-var imageSchema = (0, _.conditional)({
+export var imageSchema = (0, _.conditional)({
   image: [{
     code: (0, _uint.readByte)()
   }, {
@@ -122,7 +122,7 @@ var imageSchema = (0, _.conditional)({
   return (0, _uint.peekByte)()(stream) === 0x2c;
 }); // plain text block
 
-var textSchema = (0, _.conditional)({
+export var textSchema = (0, _.conditional)({
   text: [{
     codes: (0, _uint.readBytes)(2)
   }, {
@@ -137,7 +137,7 @@ var textSchema = (0, _.conditional)({
   return codes[0] === 0x21 && codes[1] === 0x01;
 }); // application block
 
-var applicationSchema = (0, _.conditional)({
+export var applicationSchema = (0, _.conditional)({
   application: [{
     codes: (0, _uint.readBytes)(2)
   }, {
@@ -152,7 +152,7 @@ var applicationSchema = (0, _.conditional)({
   return codes[0] === 0x21 && codes[1] === 0xff;
 }); // comment block
 
-var commentSchema = (0, _.conditional)({
+export var commentSchema = (0, _.conditional)({
   comment: [{
     codes: (0, _uint.readBytes)(2)
   }, subBlocksSchema]
@@ -160,7 +160,7 @@ var commentSchema = (0, _.conditional)({
   var codes = (0, _uint.peekBytes)(2)(stream);
   return codes[0] === 0x21 && codes[1] === 0xfe;
 });
-var schema = [{
+export var schema = [{
   header: [{
     signature: (0, _uint.readString)(3)
   }, {
