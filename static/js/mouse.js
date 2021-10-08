@@ -1,12 +1,10 @@
 import {Objects, objects, curObject, mousePos} from './main.js';
-import {WIDTH, HEIGHT, SWIDTH, SHEIGHT} from './canvas.js';
+import {WIDTH, HEIGHT, SWIDTH, SHEIGHT, OB_WIDTH, OB_HEIGHT} from './canvas.js';
 import { command, userID, roomID} from './commands.js';
 
 // The mouse position for other files to use.
 let mousePosHeld = [{"x":0,"y":0}];
 
-
-const OB_WIDTH = ((SWIDTH-WIDTH)/2); const OB_HEIGHT = ((SHEIGHT-HEIGHT)/2);
 // mouse variables
 let mouseDown = 0; let winMoveMode = 0;
 // modifier based on the width and height of the window.

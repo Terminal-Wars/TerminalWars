@@ -1,6 +1,6 @@
 import { objects } from './main.js';
 import { ping } from './ping.js';
-import * as c from './canvas.js';
+import {term_buttons, WIDTH, HEIGHT, OB_WIDTH, OB_HEIGHT} from './canvas.js';
 
 export async function loadDefaultObjects() {
 	// The desktop background
@@ -12,11 +12,11 @@ export async function loadDefaultObjects() {
 	//objects.push({"id":"0","type":"shortcut","x":48,"y":48,"width":32,"height":32,"fillStyle":"red"});
 	objects.push({"id":2,"type":"window","title":"Terminal","win_type":"text","x":400,"y":225,"width":200,"height":200,"z":1,
 				  "texts":{0: "", 1: ""}, "event_num":3,
-				  "events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":c.term_buttons,"ox":0,"oy":0,
+				  "events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":term_buttons,"ox":0,"oy":0,
 							"command":{"command": "attackDropdown"}},
-							 {"type":"button","anchor": "positive","x":-39,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":c.term_buttons,"ox":0,"oy":16,
+							 {"type":"button","anchor": "positive","x":-39,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":term_buttons,"ox":0,"oy":16,
 							"command":{"command": "bag"}},
-							 {"type":"button","anchor": "positive","x":-20,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":c.term_buttons,"ox":0,"oy":32,
+							 {"type":"button","anchor": "positive","x":-20,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":term_buttons,"ox":0,"oy":32,
 							"command":{"command": "user"}}]
 							});
 }
@@ -49,9 +49,14 @@ export async function dice() {
 		objects[1]["opacity"] = 1;
 		objects[1]["x"] = Math.round(Math.random() * 200) - 100;objects[1]["y"] = 0;
 	} else {
-		//"static/gfx/diceroll.gif"
-		let diceroll = new Image(640,480);
-		diceroll.src = "./static/gfx/diceroll.gif";
-		objects.push({id:objects.length,type:"image","x":0,"y":0,"source":"./static/gfx/diceroll.gif","playing":0,"frame":0,"frameCount":82});
+		let img = document.createElement('img');
+		img.style.position = 'absolute'; img.style.zIndex = document.body.length*22;
+		img.src = "./static/gfx/diceroll.gif";
+		img.border = "5px solid red";
+		img.style.left = OB_WIDTH+(Math.random()*(WIDTH/2))+"px"; img.style.top = OB_HEIGHT+(Math.random()*(HEIGHT/2))+"px";
+		document.body.appendChild(img);
+		setTimeout(function() {
+			img.style.filter = "brightness(50%)";
+		}, 5500)
 	}
 }

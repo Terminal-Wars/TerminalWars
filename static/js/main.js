@@ -59,11 +59,14 @@ async function frameCounter() {
   frameCount[0] = 0;
 }
 
-await loadDefaultObjects();
-await pingSite();
-await setInterval(pingSite,10000);
-await setInterval(frameCounter, 1000);
-// todo: make this dynamic or togglable for the final release
-await setInterval(loop, 5);
-await setInterval(loop60, 1000/15);
-//setInterval(lowerPriorityLoop, 1000/30);
+async function init() { // redundant, but it's here for compatibility
+  await loadDefaultObjects();
+  await pingSite();
+  await setInterval(pingSite,10000);
+  await setInterval(frameCounter, 1000);
+  // todo: make this dynamic or togglable for the final release
+  await setInterval(loop, 5);
+  await setInterval(loop60, 1000/15);
+  //setInterval(lowerPriorityLoop, 1000/30);
+}
+init();
