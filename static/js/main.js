@@ -1,5 +1,4 @@
 import {drawGFX, frameCount} from './canvas.js';
-import {diceUpdate} from './dice.js';
 import {degrade} from './degrade.js';
 import {drawParticles} from './particles.js';
 
@@ -8,7 +7,7 @@ import * as k from './keyboard.js';
 import * as m from './mouse.js';
 import * as d from './degrade.js';
 
-import { loadDefaultObjects } from './commonObjects.js';
+import { loadDefaultObjects, diceUpdate } from './commonObjects.js';
 import { pingSite } from './ping.js';
 export let objects = []; export let particles = [];
 // this should be in mouse.js but for some reason that literally cannot be imported anywhere except here,

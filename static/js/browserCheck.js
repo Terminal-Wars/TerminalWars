@@ -14,7 +14,8 @@ try{
 		var k = new Map();
 	}
 	test();
-	// If this succeeds, nothing happens. Continue as normal.
+	// If this succeeds, nothing happens. Continue as normal. 
+	// (...or the browser is MyPal, which is blacklisted below) 
 } catch(ex) {
 	// If this fails, display the error message.
 	error();

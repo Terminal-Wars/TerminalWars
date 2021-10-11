@@ -87,6 +87,7 @@ class DrawClass {
 			case "HTMLImageElement":
 				await this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
+			default:
 			case "String":
 				await drawChars(content,x,y,mode);
 				break;
