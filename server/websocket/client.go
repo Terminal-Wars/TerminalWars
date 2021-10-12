@@ -47,9 +47,9 @@ type Request struct {
 }
 
 type PutRequestData struct {
-	RoomID  string                 `json:"roomID"`
-	BlockID string                 `json:"blockID"`
-	Data    map[string]interface{} `json:"data"`
+	RoomID  string      `json:"roomID"`
+	BlockID string      `json:"blockID"`
+	Data    interface{} `json:"data"`
 }
 type GetRequestData struct {
 	RoomID  string `json:"roomID"`
