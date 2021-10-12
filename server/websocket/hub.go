@@ -31,7 +31,7 @@ type blockID struct {
 }
 
 type blockData struct {
-	Data    map[string]interface{}
+	Data    interface{}
 	Created int64
 }
 
@@ -69,13 +69,22 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) putData(id blockID, data map[string]interface{}) {
+func (h *Hub) putData(id blockID, data interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	_, ok := h.data[id]
 	if ok {
-		for k, v := range data {
-			h.data[id].Data[k] = v
+		switch data := data.(type) {
+		case map[string]interface{}:
+			for k, v := range data {
+				h.data[id].Data.(map[string]interface{})[k] = v
+			}
+		case []interface{}:
+			d := h.data[id]
+			d.Data = append(d.Data.([]interface{}), data)
+			h.data[id] = d
+		default:
+			panic("ioi thats not a map or an array")
 		}
 	} else {
 		h.data[id] = blockData{data, time.Now().UnixMilli()}
