@@ -3,14 +3,9 @@
 import {cO} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
+import {delay} from './commonFunctions.js';
 export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
 export let sockerBuffer = []; let buffer, newHealth;
-
-export async function delay(time) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() {resolve(time);},time);
-  })
-}
 
 export class ActionsClass {
   async GetUsersOnline(room) {

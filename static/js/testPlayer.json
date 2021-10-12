@@ -25,15 +25,15 @@
 			"on_activate": [
 				{
 					"0": ["roll",1,20,2,
-					{"success": {
-						"0": ["roll", 5,10,"(myRoll-enemyRoll)+5",{"success": {
+					[{
+						"0": ["roll", 5,10,"{myRoll-enemyRoll}+5",{
 							"0": ["attack","{opponent}","myRoll"]
-							}}
+							}
 							]
-					}},
-					{"failure": {
+					}],
+					[{
 						"0": ["attack","{sender}","myRoll"]
-					}}
+					}]
 					]
 				}
 			]

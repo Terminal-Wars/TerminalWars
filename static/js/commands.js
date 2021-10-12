@@ -1,10 +1,11 @@
-import {socket, Actions, delay} from './socket.js';
+import {socket, Actions} from './socket.js';
 import {keyboardBuffer} from './keyboard.js';
 import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
 import {onActivate} from './player.js';
+import {delay} from './commonFunctions.js';
 export let userID = "ioi"; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
@@ -32,31 +33,31 @@ keyboardBuffer.push(`General commands:
 Room-specific commands:
 /move (subRoom) - Move to a subroom within a room if you're near it.`);
 			break;
+		case "user":
 		case "nick":
 			if (roomID == "") {keyboardBuffer.push("You need to join a room first first.\n")} else {
 				userID = arg1;
-				socket.send(`{"type":"put","data":{"roomID":"${roomID}","blockID":"user_${userID}","data":{"health": "200", "inroom":"${roomID}"}}}`);
-				socket.send(`{"type":"put","data":{"roomID":"${roomID}","blockID":"${roomID}_users","data":{"${userID}":""}}}`);
+				await Actions.GetUsersOnline(roomID).then(r => {
+					let userData = {
+						"type":"put",
+						"data": {
+							"roomID": roomID,
+							"blockID": roomID+"_users",
+							"data": [
+								{
+									"name": userID,
+									"health": 200,
+								}
+							]
+						}
+					}
+					socket.send(JSON.stringify(userData));
+				});
 			}
 
 			break;
 		case "join":
 			roomID = arg1;
-			break;
-		case "attackDropdown":
-			await exampleUser.then(function(resp) {
-				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"]);
-			});
-			break;
-		case "attack":
-			Objects.destroyAll("dropdown");
-			await exampleUser.then(function(resp) {
-				onActivate(resp[0]["actives"][arg1]);
-				//usersInRoom = await Actions.GetUsersOnline(roomID);
-				//for (const user in usersInRoom["data"]["data"]) {
-				//	if(user != userID) {await Actions.Attack(user, userID, roomID, arg1);}
-				//}
-			});
 			break;
 		case "ping":
 			await pingSite().then(function() {
@@ -65,23 +66,35 @@ Room-specific commands:
 			break;
 		case "bag":
 			break;
-		case "user":
+		case "switch":
 			break;
 		case "list":
-			usersInRoom = await Actions.GetUsersOnline(roomID);
-			async function temp() {for (const user in usersInRoom["data"]["data"]) {
-				keyboardBuffer.push(user+"\n");
-			}};
-			await temp();
+			await Actions.GetUsersOnline(roomID).then(r => {
+				for (const user in r["data"]["data"]) {
+					keyboardBuffer.push(user+"\n");
+				}
+			});
 			break;
-		case "dice":
-			await dice();
+		// Below are commands that shouldn't really be here,
+		// but they are because I don't feel like moving them to another file,
+		// for one reason or another. They cannot be executed via the console.
+		// Most will be moved later in development(tm).
+		case "activeDropdown":
+			await exampleUser.then(function(resp) {
+				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"]);
+			});
 			break;
-		case "shake":
-			shakeNum = 10;
+		case "active":
+			Objects.destroyAll("dropdown");
+			await exampleUser.then(function(resp) {
+				onActivate(resp[0]["actives"][arg1]["on_activate"][0]);
+			});
 			break;
-		case "testt":
-			for(let i = 0; i <= 150; i++) {keyboardBuffer.push(i+"\n");}
+		case "userDropdown":
+			await Actions.GetUsersOnline(roomID).then(r => {
+				console.log(r["data"]["data"]);
+				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"]);
+			});
 			break;
 		default: 
 			keyboardBuffer.push("Invalid or unimplemented command.\n");

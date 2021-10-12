@@ -1,4 +1,4 @@
-import { objects, debugBox } from './main.js';
+import { objects, objects_dice, debugBox } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
@@ -123,6 +123,7 @@ const Draw = new DrawClass();
 // The function for drawing objects.
 async function draw(o) {
 		frameCount[0]++; 
+		if(o === undefined) {return;}
 		// Some common variables
 		let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
 		let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
@@ -169,12 +170,24 @@ async function draw(o) {
 			case "dropdown":
 				await Draw.base(xa_n, ya_n, rw, rh);
 				break;
+			case "dice_layer":
+				// This is a slow, but working way, of making sure that the dice objects (which are in a different array)
+				// are drawn behind the terminal window. They could just be in the objects array too, but they're in a different
+				// one as a sacrifice to make diceUpdate faster.
+				for(let i = 0; i <= objects_dice.length; i++) {
+	    			await draw(objects_dice[i]);
+				}
+				break;
 			case "dice":
 				let terminal = objects[terminalWinID];
 				async function tmp() {
-					Draw.image(diceblock,0,0,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
+					let ymod = 0;
+					if(o["foe"]) ymod = 48;
+					Draw.image(diceblock,0,0+ymod,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
 					ctx.globalCompositeOperation = "soft-light";
-					drawChars(`${o["value"]}`,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),1,Infinity,-1*Infinity,Infinity,o["opacity"]).then(function() {
+					async function drawDice() {drawChars(`${o["value"]}`,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),1,Infinity,-1*Infinity,Infinity,o["opacity"])}; 
+					// we do drawDice twice as a hack to make the text more visible.
+					drawDice().then(drawDice()).then(function() {
 						ctx.globalCompositeOperation = "source-over";
 					});
 				}
@@ -197,8 +210,8 @@ async function draw(o) {
 }
 
 export async function drawGFX() {
-	for(let i = 0; i < objects.length; i++) {
-	    await draw(objects[i]);
+	for(let i = 0; i <= objects.length; i++) {
+		await draw(objects[i]);
 	}
 }
 

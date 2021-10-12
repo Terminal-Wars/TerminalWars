@@ -10,6 +10,7 @@ import * as d from './degrade.js';
 import { loadDefaultObjects, diceUpdate } from './commonObjects.js';
 import { pingSite } from './ping.js';
 export let objects = []; export let particles = [];
+export let objects_dice = [];
 // this should be in mouse.js but for some reason that literally cannot be imported anywhere except here,
 // and if i don't import it here then mouse movement just doesn't work.
 export let mousePos = [{"x":0,"y":0}];
@@ -54,7 +55,7 @@ async function loop60() {
 export let curObject = objects[0];
 
 async function frameCounter() {
-  debugBox.innerHTML = "Frames drawn in the last second: "+frameCount[0];
+  debugBox.innerHTML = "Objects drawn in the last second: "+frameCount[0];
   frameCount[0] = 0;
 }
 
