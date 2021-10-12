@@ -1,4 +1,4 @@
-import { objects, objects_dice, debugBox } from './main.js';
+import { objects, objects_dice, debugBox, debugBox2 } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
@@ -83,13 +83,16 @@ class DrawClass {
 			}
 		}
 		// Draw either an image or some text
-		switch(content.constructor.name) {
-			case "HTMLImageElement":
+		switch(typeof(content)) {
+			case "object": // probably an image. if it's ever otherwise, this will be changed.
 				await this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
-			default:
-			case "String":
+			case "undefined":
+			case "string":
 				await drawChars(content,x,y,mode);
+				break;
+			default:
+				debugBox2.innerHTML = typeof(content);
 				break;
 		}
 	}

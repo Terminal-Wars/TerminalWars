@@ -17,6 +17,7 @@ export let mousePos = [{"x":0,"y":0}];
 
 // for any debug messages.
 export let debugBox = document.querySelector(".debug");
+export let debugBox2 = document.querySelector(".debug2");
 
 export class ObjectClass {
   amount() {

@@ -6,7 +6,7 @@ import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
 import {onActivate} from './player.js';
 import {delay} from './commonFunctions.js';
-export let userID = "ioi"; export let roomID = "room"; 
+export let userID = ""; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
 let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
@@ -35,7 +35,7 @@ Room-specific commands:
 			break;
 		case "user":
 		case "nick":
-			if (roomID == "") {keyboardBuffer.push("You need to join a room first first.\n")} else {
+			if (roomID == "") {keyboardBuffer.push("You need to join a room first.\n")} else {
 				userID = arg1;
 				await Actions.GetUsersOnline(roomID).then(r => {
 					let userData = {
@@ -70,8 +70,12 @@ Room-specific commands:
 			break;
 		case "list":
 			await Actions.GetUsersOnline(roomID).then(r => {
-				for (const user in r["data"]["data"]) {
-					keyboardBuffer.push(user+"\n");
+				for (const n in r["data"]["data"]) {
+					console.log(r["data"]["data"]);
+					// If [n][0] equals [0][0], which it does for the first player, it becomes
+					// [0]. so we need to account for that. And I guess we can't just use || to do that.
+					if(n == 0) keyboardBuffer.push(r["data"]["data"][0]["name"]+"\n");
+					else keyboardBuffer.push(r["data"]["data"][n][0]["name"]+"\n");
 				}
 			});
 			break;
@@ -92,7 +96,6 @@ Room-specific commands:
 			break;
 		case "userDropdown":
 			await Actions.GetUsersOnline(roomID).then(r => {
-				console.log(r["data"]["data"]);
 				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"]);
 			});
 			break;

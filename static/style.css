@@ -12,7 +12,7 @@ canvas {display: block; position: absolute; top: 50%; left: 50%; transform: tran
     -ms-interpolation-mode: nearest-neighbor!important;
     font-smoothing: none; -webkit-font-smoothing : none;
 }
-.debug {color: white; user-select: none; pointer-events: none;}
+.debug, .debug2 {color: white; user-select: none; pointer-events: none; display: block;}
 /* General
 @font-face {font-family: "Terminus"; src: url("/static/font/Terminus.ttf") format("truetype");}
 @font-face {font-family: "TerminusBold"; src: url("/static/font/TerminusBold.ttf") format("truetype");}

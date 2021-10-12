@@ -1,4 +1,4 @@
-import { objects, objects_dice } from './main.js';
+import { objects, objects_dice, debugBox2 } from './main.js';
 import { ping } from './ping.js';
 import {term_buttons, WIDTH, HEIGHT, OB_WIDTH, OB_HEIGHT} from './canvas.js';
 import {keyboardBuffer} from './keyboard.js';
@@ -35,7 +35,10 @@ export async function dropdown(x,y,sid,list) {
 	// first we want to get the longest one
 	// (todo: oh come on there has to be a better way)
 	for(let n in list) {
-		let name = (list[n]["prettyname"] || list[n]["name"]);
+		let name;
+		// account for some arrays, which have the name in a nested array.
+		if(list[n][0] != undefined) {name = "-> "+list[n][0]["name"]; console.log(name);}
+		else name = (list[n]["prettyname"] || list[n]["name"]);
 		if(name.length*8 >= width) {width = name.length*8}
 	}
 	// Then we initialize the dropdown object with default values.
