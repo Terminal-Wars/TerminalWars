@@ -26,14 +26,12 @@
 				{
 					"0": ["roll",1,20,2,
 					[{
-						"0": ["roll", 5,10,"{myRoll-enemyRoll}+5",{
-							"0": ["attack","{opponent}","myRoll"]
-							}
+						"0": ["roll", 5,10,"myRoll-enemyRoll-5",[{
+							"0": ["attack","opponent","myRoll-enemyRoll"]
+							}]
 							]
 					}],
-					[{
-						"0": ["attack","{sender}","myRoll"]
-					}]
+					[]
 					]
 				}
 			]
@@ -58,10 +56,10 @@
 							"name": "damageboost",
 							"prettyname": "Damage Boost",
 							"on_activate": {
-								"0": ["add","{team}","attack",1]
+								"0": ["add","team","attack",1]
 							},
 							"on_deactivate": { 
-								"0": ["sub","{team}","attack",1]
+								"0": ["sub","team","attack",1]
 							}
 						}
 					],
@@ -71,10 +69,10 @@
 							"pretty_name": "Plugged In",
 							"bio": "As long as Damage Booster is still alive, 8-BIT loses the Arcade Machine passive.",
 							"on_activate": {
-								"0": ["disable_passive","{owner}","arcademachine"]
+								"0": ["disable_passive","owner","arcademachine"]
 							},
 							"on_deactivate": {
-								"0": ["enable_passive", "{owner}","arcademachine"]
+								"0": ["enable_passive", "owner","arcademachine"]
 							}
 						},
 						{
@@ -98,13 +96,13 @@
 				{
 					"name":"dodge",
 					"on_activate": {
-						"0": ["move_attack","{sender}","TrackballBooster"]
+						"0": ["move_attack","sender","TrackballBooster"]
 					}
 				},
 				{
 					"name":"defend",
 					"on_activate": {
-						"1": ["move_attack","TrackballBooster","{sender}"]
+						"1": ["move_attack","TrackballBooster","sender"]
 					}
 				}
 			]

@@ -6,17 +6,12 @@ import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
 import {onActivate} from './player.js';
 import {delay} from './commonFunctions.js';
-export let userID = ""; export let roomID = "room"; 
+export let userID = "test"; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
 let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
-// some example attacks
-let exampleAttacks = [{"name":"Punch","damage":5},
-	{"name":"Kick","damage":3},
-	{"name":"Kablammo Zammo","damage":10,"magic":10},
-	{"name":"Alakafuckyou","damage":20,"magic":20,"roll":8}];
 
-export async function command(cmd, arg1="", arg2="") {
+export async function command(cmd, arg1="", arg2="", arg3="") {
 	switch(cmd) {
 		/*
 		case "put":
@@ -37,22 +32,20 @@ Room-specific commands:
 		case "nick":
 			if (roomID == "") {keyboardBuffer.push("You need to join a room first.\n")} else {
 				userID = arg1;
-				await Actions.GetUsersOnline(roomID).then(r => {
-					let userData = {
-						"type":"put",
-						"data": {
-							"roomID": roomID,
-							"blockID": roomID+"_users",
-							"data": [
-								{
-									"name": userID,
-									"health": 200,
-								}
-							]
-						}
+				let userData = {
+					"type":"put",
+					"data": {
+						"roomID": roomID,
+						"blockID": roomID+"_users",
+						"data": [
+							{
+								"name": userID,
+								"health": 200,
+							}
+						]
 					}
-					socket.send(JSON.stringify(userData));
-				});
+				}
+				socket.send(JSON.stringify(userData));
 			}
 
 			break;
@@ -85,19 +78,23 @@ Room-specific commands:
 		// Most will be moved later in development(tm).
 		case "activeDropdown":
 			await exampleUser.then(function(resp) {
-				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"]);
+				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"],"userDropdown");
 			});
 			break;
 		case "active":
 			Objects.destroyAll("dropdown");
 			await exampleUser.then(function(resp) {
-				onActivate(resp[0]["actives"][arg1]["on_activate"][0]);
+				onActivate(resp[0]["actives"][arg1]["on_activate"][0], arg2);
 			});
 			break;
 		case "userDropdown":
 			await Actions.GetUsersOnline(roomID).then(r => {
-				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"]);
+				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"],"active","{index}","{name}");
+				//,"arg1":list.indexOf(l)
 			});
+			break;
+		case "attack":
+			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
 		default: 
 			keyboardBuffer.push("Invalid or unimplemented command.\n");

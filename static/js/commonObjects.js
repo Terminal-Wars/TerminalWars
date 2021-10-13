@@ -23,7 +23,17 @@ export async function loadDefaultObjects() {
 							"command":{"command": "user"}}]
 							});
 }
-export async function dropdown(x,y,sid,list) {
+export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
+	// TODO: make it so a dropdown disappears when the mouse moves away from it.
+	// impromptu function to avoid some small but repeated code
+	function nameReturn(array) {
+		let name;
+		// account for some arrays, which have the name in a nested array.
+		if(array[0] != undefined) {name = array[0]["name"];}
+		else name = (array["prettyname"] || array["name"]);
+		return name;
+	}
+	// this for loop mostly uses the index anyways so just use for
 	for(let n in objects) {
 		if(objects[n]["sid"] == sid) {
 			objects.splice(n,n);
@@ -34,20 +44,22 @@ export async function dropdown(x,y,sid,list) {
 	// For each item in the list we were given...
 	// first we want to get the longest one
 	// (todo: oh come on there has to be a better way)
-	for(let n in list) {
-		let name;
-		// account for some arrays, which have the name in a nested array.
-		if(list[n][0] != undefined) {name = "-> "+list[n][0]["name"]; console.log(name);}
-		else name = (list[n]["prettyname"] || list[n]["name"]);
+	list.forEach(function(l) {
+		let name = nameReturn(l);
 		if(name.length*8 >= width) {width = name.length*8}
-	}
+	});
 	// Then we initialize the dropdown object with default values.
-	let dropdown = {"id":objects.length,"sid":sid,"type":"dropdown","x":x+width/2+2,"y":y+height,"width":width/2+2,"height":height,"z":9999,"event_num":list.length, "events":[]};
+	let dropdown = {"id":objects.length,"sid":sid,"type":"dropdown","x":x+width/2+2,"y":y+height,"width":width/2+2,"height":height,"z":9999,"event_num":list.length, "events":[], "z":objects.length};
 	// then we loop that list again and add the entries to that dropdown.
-	for(let n in list) {
-		dropdown.events.push({"type":"flat","anchor":"negative","x":3,"y":y_,"width":width,"height":15,"active":0,"hover":0,"text":list[n]["prettyname"],"command":{"command": "userDropdown","arg1":n}})
+	list.forEach(function(l) {
+		let name = nameReturn(l);
+		// this would normally be put in a function but it would be weird and slower
+		// to do that because of {index}, which means we would need to remake it every loop.
+		let arg1_ = arg1.replace("{index}",list.indexOf(l),1).replace("{name}",name,1);
+		let arg2_ = arg2.replace("{index}",list.indexOf(l),1).replace("{name}",name,1);
+		dropdown.events.push({"type":"flat","anchor":"negative","x":3,"y":y_,"width":width,"height":15,"active":0,"hover":0,"text":name,"command":{"command":command,"arg1":arg1_,"arg2":arg2_}})
 		y_ += 17;
-	}
+	});
 	objects.push(dropdown);
 }
 export async function dice(max, foe=false) {
@@ -90,4 +102,4 @@ export async function diceUpdate() {
 		// eventually it is forced away.
 		if(o["animStep"] >= 60) objects_dice.splice(n,n);
 	}
-}
+}2

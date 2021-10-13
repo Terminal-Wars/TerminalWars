@@ -82,17 +82,14 @@ class DrawClass {
 				mode = 2;
 			}
 		}
+		debugBox2.innerHTML = "";
 		// Draw either an image or some text
 		switch(typeof(content)) {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
 				await this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
-			case "undefined":
-			case "string":
-				await drawChars(content,x,y,mode);
-				break;
 			default:
-				debugBox2.innerHTML = typeof(content);
+				await drawChars(content,x,y,mode);
 				break;
 		}
 	}
