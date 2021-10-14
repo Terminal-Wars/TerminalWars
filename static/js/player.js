@@ -51,7 +51,7 @@ export async function onActivate(active, target) {
 				}
 				break;
 			case "attack":
-				command("attack",cmd[1],Math.floor(solve(cmd[2])/5),userID)
+				command("attack",cmd[1],Math.floor(solve(cmd[2])+1),userID)
 			default:
 				console.error("Uncaught or unknown command: "+cmd[0]);
 				break;
