@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net/http"
 	"time"
@@ -9,12 +10,14 @@ import (
 )
 
 func main() {
+	addr := flag.String("l", ":2191", "http listen addr")
+	flag.Parse()
 	handler, err := server.New()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	server := http.Server{
-		Addr:        ":2191",
+		Addr:        *addr,
 		Handler:     handler,
 		ReadTimeout: 5 * time.Second,
 	}
