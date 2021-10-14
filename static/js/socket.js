@@ -7,21 +7,27 @@ const wsurl = wsproto + "://" + window.location.host + "/socket";
 export let socket = new WebSocket(wsurl);
 export let sockerBuffer = []; let buffer, newHealth;
 
+export async function reload() {
+  socket.close();
+  socket = new WebSocket(wsurl);
+}
+
 export class ActionsClass {
-  async bufferReturn() {
+  async BufferReturn() {
       return delay(ping).then(function() {
         buffer = sockerBuffer[0];
-        sockerBuffer.splice(0,buffer.length);
+        sockerBuffer.length = 0;
+        console.log(sockerBuffer);
         return buffer;
       });
   }
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      return this.bufferReturn();
+      return this.BufferReturn();
   }
   async GetUserInfo(user, room) {
-      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
-      return this.bufferReturn();
+      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
+      let buffer = this.BufferReturn();
   }
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
@@ -38,7 +44,7 @@ export class ActionsClass {
   }
   async MemoryDump(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}"}}`);
-      return this.bufferReturn();
+      return this.BufferReturn();
   }
 }
 export const Actions = new ActionsClass;
@@ -59,12 +65,12 @@ socket.addEventListener('message', async function (event) {
       }
 });
 
+
+/*
 socket.addEventListener('close', async function (event) {
     cO.remove();
     alert("The server was closed. Please wait a moment and then reload the page.");
 });
-
-/*
               socket.send(`[{
                   "roomid": "${roomid}",
                   "name": "${name}",

@@ -64,9 +64,16 @@ Room-specific commands:
 			break;
 		case "list":
 			await Actions.GetUsersOnline(roomID).then(r => {
+				console.log(r["data"]["data"])
 				for (let n in r["data"]["data"]) {
 					keyboardBuffer.push(r["data"]["data"][n]["name"]+"\n");
 				}
+			});
+			break;
+		case "health": 
+			await Actions.GetHealth(arg1, roomID).then(r => {
+				console.log(r);
+				keyboardBuffer.push(r);
 			});
 			break;
 		// Below are commands that shouldn't really be here,
