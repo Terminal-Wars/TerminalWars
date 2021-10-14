@@ -116,21 +116,32 @@ func (c *Client) readPump() {
 			if err != nil {
 				log.Println("malformed json from client:", err)
 			}
-			c.hub.putData(blockID{data.RoomID, data.BlockID}, data.Data)
+			c.hub.putData(blockKey{data.RoomID, data.BlockID}, data.Data)
 		case GetRequest:
 			var data GetRequestData
 			err := json.Unmarshal(req.Data, &data)
 			if err != nil {
 				log.Println("malformed json from client:", err)
 			}
-			bd, ok := c.hub.getData(blockID{data.RoomID, data.BlockID})
-			resp := Response{Type: GetResponse, Data: GetDataResponse{
-				OK:      ok,
-				RoomID:  data.RoomID,
-				BlockID: data.BlockID,
-				Data:    bd.Data,
-				Created: bd.Created,
-			}}
+			var resp Response
+
+			if data.BlockID != "" {
+				bd, ok := c.hub.getBlock(data.RoomID, data.BlockID)
+				resp = Response{Type: GetResponse, Data: GetDataResponse{
+					OK:      ok,
+					RoomID:  data.RoomID,
+					BlockID: data.BlockID,
+					Data:    bd.Data,
+					Created: bd.Created,
+				}}
+			} else {
+				d := c.hub.getRoom(data.RoomID)
+				resp = Response{Type: GetResponse, Data: GetDataResponse{
+					OK:     true,
+					RoomID: data.RoomID,
+					Data:   d,
+				}}
+			}
 			p, err := json.Marshal(resp)
 			if err != nil {
 				log.Println("error marshaling json:", err)
