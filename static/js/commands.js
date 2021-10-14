@@ -30,8 +30,7 @@ keyboardBuffer.push(`General commands:
 Room-specific commands:
 /move (subRoom) - Move to a subroom within a room if you're near it.`);
 			break;
-		case "user":
-		case "nick":
+		case "user", "nick":
 			if (roomID == "") {keyboardBuffer.push("You need to join a room first.\n")} else {
 				userID = arg1;
 				let userData = {
@@ -51,12 +50,12 @@ Room-specific commands:
 			}
 
 			break;
-		case "join":
+		case "join", "room":
 			roomID = arg1;
 			break;
 		case "ping":
 			await pingSite().then(function() {
-				keyboardBuffer.push("Pong! "+ping+"\n");
+				keyboardBuffer.push("Pong! "+ping+"ms\n");
 			});
 			break;
 		case "bag":
@@ -65,12 +64,8 @@ Room-specific commands:
 			break;
 		case "list":
 			await Actions.GetUsersOnline(roomID).then(r => {
-				for (const n in r["data"]["data"]) {
-					console.log(r["data"]["data"]);
-					// If [n][0] equals [0][0], which it does for the first player, it becomes
-					// [0]. so we need to account for that. And I guess we can't just use || to do that.
-					if(n == 0) keyboardBuffer.push(r["data"]["data"][0]["name"]+"\n");
-					else keyboardBuffer.push(r["data"]["data"][n][0]["name"]+"\n");
+				for (let n in r["data"]["data"]) {
+					keyboardBuffer.push(r["data"]["data"][n]["name"]+"\n");
 				}
 			});
 			break;
@@ -101,6 +96,8 @@ Room-specific commands:
 		case "debug":
 			if(window.location.hostname == "localhost") {
 				await Actions.MemoryDump(roomID);
+			} else {
+				keyboardBuffer.push(invalidMessage);
 			}
 			break;
 		default: 

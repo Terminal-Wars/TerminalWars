@@ -4,30 +4,24 @@ import {ping} from './ping.js';
 import {delay} from './commonFunctions.js';
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
 const wsurl = wsproto + "://" + window.location.host + "/socket";
-export const socket = new WebSocket(wsurl);
+export let socket = new WebSocket(wsurl);
 export let sockerBuffer = []; let buffer, newHealth;
 
 export class ActionsClass {
-  async MemoryDump(room) {
-      socket.send(`{"type":"get","data":{"roomID":"${room}"}}`);
-      await delay(ping);
-      buffer = sockerBuffer[0];
-      sockerBuffer.splice(0,buffer.length);
-      return buffer;
+  async bufferReturn() {
+      return delay(ping).then(function() {
+        buffer = sockerBuffer[0];
+        sockerBuffer.splice(0,buffer.length);
+        return buffer;
+      });
   }
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      await delay(ping);
-      buffer = sockerBuffer[0];
-      sockerBuffer.splice(0,buffer.length);
-      return buffer;
+      return this.bufferReturn();
   }
   async GetUserInfo(user, room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"user_${user}"}}`);
-      await delay(ping);
-      buffer = sockerBuffer[0];
-      sockerBuffer.splice(0,buffer.length);
-      return buffer["data"];
+      return this.bufferReturn();
   }
   async Attack(foe, user, room, damage) {
       let userinfo = await this.GetUserInfo(foe, room);
@@ -41,6 +35,10 @@ export class ActionsClass {
       await delay(ping).then(function() {
         return userinfo["data"]["health"];
       })
+  }
+  async MemoryDump(room) {
+      socket.send(`{"type":"get","data":{"roomID":"${room}"}}`);
+      return this.bufferReturn();
   }
 }
 export const Actions = new ActionsClass;
