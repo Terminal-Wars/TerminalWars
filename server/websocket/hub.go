@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -95,7 +96,8 @@ func (h *Hub) putData(id blockID, newdata interface{}) {
 			}
 			h.data[id] = d
 		default:
-			panic("ioi thats not a map or an array")
+			log.Println("ioi thats not a map or an array")
+			return
 		}
 	} else {
 		h.data[id] = blockData{newdata, time.Now().UnixMilli()}
