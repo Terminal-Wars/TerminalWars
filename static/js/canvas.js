@@ -1,16 +1,12 @@
-import { objects, debugBox } from './main.js';
+import { objects, objects_dice, debugBox, debugBox2 } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
-import { parseGIF, decompressFrames } from './gifuct/index.js'
 
 // The canvas
 export let cO = document.querySelector('.draw');
-export let cO2 = document.querySelector('.mpeg'); 
 export let ctx = cO.getContext('2d');
-export let ctx2 = cO2.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-ctx2.imageSmoothingEnabled = false;
 
 //ctx.mozImageSmoothingEnabled = false;
 
@@ -19,16 +15,15 @@ export const SWIDTH = screen.width; export const SHEIGHT = window.innerHeight;
 // The default, set width and height.
 export const WIDTH = 800;
 export const HEIGHT = 600;
+// The remaining width/height
+export const OB_WIDTH = ((SWIDTH-WIDTH)/2); export const OB_HEIGHT = ((SHEIGHT-HEIGHT)/2);
 // The scale multiplier.
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
 
 // From here, we'll scale the canvas based on the user's actual screen size.
 cO.width = WIDTH; cO.height = HEIGHT;
-cO2.width = WIDTH; cO2.height = HEIGHT;
 cO.style.width = WIDTH*MUL+"px"; cO.style.maxWidth = WIDTH*MUL+"px"; 
-cO2.style.width = WIDTH*MUL+"px"; cO2.style.maxWidth = WIDTH*MUL+"px";
 cO.style.height = HEIGHT*MUL+"px"; cO.style.maxHeight = HEIGHT*MUL+"px";
-cO2.style.height = HEIGHT*MUL+"px"; cO2.style.maxHeight = HEIGHT*MUL+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
 
 // Any images we need
@@ -39,7 +34,6 @@ export const diceblock = new Image();
 diceblock.src = 'static/gfx/diceblock.webp';
 export const dice_font = new Image();
 dice_font.src = 'static/gfx/dice_font.webp';
-let promisedGif; // some shit for the gif function
 
 // X and Y anchors, seperate from the ones from within the switch case in the drawGFX function.
 let xa, ya = 0;
@@ -88,12 +82,13 @@ class DrawClass {
 				mode = 2;
 			}
 		}
+		debugBox2.innerHTML = "";
 		// Draw either an image or some text
-		switch(content.constructor.name) {
-			case "HTMLImageElement":
+		switch(typeof(content)) {
+			case "object": // probably an image. if it's ever otherwise, this will be changed.
 				await this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
-			case "String":
+			default:
 				await drawChars(content,x,y,mode);
 				break;
 		}
@@ -122,23 +117,13 @@ class DrawClass {
 		ctx.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
 		ctx.globalAlpha = 1;
 	}
-	async gif(image=null,x=0,y=0,frame=0) {
-		fetch("./static/gfx/diceroll.gif")
-		       .then(resp => resp.arrayBuffer())
-		       .then(buff => parseGIF(buff))
-		       .then(gif => decompressFrames(gif, true))
-			   .then(images => {
-			   	let frameImageData = ctx.createImageData(320, 240);
-			   	frameImageData.data.set(images[Math.round(frame)*4].patch);
-				ctx2.putImageData(frameImageData, x, y);
-			   });
-	}
 }
 const Draw = new DrawClass();
 
 // The function for drawing objects.
-export async function draw(o) {
+async function draw(o) {
 		frameCount[0]++; 
+		if(o === undefined) {return;}
 		// Some common variables
 		let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
 		let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
@@ -185,22 +170,28 @@ export async function draw(o) {
 			case "dropdown":
 				await Draw.base(xa_n, ya_n, rw, rh);
 				break;
+			case "dice_layer":
+				// This is a slow, but working way, of making sure that the dice objects (which are in a different array)
+				// are drawn behind the terminal window. They could just be in the objects array too, but they're in a different
+				// one as a sacrifice to make diceUpdate faster.
+				for(let i = 0; i <= objects_dice.length; i++) {
+	    			await draw(objects_dice[i]);
+				}
+				break;
 			case "dice":
 				let terminal = objects[terminalWinID];
 				async function tmp() {
-					Draw.image(diceblock,0,0,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
+					let ymod = 0;
+					if(o["foe"]) ymod = 48;
+					Draw.image(diceblock,0,0+ymod,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
 					ctx.globalCompositeOperation = "soft-light";
-					drawChars(`${o["value"]}`,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),1,Infinity,-1*Infinity,Infinity,o["opacity"]).then(function() {
+					async function drawDice() {drawChars(`${o["value"]}`,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),1,Infinity,-1*Infinity,Infinity,o["opacity"])}; 
+					// we do drawDice twice as a hack to make the text more visible.
+					drawDice().then(drawDice()).then(function() {
 						ctx.globalCompositeOperation = "source-over";
 					});
 				}
 				await tmp();
-			case "image":
-				if(o["source"] != undefined && o["source"].endsWith(".gif") && o["playing"] == 0) {
-					// Set playing to 1, because we're now gonna pass control to another draw function.
-					Draw.gif(o["source"],o["x"],o["y"],o["frame"]);
-					if(o["frame"] <= o["frameCount"]) {o["frame"]+=2};
-				}
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {
@@ -219,8 +210,8 @@ export async function draw(o) {
 }
 
 export async function drawGFX() {
-	for(let i = 0; i < objects.length; i++) {
-	    await draw(objects[i]);
+	for(let i = 0; i <= objects.length; i++) {
+		await draw(objects[i]);
 	}
 }
 

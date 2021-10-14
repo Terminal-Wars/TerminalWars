@@ -1,16 +1,11 @@
-// export const socket = new WebSocket("ws://localhost:2191/socket");
-// export const socket = new WebSocket("wss://battle.ioi-xd.net/socket")
 import {cO} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
-export const socket = new WebSocket(await fetch("static/js/websocket_name").then(resp => resp.text()));
+import {delay} from './commonFunctions.js';
+let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
+const wsurl = wsproto + "://" + window.location.host + "/socket";
+export const socket = new WebSocket(wsurl);
 export let sockerBuffer = []; let buffer, newHealth;
-
-export async function delay(time) {
-  return new Promise(function(resolve, reject) {
-    setTimeout(function() {resolve(time);},time);
-  })
-}
 
 export class ActionsClass {
   async GetUsersOnline(room) {
