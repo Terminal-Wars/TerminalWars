@@ -93,7 +93,7 @@ func (h *Hub) putData(id blockID, newdata interface{}) {
 						continue Outer
 					}
 				}
-				data = append(data, ent)
+				d.Data = append(data, ent)
 			}
 			h.data[id] = d
 		default:
