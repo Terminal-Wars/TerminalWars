@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"fmt"
 
 	"github.com/gorilla/websocket"
 )
@@ -120,10 +121,14 @@ func (h *Hub) putData(id blockID, newdata interface{}) {
 }
 
 func (h *Hub) getData(id blockID) (blockData, bool) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	bd, ok := h.data[id]
-	return bd, ok
+    h.mu.Lock()
+    defer h.mu.Unlock()
+    fmt.Println(id)
+    bd, ok := h.data[id]
+    if !ok {
+        fmt.Println(h.data)
+    }
+    return bd, ok
 }
 
 var upgrader = websocket.Upgrader{

@@ -8,6 +8,13 @@ export const socket = new WebSocket(wsurl);
 export let sockerBuffer = []; let buffer, newHealth;
 
 export class ActionsClass {
+  async MemoryDump(room) {
+      socket.send(`{"type":"get","data":{"roomID":"${room}"}}`);
+      await delay(ping);
+      buffer = sockerBuffer[0];
+      sockerBuffer.splice(0,buffer.length);
+      return buffer;
+  }
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
       await delay(ping);

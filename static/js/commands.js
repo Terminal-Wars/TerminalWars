@@ -9,6 +9,8 @@ import {delay} from './commonFunctions.js';
 export let userID = "test"; export let roomID = "room"; 
 export let shakeNum = 0; export let usersInRoom;
 
+let invalidMessage = "Invalid or unimplemented command.\n";
+
 let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
 
 export async function command(cmd, arg1="", arg2="", arg3="") {
@@ -96,8 +98,13 @@ Room-specific commands:
 		case "attack":
 			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
+		case "debug":
+			if(window.location.hostname == "localhost") {
+				await Actions.MemoryDump(roomID);
+			}
+			break;
 		default: 
-			keyboardBuffer.push("Invalid or unimplemented command.\n");
+			keyboardBuffer.push(invalidMessage);
 			break;
 	}
 }
