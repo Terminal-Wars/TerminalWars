@@ -69,25 +69,36 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) putData(id blockID, data interface{}) {
+func (h *Hub) putData(id blockID, newdata interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	_, ok := h.data[id]
 	if ok {
-		switch data := data.(type) {
+		switch newdata := newdata.(type) {
 		case map[string]interface{}:
-			for k, v := range data {
+			for k, v := range newdata {
 				h.data[id].Data.(map[string]interface{})[k] = v
 			}
-		case []interface{}:
+		case []map[string]interface{}:
 			d := h.data[id]
-			d.Data = append(d.Data.([]interface{}), data)
+			data := d.Data.([]map[string]interface{})
+		Outer:
+			for _, ent := range newdata {
+				name := ent["name"].(string)
+				for i, oldent := range data {
+					if oldent["name"].(string) == name {
+						data[i] = ent
+						continue Outer
+					}
+				}
+				data = append(data, ent)
+			}
 			h.data[id] = d
 		default:
 			panic("ioi thats not a map or an array")
 		}
 	} else {
-		h.data[id] = blockData{data, time.Now().UnixMilli()}
+		h.data[id] = blockData{newdata, time.Now().UnixMilli()}
 	}
 	if _, ok := h.expiry[id.roomID]; !ok {
 		h.expiry[id.roomID] = struct{}{}
