@@ -80,11 +80,12 @@ func (h *Hub) putData(id blockID, newdata interface{}) {
 			for k, v := range newdata {
 				h.data[id].Data.(map[string]interface{})[k] = v
 			}
-		case []map[string]interface{}:
+		case []interface{}:
 			d := h.data[id]
 			data := d.Data.([]map[string]interface{})
 		Outer:
-			for _, ent := range newdata {
+			for _, entry := range newdata {
+				ent := entry.(map[string]interface{})
 				name := ent["name"].(string)
 				for i, oldent := range data {
 					if oldent["name"].(string) == name {
