@@ -3,11 +3,13 @@
 	"userID": "8-BIT",
 	"aggressive": "true",
 	"hp": 20,
-	"diceType": 20,
-	"diceAmount": 1,
-	"diceModAttack": 0,
-	"diceModDefense": -5,
-	"bio": "8-BIT is a loaded arcade machine, both in the lethal sense, and the literal sense. He's heavy, and moves slow. Because of this, 8-BIT rolls with a -5 for his defense rolls.",
+	"info": {
+		"diceType": 20,
+		"diceAmount": 1,
+		"diceModAttack": 0,
+		"diceModDefense": -5,
+		"bio": "8-BIT is a loaded arcade machine, both in the lethal sense, and the literal sense. He's heavy, and moves slow. Because of this, 8-BIT rolls with a -5 for his defense rolls."
+	},
 	"passives": [
 		{
 			"name": "arcademachine",

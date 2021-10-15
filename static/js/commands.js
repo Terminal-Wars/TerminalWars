@@ -4,54 +4,29 @@ import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
-import {onActivate} from './player.js';
+import {onActivate, initUserAndRoom, activePlayers, exampleUser} from './player.js';
 import {delay} from './commonFunctions.js';
-export let userID = "test"; export let roomID = "room"; 
+export let userID = ""; export let roomID = ""; 
 export let shakeNum = 0; export let usersInRoom;
 
 let invalidMessage = "Invalid or unimplemented command.\n";
 
-let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
-
 export async function command(cmd, arg1="", arg2="", arg3="") {
 	switch(cmd) {
-		/*
-		case "put":
-			socket.send(`{"type":"put","data":{"roomID":"test","blockID":"test","data":{"${arg1}": "${arg2}"}}}`);
-			break;
-		case "get":
-			socket.send(`{"type":"get","data":{"roomID":"test","blockID":"test"}}`);
-			break;
-		*/
 		case "help":
-keyboardBuffer.push(`General commands:
-/nick (name) - Set your name. If it's an established nickname in the room you try and join, you will be prompted for a password.
-/join (room) - Join a room.
-Room-specific commands:
-/move (subRoom) - Move to a subroom within a room if you're near it.`);
+			keyboardBuffer.push(`General commands:
+			/nick (name) - Set your name. If it's an established nickname in the room you try and join, you will be prompted for a password.
+			/join (room) - Join a room.
+			Room-specific commands:
+			/move (subRoom) - Move to a subroom within a room if you're near it.`);
 			break;
 		case "user", "nick":
-			if (roomID == "") {keyboardBuffer.push("You need to join a room first.\n")} else {
-				userID = arg1;
-				let userData = {
-					"type":"put",
-					"data": {
-						"roomID": roomID,
-						"blockID": roomID+"_users",
-						"data": [
-							{
-								"name": userID,
-								"health": 200,
-							}
-						]
-					}
-				}
-				socket.send(JSON.stringify(userData));
-			}
-
+			userID = arg1;
+			if(roomID != "") {initUserAndRoom(userID, roomID);}
 			break;
 		case "join", "room":
 			roomID = arg1;
+			if(userID != "") {initUserAndRoom(userID, roomID);}
 			break;
 		case "ping":
 			await pingSite().then(function() {
@@ -68,12 +43,6 @@ Room-specific commands:
 				for (let n in r["data"]["data"]) {
 					keyboardBuffer.push(r["data"]["data"][n]["name"]+"\n");
 				}
-			});
-			break;
-		case "health": 
-			await Actions.GetHealth(arg1, roomID).then(r => {
-				console.log(r);
-				keyboardBuffer.push(r);
 			});
 			break;
 		// Below are commands that shouldn't really be here,

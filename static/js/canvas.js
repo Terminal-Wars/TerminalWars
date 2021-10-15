@@ -88,8 +88,11 @@ class DrawClass {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
 				await this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
-			default:
+			case "string":
 				await drawChars(content,x,y,mode);
+				break;
+			default:
+				debugBox2.innerHTML = typeof(content);
 				break;
 		}
 	}

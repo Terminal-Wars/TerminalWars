@@ -4,6 +4,63 @@ import {command, userID} from './commands.js';
 import {keyboardBuffer} from './keyboard.js';
 export let diceSum = 0; export let foeDiceSum = 0;
 
+export let activePlayers = [];
+export let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
+
+class User {
+	constructor(data) {
+		this.name = data["name"];
+		this.owner = data["owner"];
+		this.aggressive = data["aggressive"];
+		this.hp = data["hp"];
+		this.info = data["info"];
+		this.passives = data["passives"];
+		this.actives = data["actives"];
+	}
+}
+
+export async function initUserAndRoom(user, room) {
+	activePlayers.length = 0; 
+	// Get the relevant options from the json file.
+	// This should always be the first entry in the list.
+	let player = new User({
+		"name": exampleUser["userID"],
+		"owner": userID,
+		"aggressive": exampleUser["aggressive"],
+		"hp": exampleUser["hp"],
+		"info": exampleUser["info"],
+		"passives": exampleUser["passives"],
+		"actives": exampleUser["actives"]
+	}); 
+	// Add the new user to the list of active ones,
+	// and add their information to the server.
+	activePlayers.push(player);
+	socket.send(JSON.stringify({
+		"type":"put",
+		"data": {
+			"roomID": roomID,
+			"blockID": roomID+"_users",
+			"data": [
+				{
+					"name": player.name,
+					"owner": player.owner,
+					"aggressive": player.aggressive,
+					"hp": player.hp,
+					"info": player.info,
+					"passives": player.passives,
+					"actives": player.actives
+				}
+			]
+		}
+	}));
+	await Actions.GetUsersOnline(roomID).then(r => {
+		for (let n in r["data"]["data"]) {
+			let player = new User(r["data"]["data"][n]);
+			activePlayers.push(player);
+		}
+	});
+}
+
 export function replacePlaceholders(value, target) { 
 	if(typeof(value) != "string") {return value;} else {
 		value=value.replace("myRoll",diceSum,99)
@@ -51,7 +108,8 @@ export async function onActivate(active, target) {
 				}
 				break;
 			case "attack":
-				command("attack",cmd[1],Math.floor(solve(cmd[2])+1),userID)
+				command("attack",cmd[1],Math.floor(solve(cmd[2])+1),userID);
+				break;
 			default:
 				console.error("Uncaught or unknown command: "+cmd[0]);
 				break;
