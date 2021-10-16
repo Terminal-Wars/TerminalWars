@@ -1,12 +1,16 @@
+import {socket, Actions, reload} from './socket.js';
 import {dice} from './commonObjects.js';
-import {solve} from './commonFunctions.js';
+import {delay, solve} from './commonFunctions.js';
 import {command, userID} from './commands.js';
 import {keyboardBuffer} from './keyboard.js';
+import {ping} from './ping.js';
 export let diceSum = 0; export let foeDiceSum = 0;
+export let turn = 0;
 
 export let activePlayers = [];
 export let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
-
+// can you feel me rolling my eyes right now
+export async function getExampleUser() {return exampleUser};
 class User {
 	constructor(data) {
 		this.name = data["name"];
@@ -21,16 +25,17 @@ class User {
 
 export async function initUserAndRoom(user, room) {
 	activePlayers.length = 0; 
+	await getExampleUser().then(r => {
 	// Get the relevant options from the json file.
 	// This should always be the first entry in the list.
 	let player = new User({
-		"name": exampleUser["userID"],
-		"owner": userID,
-		"aggressive": exampleUser["aggressive"],
-		"hp": exampleUser["hp"],
-		"info": exampleUser["info"],
-		"passives": exampleUser["passives"],
-		"actives": exampleUser["actives"]
+		"name": r[0]["name"],
+		"owner": user,
+		"aggressive": r[0]["aggressive"],
+		"hp": r[0]["hp"],
+		"info": r[0]["info"],
+		"passives": r[0]["passives"],
+		"actv": r[0]["actives"]
 	}); 
 	// Add the new user to the list of active ones,
 	// and add their information to the server.
@@ -38,8 +43,8 @@ export async function initUserAndRoom(user, room) {
 	socket.send(JSON.stringify({
 		"type":"put",
 		"data": {
-			"roomID": roomID,
-			"blockID": roomID+"_users",
+			"roomID": room,
+			"blockID": room+"_users",
 			"data": [
 				{
 					"name": player.name,
@@ -48,17 +53,22 @@ export async function initUserAndRoom(user, room) {
 					"hp": player.hp,
 					"info": player.info,
 					"passives": player.passives,
-					"actives": player.actives
+					"actv": player.actives
 				}
 			]
 		}
 	}));
-	await Actions.GetUsersOnline(roomID).then(r => {
+	})
+	Actions.GetUsersOnline(room).then(r => {
 		for (let n in r["data"]["data"]) {
-			let player = new User(r["data"]["data"][n]);
-			activePlayers.push(player);
+			if(r["data"]["data"].includes(getExampleUser()[0])) {
+				let player = new User(r["data"]["data"][n]);
+				activePlayers.push(player);
+			}
 		}
 	});
+	// sort the array alphabetically
+	activePlayers.sort();
 }
 
 export function replacePlaceholders(value, target) { 
@@ -110,9 +120,21 @@ export async function onActivate(active, target) {
 			case "attack":
 				command("attack",cmd[1],Math.floor(solve(cmd[2])+1),userID);
 				break;
+			case "bot":
+				activePlayers.push(cmd[1]);
+				break;
 			default:
 				console.error("Uncaught or unknown command: "+cmd[0]);
 				break;
 		}
 	}
+	// Advance the turn.
+	// todo: when passives are added, make this only apply to actives.
+	advanceTurn();
+}
+
+export async function advanceTurn() {
+	// todo: going through the player list alphabetically works for now, but it should eventually be changed.
+	if(turn > activePlayers.length) turn++
+	else turn = 0;
 }

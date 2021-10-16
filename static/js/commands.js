@@ -20,11 +20,13 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			Room-specific commands:
 			/move (subRoom) - Move to a subroom within a room if you're near it.`);
 			break;
-		case "user", "nick":
+		case "user":
+		case "nick":
 			userID = arg1;
 			if(roomID != "") {initUserAndRoom(userID, roomID);}
 			break;
-		case "join", "room":
+		case "join":
+		case "room":
 			roomID = arg1;
 			if(userID != "") {initUserAndRoom(userID, roomID);}
 			break;
@@ -38,12 +40,9 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "switch":
 			break;
 		case "list":
-			await Actions.GetUsersOnline(roomID).then(r => {
-				console.log(r["data"]["data"])
-				for (let n in r["data"]["data"]) {
-					keyboardBuffer.push(r["data"]["data"][n]["name"]+"\n");
-				}
-			});
+			for (let n in activePlayers) {
+				keyboardBuffer.push(activePlayers[n]["name"]+"\n");
+			};
 			break;
 		// Below are commands that shouldn't really be here,
 		// but they are because I don't feel like moving them to another file,
@@ -51,7 +50,7 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		// Most will be moved later in development(tm).
 		case "activeDropdown":
 			await exampleUser.then(function(resp) {
-				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"],"userDropdown");
+				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"],"userDropdown","{index}","{name}");
 			});
 			break;
 		case "active":
@@ -62,7 +61,7 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			break;
 		case "userDropdown":
 			await Actions.GetUsersOnline(roomID).then(r => {
-				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"],"active","{index}","{name}");
+				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"],"active",arg1,arg2);
 				//,"arg1":list.indexOf(l)
 			});
 			break;

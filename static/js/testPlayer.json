@@ -1,6 +1,6 @@
 [{
-	"ownerID": "ioi",
-	"userID": "8-BIT",
+	"name": "8-BIT",
+	"owner": "ioi",
 	"aggressive": "true",
 	"hp": 20,
 	"info": {
@@ -47,12 +47,14 @@
 			{
 				"0": ["attack","opponent",5],
 				"1": ["bot", {
-					"ownerID": "8-BIT",
-					"userID": "TrackballBooster", 
-					"aggressive": "true",
-					"hp": 3,
-					"diceType": -1,
-					"diceValue": 5,
+					"name": "TrackballBooster", 
+					"owner": "8-BIT",
+					"info": {
+						"aggressive": "true",
+						"hp": 3,
+						"diceType": -1,
+						"diceValue": 5
+					},
 					"passives": [
 						{
 							"name": "damageboost",

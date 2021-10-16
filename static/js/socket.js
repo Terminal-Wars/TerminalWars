@@ -8,13 +8,15 @@ const wsurl = wsproto + "://" + window.location.host + "/socket";
 export let socket = new WebSocket(wsurl);
 export let sockerBuffer = []; let buffer, newHealth;
 export let lastSpeaker = "";
+export let connected = 0; // are we connected to the server?
+
+export async function reload() {console.error("reload() exists to remind you that a websocket server cannot actually be reloaded")};
 
 export class ActionsClass {
   async BufferReturn() {
       return delay(ping).then(function() {
         buffer = sockerBuffer[0];
         sockerBuffer.shift();
-        console.log(sockerBuffer);
         return buffer;
       });
   }
@@ -27,10 +29,11 @@ export class ActionsClass {
       let buffer = this.BufferReturn();
   }
   async Attack(foe, user, room, damage) {
-      let userinfo = await this.GetUserInfo(foe, room);
-      newHealth = userinfo["data"]["health"]-damage;
-      socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${newHealth}"}}}`);
-      socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${room}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
+      // todo: rewrite
+      //let userinfo = await this.GetUserInfo(foe, room);
+      //newHealth = userinfo["data"]["health"]-damage;
+      //socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${newHealth}"}}}`);
+      //socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${room}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
       return 0;
   }
   async GetHealth(user, room) {
@@ -45,6 +48,10 @@ export class ActionsClass {
   }
 }
 export const Actions = new ActionsClass;
+
+socket.addEventListener('open', async function (event) {
+    console.log("Server open");
+});
 
 socket.addEventListener('message', async function (event) {
     let data = JSON.parse(event.data);
@@ -65,4 +72,9 @@ socket.addEventListener('message', async function (event) {
       if(data["type"] == "get") {
         sockerBuffer.push(data);
       }
+});
+
+socket.addEventListener('close', async function (event) {
+    cO.remove();
+    alert("The server was closed. Please wait a moment and then reload the page.");
 });
