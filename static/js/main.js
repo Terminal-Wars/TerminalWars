@@ -47,8 +47,9 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  await drawGFX();
-  await degrade(16); 
+  await drawGFX().then(function() {
+    degrade(16); 
+  });
 }
 async function loop60() {
   await diceUpdate();
@@ -63,7 +64,7 @@ async function frameCounter() {
 async function init() { // redundant, but it's here for compatibility
   await loadDefaultObjects();
   await pingSite();
-  await setInterval(pingSite,10000);
+  await setInterval(pingSite,3000); // ping the site and update it every three seconds.
   await setInterval(frameCounter, 1000);
   // todo: make this dynamic or togglable for the final release
   await setInterval(loop, 5);

@@ -4,9 +4,9 @@ import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
-import {onActivate, initUserAndRoom, activePlayers, exampleUser} from './player.js';
+import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
 import {delay} from './commonFunctions.js';
-export let userID = ""; export let roomID = ""; 
+export let userID = ""; export let roomID = "test"; 
 export let shakeNum = 0; export let usersInRoom;
 
 let invalidMessage = "Invalid or unimplemented command.\n";
@@ -22,13 +22,20 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			break;
 		case "user":
 		case "nick":
-			userID = arg1;
-			if(roomID != "") {initUserAndRoom(userID, roomID);}
+			if(arg1 == "") {keyboardBuffer.push("Username cannot be blank.\n")} else {
+				userID = arg1;
+				if(roomID != "") {initUserAndRoom();}
+			}
 			break;
 		case "join":
 		case "room":
-			roomID = arg1;
-			if(userID != "") {initUserAndRoom(userID, roomID);}
+			if(arg1 == "") {
+				keyboardBuffer.push("Joined the hub room.\n");
+				roomID = "hub";
+			} else {
+				roomID = arg1;
+			}
+			if(userID != "") {initUserAndRoom();}
 			break;
 		case "ping":
 			await pingSite().then(function() {
@@ -40,9 +47,14 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "switch":
 			break;
 		case "list":
+			console.log(activePlayers);
 			for (let n in activePlayers) {
-				keyboardBuffer.push(activePlayers[n]["name"]+"\n");
+				let p = activePlayers[n];
+				keyboardBuffer.push(p["name"]+" ("+p["owner"]+")\n");
 			};
+			break;
+		case "battle":
+			startBattle();
 			break;
 		// Below are commands that shouldn't really be here,
 		// but they are because I don't feel like moving them to another file,
@@ -60,17 +72,14 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			});
 			break;
 		case "userDropdown":
-			await Actions.GetUsersOnline(roomID).then(r => {
-				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"],"active",arg1,arg2);
-				//,"arg1":list.indexOf(l)
-			});
+			dropdown(mousePos["x"],mousePos["y"],"users",activePlayers,"active",arg1,arg2);
 			break;
 		case "attack":
 			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
 		case "debug":
 			if(window.location.hostname == "localhost") {
-				await Actions.MemoryDump(roomID);
+				await Actions.MemoryDump(roomID).then(r => console.log(r));
 			} else {
 				keyboardBuffer.push(invalidMessage);
 			}

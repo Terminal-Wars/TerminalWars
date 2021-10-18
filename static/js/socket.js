@@ -24,12 +24,12 @@ export class ActionsClass {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
       return this.BufferReturn();
   }
+  // TODO: REWRITE THE NEXT THREE FUNCTIONS
   async GetUserInfo(user, room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
       let buffer = this.BufferReturn();
   }
   async Attack(foe, user, room, damage) {
-      // todo: rewrite
       //let userinfo = await this.GetUserInfo(foe, room);
       //newHealth = userinfo["data"]["health"]-damage;
       //socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${newHealth}"}}}`);
@@ -41,6 +41,10 @@ export class ActionsClass {
       await delay(ping).then(function() {
         return userinfo["data"]["health"];
       })
+  }
+  async HasBattleStarted(room) {
+      socket.send(`{"type": "get","data":{"roomID":"${room}","blockID":"battleInProgress"}}`);
+      return this.BufferReturn();
   }
   async MemoryDump(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}"}}`);
@@ -61,11 +65,15 @@ socket.addEventListener('message', async function (event) {
         let text = data["data"]["data"]["text"];
         // ℡ is the character that signifies that this shouldn't be broadcast
         if(!text.startsWith("℡")) {
-          if(speaker == lastSpeaker) {
-            keyboardBuffer.push("\xFF"+text);
+          if(data["data"]["data"]["blank"]) {
+            keyboardBuffer.push(speaker+" "+text);
           } else {
-            keyboardBuffer.push("\0\b"+speaker+"\n\xFF"+text);
-            lastSpeaker = speaker;
+            if(speaker == lastSpeaker) {
+              keyboardBuffer.push("\xFF"+text);
+            } else {
+              keyboardBuffer.push("\0\b"+speaker+"\n\xFF"+text);
+              lastSpeaker = speaker;
+            }
           }
         }
       }
