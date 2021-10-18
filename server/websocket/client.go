@@ -70,8 +70,8 @@ type Response struct {
 
 type GetDataResponse struct {
 	OK      bool        `json:"ok"`
-	RoomID  string      `json:roomID`
-	BlockID string      `json:blockID`
+	RoomID  string      `json:"roomID"`
+	BlockID string      `json:"blockID"`
 	Data    interface{} `json:"data,omitempty"`
 	Created int64       `json:"created,omitempty"`
 }
