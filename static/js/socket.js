@@ -1,3 +1,4 @@
+import {notices} from './main.js';
 import {cO} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
@@ -42,8 +43,8 @@ export class ActionsClass {
         return userinfo["data"]["health"];
       })
   }
-  async HasBattleStarted(room) {
-      socket.send(`{"type": "get","data":{"roomID":"${room}","blockID":"battleInProgress"}}`);
+  async GetBattle(room) {
+      socket.send(`{"type": "get","data":{"roomID":"${room}","blockID":"battle"}}`);
       return this.BufferReturn();
   }
   async MemoryDump(room) {
@@ -84,5 +85,5 @@ socket.addEventListener('message', async function (event) {
 
 socket.addEventListener('close', async function (event) {
     cO.remove();
-    alert("The server was closed. Please wait a moment and then reload the page.");
+    notices.innerHTML = "The server was closed. Please wait a moment and then reload the page.";
 });

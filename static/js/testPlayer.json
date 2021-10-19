@@ -46,8 +46,8 @@
 			{
 				"0": ["attack","opponent",5],
 				"1": ["bot", {
-					"name": "TrackballBooster", 
-					"owner": "8-BIT",
+					"name": "sender",
+					"character": "TrackballBooster", 
 					"info": {
 						"aggressive": "true",
 						"hp": 3,

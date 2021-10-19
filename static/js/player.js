@@ -4,14 +4,17 @@ import {delay, solve} from './commonFunctions.js';
 import {command, userID, roomID} from './commands.js';
 import {keyboardBuffer} from './keyboard.js';
 import {ping} from './ping.js';
+import {asyncResult, replacePlaceholders} from './commonFunctions.js';
+
 export let diceSum = 0; export let foeDiceSum = 0;
-export let turn = -1;
-export let battleStarted = 0; // Cached value for whether a battle is started.
+export let turn = 0; // Cached value for whoever's turn it is.
+export let battleStarted = -1; // Cached value for whether a battle is started.
+export let ourTurn = false; // Whether or not it's our turn.
 
 export let activePlayers = [];
+export let participants = []; // for when we only need the names (i.e. when sending this back to the server).
+
 export let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
-// can you feel me rolling my eyes right now
-export async function getExampleUser() {return exampleUser};
 class User {
 	constructor(data) {
 		this.name = data["name"];
@@ -20,14 +23,13 @@ class User {
 		this.hp = data["hp"];
 		this.info = data["info"];
 		this.passives = data["passives"];
-		this.actives = data["actives"];
+		//this.actives = data["actives"];
 	}
 }
 
 export async function initUserAndRoom() {
-	console.log(userID);
 	activePlayers.length = 0; 
-	await getExampleUser().then(r => {
+	await asyncResult(exampleUser).then(r => {
 	// Get the relevant options from the json file.
 	// This should always be the first entry in the list.
 	let player = new User({
@@ -36,9 +38,9 @@ export async function initUserAndRoom() {
 		"aggressive": r[0]["aggressive"],
 		"hp": r[0]["hp"],
 		"info": r[0]["info"],
-		"passives": r[0]["passives"],
-		"actv": r[0]["actives"]
-	}); 
+		"passives": r[0]["passives"]
+		//"actives": r[0]["actives"]
+	});
 	// Add the new user to the server
 	socket.send(JSON.stringify({"type":"put",
 		"data": {
@@ -50,8 +52,8 @@ export async function initUserAndRoom() {
 					"aggressive": player.aggressive,
 					"hp": player.hp,
 					"info": player.info,
-					"passives": player.passives,
-					"actv": player.actives
+					"passives": player.passives
+					//"actives": player.actives
 				}
 			]
 		}
@@ -62,19 +64,9 @@ export async function initUserAndRoom() {
 			let player = new User(r["data"]["data"][n]);
 			activePlayers.push(player);
 		}
+		// sort the array alphabetically
+		activePlayers.sort();
 	});
-	// sort the array alphabetically
-	activePlayers.sort();
-}
-
-export function replacePlaceholders(value, target) { 
-	if(typeof(value) != "string") {return value;} else {
-		value=value.replace("myRoll",diceSum,99)
-				   .replace("enemyRoll",foeDiceSum,99)
-				   .replace("sender",userID,99)
-				   .replace("opponent",target,99);
-		return value;
-	}
 }
 
 export async function onActivate(active, target) {
@@ -129,21 +121,96 @@ export async function onActivate(active, target) {
 	advanceTurn();
 }
 
-export async function startBattle() {
-	await Actions.HasBattleStarted(roomID).then(function(r) {
-		if(r["data"]["ok"] == false || r["data"]["value"] == false) {
-			socket.send(`{"type": "put", "data": {"roomID":"${roomID}","blockID": "battleInProgress","data":{"value":true}}}`);
-			socket.send(`{"type": "broadcast", "data": {"blank":true,"roomID":"${roomID}","userID":"${userID}","text":"has started a battle!"}`)
-			let battleStarted = 1;
-		} else {
-			keyboardBuffer.push("A battle has already started in this room!\n");
-			let battleStarted = 0;
+// Getting battle specific data.
+export async function getTurn() {
+	switch(turn) {
+		case -1: // We don't know it.
+			serverResult = Actions.GetBattle(roomID).then(function(r) {
+				return r["data"]["data"]["turn"];
+			});
+			return asyncResult(serverResult);
+			break;
+		default:
+			return turn;
+			break;
+	}
+}
+export async function getParticipants() {
+	if(participants.length == 0) {
+		serverResult = Actions.GetBattle(roomID).then(function(r) {
+			return r["data"]["data"]["participants"];
+		});
+		return asyncResult(serverResult);
+	} else {
+		return participants;
+	}
+}
+
+export async function startBattle(restart) {
+	let battleStartMessage = "A battle has already started in this room!\n";
+	function start() {
+		for (let n in activePlayers) {
+			participants.push(activePlayers[n]["name"]);
 		}
-	})
+		socket.send(JSON.stringify({
+			"type": "put", 
+			"data": {
+				"roomID":roomID,
+				"blockID": "battle",
+				"data": {
+					"value":true,
+					"participants": participants,
+					"turn": 0
+				}
+			}
+		}));
+		socket.send(JSON.stringify({
+			"type": "broadcast", 
+			"data": {
+				"blank":true,
+				"roomID":roomID,
+				"userID":userID,
+				"text":"has started a battle!"
+			}
+		}));
+		let battleStarted = 1;
+	}
+	switch(battleStarted) {
+		case -1: // We don't know if it's started, actually.
+			await Actions.GetBattle(roomID).then(function(r) {
+				if(restart || r["data"]["ok"] == false || r["data"]["value"] == false) {
+					start()
+				} else {
+					keyboardBuffer.push(battleStartMessage);
+					let battleStarted = 0;
+				}
+			});
+			break;
+		case 0: // We know that one hasn't started.
+			start();
+			break;
+		case 1: // We know that one has started.
+			keyboardBuffer.push(battleStartMessage);
+			break;
+	}
 }
 
 export async function advanceTurn() {
 	// todo: going through the player list alphabetically works for now, but it should eventually be changed.
-	if(turn > activePlayers.length) turn++
-	else turn = 0;
+	await getTurn().then(function(r) {
+		turn = r;
+		if(turn < activePlayers.length) turn++
+		else turn = 0;
+		socket.send(JSON.stringify({
+			"type":"put",
+			"data": {
+				"roomID":roomID,
+				"blockID":"battle",
+				"data": {
+					"turn":turn
+				}
+			}
+		}));
+		if(activePlayers)
+	})
 }

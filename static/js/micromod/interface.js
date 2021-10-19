@@ -1,5 +1,6 @@
 import {AudioPlayer} from './AudioPlayer.js';
 export let player = new AudioPlayer();
+console.warn("%c The above errors do not matter at the moment because I have not even finished implementing the sound.","font-weight:bold")
 export function play() {
 	player.play();
 }

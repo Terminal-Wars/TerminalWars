@@ -78,10 +78,10 @@ class DrawClass {
 		await this.box(x, y, width+1, height+1,"black");
 		await this.box(x, y, width, height,"white");
 	}
-	async button(x, y, width, height, content, ox, oy,active,hover,type) {
+	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled) {
 		let mode = 0;
 		// Buttons cannot be pressed until the user is logged in.
-		if(userID == "" || roomID == "") {ox += 16;}
+		if(!enabled) {ox += 16;}
 		if(type == "button") {
 			await this.box(x-1, y-1, width+2, height+2,"black");
 			if(active == 0) {
