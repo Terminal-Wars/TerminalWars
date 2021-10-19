@@ -2,6 +2,7 @@ import { objects, objects_dice, debugBox, debugBox2, notices } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
+import { replacePlaceholders } from './commonFunctions.js';
 
 // The canvas
 export let cO = document.querySelector('.draw');
@@ -80,8 +81,9 @@ class DrawClass {
 	}
 	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled) {
 		let mode = 0;
-		// Buttons cannot be pressed until the user is logged in.
-		if(!enabled) {ox += 16;}
+		if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
+		debugBox2.innerHTML = "";
+		if(enabled == 0) ox += 16;
 		if(type == "button") {
 			await this.box(x-1, y-1, width+2, height+2,"black");
 			if(active == 0) {
@@ -100,7 +102,7 @@ class DrawClass {
 				mode = 2;
 			}
 		}
-		debugBox2.innerHTML = "";
+		//debugBox2.innerHTML = "";
 		// Draw either an image or some text
 		switch(typeof(content)) {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
@@ -110,7 +112,7 @@ class DrawClass {
 				await drawChars(content,x,y,mode);
 				break;
 			default:
-				debugBox2.innerHTML = typeof(content);
+				//debugBox2.innerHTML = typeof(content);
 				break;
 		}
 	}
@@ -226,7 +228,7 @@ async function draw(o) {
 			// Bit of a bizarre way of doing things, but it's less messy.
 			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
-			await Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]),e["ox"],e["oy"],e["active"],e["hover"],e["type"]);
+			await Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]),e["ox"],e["oy"],e["active"],e["hover"],e["type"],e["enabled"]);
 		}
 }
 

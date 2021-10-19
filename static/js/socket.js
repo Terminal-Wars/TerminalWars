@@ -4,6 +4,8 @@ import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 import {delay} from './commonFunctions.js';
 import {keyboardBuffer} from './keyboard.js';
+import {setOurTurn} from './player.js';
+
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
 const wsurl = wsproto + "://" + window.location.host + "/socket";
 export let socket = new WebSocket(wsurl);
@@ -75,6 +77,13 @@ socket.addEventListener('message', async function (event) {
               keyboardBuffer.push("\0\b"+speaker+"\n\xFF"+text);
               lastSpeaker = speaker;
             }
+          }
+        } else {
+          // if the message does start with it, it signifies that a select function should be run.
+          switch(text.replace("℡","",1)) {
+            case "setOurTurn":
+              setOurTurn();
+              break;
           }
         }
       }

@@ -15,11 +15,11 @@ export async function loadDefaultObjects() {
 	objects.push({"id":1,"type":"dice_layer","x":0,"y":0,"width":0,"height":0,"z":0});
 	objects.push({"id":2,"type":"window","title":"Terminal","win_type":"text","x":400,"y":225,"width":200,"height":200,"z":1,
 				  "texts":{0: "", 1: ""}, "event_num":3,
-				  "events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":term_buttons,"ox":0,"oy":0,
+				  "events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{ourTurn}","image":term_buttons,"ox":0,"oy":0,
 							"command":{"command": "activeDropdown"}},
-							 {"type":"button","anchor": "positive","x":-39,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":term_buttons,"ox":0,"oy":16,
+							 {"type":"button","anchor": "positive","x":-39,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{loggedIn}","image":term_buttons,"ox":0,"oy":16,
 							"command":{"command": "bag"}},
-							 {"type":"button","anchor": "positive","x":-20,"y":-25,"width":16,"height":16,"active":0,"hover":0,"image":term_buttons,"ox":0,"oy":32,
+							 {"type":"button","anchor": "positive","x":-20,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{loggedIn}","image":term_buttons,"ox":0,"oy":32,
 							"command":{"command": "user"}}]
 							});
 }

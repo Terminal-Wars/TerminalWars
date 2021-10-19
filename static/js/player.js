@@ -7,12 +7,14 @@ import {ping} from './ping.js';
 import {asyncResult, replacePlaceholders} from './commonFunctions.js';
 
 export let diceSum = 0; export let foeDiceSum = 0;
-export let turn = 0; // Cached value for whoever's turn it is.
+export let turn = -1; // Cached value for whoever's turn it is.
 export let battleStarted = -1; // Cached value for whether a battle is started.
-export let ourTurn = false; // Whether or not it's our turn.
+export let ourTurn = 0; // Whether or not it's our turn.
 
 export let activePlayers = [];
 export let participants = []; // for when we only need the names (i.e. when sending this back to the server).
+
+export let ourPlayer;
 
 export let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
 class User {
@@ -31,8 +33,7 @@ export async function initUserAndRoom() {
 	activePlayers.length = 0; 
 	await asyncResult(exampleUser).then(r => {
 	// Get the relevant options from the json file.
-	// This should always be the first entry in the list.
-	let player = new User({
+	ourPlayer = new User({
 		"name": userID,
 		"character": r[0]["character"],
 		"aggressive": r[0]["aggressive"],
@@ -46,16 +47,7 @@ export async function initUserAndRoom() {
 		"data": {
 			"roomID": roomID,
 			"blockID": roomID+"_users",
-			"data": [{
-					"name": player.name,
-					"character": player.character,
-					"aggressive": player.aggressive,
-					"hp": player.hp,
-					"info": player.info,
-					"passives": player.passives
-					//"actives": player.actives
-				}
-			]
+			"data": [ourPlayer]
 		}
 	}));
 	});
@@ -66,10 +58,12 @@ export async function initUserAndRoom() {
 		}
 		// sort the array alphabetically
 		activePlayers.sort();
+		// set ourTurn, if applicable
+		setOurTurn();
 	});
 }
 
-export async function onActivate(active, target) {
+export async function onActivate(active, target, advance=true) {
 	for(let n in active) {
 		let cmd = [];
 		let cmdo = active[n];
@@ -99,10 +93,10 @@ export async function onActivate(active, target) {
 				await dice(20,true).then(r => {foeDiceSum += r["value"]});
 				if(diceSum > foeDiceSum) {
 					keyboardBuffer.push("success, your dice sum: "+diceSum+", foe's dice sum: "+foeDiceSum+"\n");
-					onActivate(cmd[4][0], target);
+					onActivate(cmd[4][0], target, false);
 				} else {
 					keyboardBuffer.push("failure, your dice sum: "+diceSum+", foe's dice sum: "+foeDiceSum+"\n");
-					onActivate(cmd[5][0], target);
+					onActivate(cmd[5][0], target, false);
 				}
 				break;
 			case "attack":
@@ -118,26 +112,25 @@ export async function onActivate(active, target) {
 	}
 	// Advance the turn.
 	// todo: when passives are added, make this only apply to actives.
-	advanceTurn();
+	if(advance) {
+		advanceTurn();
+	}
 }
 
 // Getting battle specific data.
 export async function getTurn() {
-	switch(turn) {
-		case -1: // We don't know it.
-			serverResult = Actions.GetBattle(roomID).then(function(r) {
-				return r["data"]["data"]["turn"];
-			});
-			return asyncResult(serverResult);
-			break;
-		default:
-			return turn;
-			break;
+	if(turn == -1) {
+		let serverResult = Actions.GetBattle(roomID).then(function(r) {
+			return r["data"]["data"]["turn"];
+		});
+		return asyncResult(serverResult);
+	} else {
+		return turn;
 	}
 }
 export async function getParticipants() {
 	if(participants.length == 0) {
-		serverResult = Actions.GetBattle(roomID).then(function(r) {
+		let serverResult = Actions.GetBattle(roomID).then(function(r) {
 			return r["data"]["data"]["participants"];
 		});
 		return asyncResult(serverResult);
@@ -173,16 +166,19 @@ export async function startBattle(restart) {
 				"text":"has started a battle!"
 			}
 		}));
-		let battleStarted = 1;
+		battleStarted = 1;
+		turn = 0;
+		uploadTurn(turn);
+		setOurTurn();
 	}
 	switch(battleStarted) {
 		case -1: // We don't know if it's started, actually.
 			await Actions.GetBattle(roomID).then(function(r) {
 				if(restart || r["data"]["ok"] == false || r["data"]["value"] == false) {
-					start()
+					start();
 				} else {
 					keyboardBuffer.push(battleStartMessage);
-					let battleStarted = 0;
+					battleStarted = 0;
 				}
 			});
 			break;
@@ -198,19 +194,33 @@ export async function startBattle(restart) {
 export async function advanceTurn() {
 	// todo: going through the player list alphabetically works for now, but it should eventually be changed.
 	await getTurn().then(function(r) {
+		// We want to set the global "turn" variable.
 		turn = r;
-		if(turn < activePlayers.length) turn++
+		if(turn < activePlayers.length-1) turn++
 		else turn = 0;
-		socket.send(JSON.stringify({
-			"type":"put",
-			"data": {
-				"roomID":roomID,
-				"blockID":"battle",
-				"data": {
-					"turn":turn
-				}
-			}
-		}));
-		if(activePlayers)
+		uploadTurn(turn);
+		socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":"","text":"℡setOurTurn"}}))
+		setOurTurn();
 	})
+}
+
+export async function uploadTurn(turn) {
+	socket.send(JSON.stringify({
+		"type":"put",
+		"data": {
+			"roomID":roomID,
+			"blockID":"battle",
+			"data": {
+				"turn":turn
+			}
+		}
+	}));
+}
+
+export async function setOurTurn() { // whereas advanceTurn() advances the turn counter,
+									 // this updates the "ourTurn" value if it's our turn.
+    await Promise.all([getParticipants(),getTurn()]).then(async(p) => {
+		if(p[0].indexOf(ourPlayer["name"]) == p[1]) ourTurn = 1;
+		else ourTurn = 0;
+	});
 }
