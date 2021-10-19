@@ -6,6 +6,7 @@ import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
 import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
 import {delay} from './commonFunctions.js';
+import {play, stop, setModule} from './micromod/interface.js';
 export let userID = ""; export let roomID = "test"; 
 export let shakeNum = 0; export let usersInRoom;
 
@@ -55,6 +56,13 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			break;
 		case "battle":
 			startBattle();
+			break;
+		case "music":
+			let f = new FileReader();
+			fetch('./addicti.mod').then(function(r){
+				setModule(f.readAsArrayBuffer(r));
+				play();
+			});
 			break;
 		// Below are commands that shouldn't really be here,
 		// but they are because I don't feel like moving them to another file,

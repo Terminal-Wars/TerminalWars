@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
-
+	"fmt"
 	"github.com/gorilla/websocket"
 )
 
@@ -81,6 +81,7 @@ func (h *Hub) putData(id blockKey, newdata interface{}) {
 				h.data[id].Data.(map[string]interface{})[k] = v
 			}
 		case []interface{}:
+			fmt.Println("current len of block:", len(newdata))
 			d := h.data[id]
 			data := d.Data.([]interface{})
 		Outer:
@@ -89,12 +90,15 @@ func (h *Hub) putData(id blockKey, newdata interface{}) {
 				name := ent["name"].(string)
 				for i, oldent := range data {
 					if oldent.(map[string]interface{})["name"].(string) == name {
+						fmt.Printf("block with name %s already present in block, replacing\n", name)
 						data[i] = ent
 						continue Outer
 					}
 				}
-				d.Data = append(data, ent)
+				data = append(data, ent)
 			}
+			d.Data = data
+			fmt.Println("new length of block:", len(data))
 			h.data[id] = d
 		default:
 			log.Println("ioi thats not a map or an array")
