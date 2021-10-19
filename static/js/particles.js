@@ -1,5 +1,5 @@
 import { particles } from './main.js';
-import { ctx, WIDTH, HEIGHT } from './canvas.js';
+import { ctx } from './canvas.js';
 import { drawChars } from './charmap.js';
 
 export function rand(num) {return Math.random() * num;}

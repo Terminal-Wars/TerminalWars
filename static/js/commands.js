@@ -1,6 +1,5 @@
 import {socket, Actions} from './socket.js';
 import {keyboardBuffer} from './keyboard.js';
-import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';

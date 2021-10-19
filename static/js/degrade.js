@@ -1,4 +1,4 @@
-import {ctx, WIDTH, HEIGHT} from './canvas.js';
+import {ctx, width, height} from './canvas.js';
 import {debugBox} from './main.js';
 export async function degradeChunk(x,y,width,height,depth) {
 	let colorBuffer = [];
@@ -25,7 +25,7 @@ export async function degrade(depth) {
 	const DIVIDE = 4;
 	for(let y = 0; y <= DIVIDE; y++) {
 		for(let x = 0; x <= DIVIDE; x++) {
-			await degradeChunk(WIDTH/DIVIDE*x,HEIGHT/DIVIDE*y,WIDTH/DIVIDE,HEIGHT/DIVIDE,depth);
+			await degradeChunk(width/DIVIDE*x,height/DIVIDE*y,width/DIVIDE,height/DIVIDE,depth);
 		}
 	}
 }

@@ -1,6 +1,6 @@
 import { objects, objects_dice, debugBox2 } from './main.js';
 import { ping } from './ping.js';
-import {term_buttons, WIDTH, HEIGHT, OB_WIDTH, OB_HEIGHT} from './canvas.js';
+import {term_buttons, width, height, obWidth, obHeight} from './canvas.js';
 import {keyboardBuffer} from './keyboard.js';
 import {delay} from './commonFunctions.js';
 
@@ -71,7 +71,7 @@ export async function dice(max, foe=false) {
 		img.style.position = 'absolute'; img.style.zIndex = document.body.length*22;
 		img.src = "./static/gfx/diceroll.gif";
 		img.border = "5px solid red";
-		img.style.left = OB_WIDTH+(Math.random()*(WIDTH/2))+"px"; img.style.top = OB_HEIGHT+(Math.random()*(HEIGHT/2))+"px";
+		img.style.left = obWidth+(Math.random()*(width/2))+"px"; img.style.top = onHeight+(Math.random()*(height/2))+"px";
 		document.body.appendChild(img);
 		setTimeout(function() {
 			img.style.filter = "brightness(50%)";

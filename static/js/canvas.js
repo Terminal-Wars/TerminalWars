@@ -1,4 +1,4 @@
-import { objects, objects_dice, debugBox, debugBox2 } from './main.js';
+import { objects, objects_dice, debugBox, debugBox2, notices } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
@@ -10,24 +10,39 @@ ctx.imageSmoothingEnabled = false;
 
 //ctx.mozImageSmoothingEnabled = false;
 
-// The monitor width
-export const SWIDTH = screen.width; export const SHEIGHT = window.innerHeight;
 // The default, set width and height.
-export const WIDTH = 800;
-export const HEIGHT = 600;
-// The remaining width/height
-export const OB_WIDTH = ((SWIDTH-WIDTH)/2); export const OB_HEIGHT = ((SHEIGHT-HEIGHT)/2);
-// The scale multiplier.
-export const MUL = Math.floor(SHEIGHT/HEIGHT);
-// The dpi
-export const DPI = document.querySelector('#dpi').offsetHeight;
-console.log(DPI);
+export const width = 800;
+export const height = 600;
+// DPI (currently unused, todo: find a way to fix the dpi bug using this)
+export const DPI = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
+export const DPI_MUL = Math.ceil(DPI/96);
+
+export let sWidth = 0;
+export let sHeight = 0;
+export let obWidth = 0;
+export let obHeight = 0;
+export let mul = 0;
+export let fWidth = 0;
+export let fHeight = 0;
+
+function init() {
+	// The monitor width
+	sWidth = window.innerWidth; sHeight = window.innerHeight;
+	// The remaining width/height
+	obWidth = ((sWidth-width)/2); obHeight = ((sHeight-height)/2);
+	// The scale multiplier.
+	mul = Math.floor(sHeight/height);
+	// Final width and height after all this.
+	fWidth = (width*mul); fHeight = (height*mul);
+}
+init();
+window.addEventListener('resize',init);
 
 // From here, we'll scale the canvas based on the user's actual screen size.
-cO.width = WIDTH; cO.height = HEIGHT;
-cO.style.width = WIDTH*MUL+"px"; cO.style.maxWidth = WIDTH*MUL+"px"; 
-cO.style.height = HEIGHT*MUL+"px"; cO.style.maxHeight = HEIGHT*MUL+"px";
-//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = SHEIGHT+"px";
+cO.width = width; cO.height = height;
+cO.style.width = fWidth+"px"; cO.style.maxWidth = fWidth+"px"; 
+cO.style.height = fHeight+"px"; cO.style.maxHeight = fHeight+"px";
+//canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = Sheight+"px";
 
 // Any images we need
 // todo: make a seperate .json file with all of these in it and just use arrays instead.
@@ -170,8 +185,8 @@ async function draw(o) {
 				}
 				break;
 			case "desktop":
-				await Draw.box(0,0,WIDTH,HEIGHT,o["color1"]);
-				//await Draw.gradient(0,0,0,HEIGHT,WIDTH,HEIGHT,o["color1"],o["color2"])
+				await Draw.box(0,0,width,height,o["color1"]);
+				//await Draw.gradient(0,0,0,height,width,height,o["color1"],o["color2"])
 				break;
 			case "dropdown":
 				await Draw.base(xa_n, ya_n, rw, rh);
@@ -216,6 +231,7 @@ async function draw(o) {
 }
 
 export async function drawGFX() {
+	if(DPI > 96) {notices.innerHTML = "Your monitor has a higher DPI then the game supports, and due to a known bug this will cause the game to look slightly wrong."}
 	for(let i = 0; i <= objects.length; i++) {
 		await draw(objects[i]);
 	}

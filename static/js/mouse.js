@@ -1,5 +1,5 @@
 import {Objects, objects, curObject, mousePos} from './main.js';
-import {WIDTH, HEIGHT, SWIDTH, SHEIGHT, OB_WIDTH, OB_HEIGHT} from './canvas.js';
+import {width, height, sWidth, sHeight, obWidth, obHeight} from './canvas.js';
 import { command, userID, roomID} from './commands.js';
 
 // The mouse position for other files to use.
@@ -8,7 +8,7 @@ let mousePosHeld = [{"x":0,"y":0}];
 // mouse variables
 let mouseDown = 0; let winMoveMode = 0;
 // modifier based on the width and height of the window.
-let wmod = (WIDTH/SWIDTH); let hmod = (HEIGHT/SHEIGHT);
+let wmod = (width/sWidth); let hmod = (height/sHeight);
 // x and y anchor (for event positioning)
 let xa, ya = 0;
 
@@ -50,7 +50,7 @@ async function windowUpdate(val) {
 // On every mouse movement
 document.addEventListener("mousemove", async function(e) {
 	// The current mouse position
-	mousePos["x"] = Math.round(e.clientX-OB_WIDTH); mousePos["y"] = Math.round(e.clientY-OB_HEIGHT);
+	mousePos["x"] = Math.round(e.clientX-obWidth); mousePos["y"] = Math.round(e.clientY-obHeight);
 	await windowUpdate("hover");
 	if(mouseDown) {
 	// The distance that we've moved between the last mouse position we have and the current one.
@@ -68,7 +68,7 @@ document.addEventListener("mousemove", async function(e) {
 document.addEventListener("mousedown", async function(e) {
 	mouseDown = 1;
 	// The "old" mouse position variables get set.
-	mousePosHeld["x"] = Math.round(e.clientX-OB_WIDTH); mousePosHeld["y"] = Math.round(e.clientY-OB_HEIGHT);
+	mousePosHeld["x"] = Math.round(e.clientX-obWidth); mousePosHeld["y"] = Math.round(e.clientY-obHeight);
 	await windowUpdate("active");
 });
 // When the mouse button is released.
