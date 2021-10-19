@@ -1,6 +1,5 @@
 [{
-	"name": "8-BIT",
-	"owner": "ioi",
+	"character": "8-BIT",
 	"aggressive": "true",
 	"hp": 20,
 	"info": {

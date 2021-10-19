@@ -15,7 +15,7 @@ export async function getExampleUser() {return exampleUser};
 class User {
 	constructor(data) {
 		this.name = data["name"];
-		this.owner = data["owner"];
+		this.character = data["character"];
 		this.aggressive = data["aggressive"];
 		this.hp = data["hp"];
 		this.info = data["info"];
@@ -31,8 +31,8 @@ export async function initUserAndRoom() {
 	// Get the relevant options from the json file.
 	// This should always be the first entry in the list.
 	let player = new User({
-		"name": r[0]["name"],
-		"owner": userID,
+		"name": userID,
+		"character": r[0]["character"],
 		"aggressive": r[0]["aggressive"],
 		"hp": r[0]["hp"],
 		"info": r[0]["info"],
@@ -46,7 +46,7 @@ export async function initUserAndRoom() {
 			"blockID": roomID+"_users",
 			"data": [{
 					"name": player.name,
-					"owner": player.owner,
+					"character": player.character,
 					"aggressive": player.aggressive,
 					"hp": player.hp,
 					"info": player.info,
