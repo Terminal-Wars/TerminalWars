@@ -4,57 +4,43 @@ import {WIDTH, HEIGHT} from './canvas.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown, dice} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
-import {onActivate} from './player.js';
+import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
 import {delay} from './commonFunctions.js';
-export let userID = "test"; export let roomID = "room"; 
+import {play, stop, setModule} from './micromod/interface.js';
+export let userID = ""; export let roomID = "test"; 
 export let shakeNum = 0; export let usersInRoom;
 
-let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
+let invalidMessage = "Invalid or unimplemented command.\n";
 
 export async function command(cmd, arg1="", arg2="", arg3="") {
 	switch(cmd) {
-		/*
-		case "put":
-			socket.send(`{"type":"put","data":{"roomID":"test","blockID":"test","data":{"${arg1}": "${arg2}"}}}`);
-			break;
-		case "get":
-			socket.send(`{"type":"get","data":{"roomID":"test","blockID":"test"}}`);
-			break;
-		*/
 		case "help":
-keyboardBuffer.push(`General commands:
-/nick (name) - Set your name. If it's an established nickname in the room you try and join, you will be prompted for a password.
-/join (room) - Join a room.
-Room-specific commands:
-/move (subRoom) - Move to a subroom within a room if you're near it.`);
+			keyboardBuffer.push(`General commands:
+			/nick (name) - Set your name. If it's an established nickname in the room you try and join, you will be prompted for a password.
+			/join (room) - Join a room.
+			Room-specific commands:
+			/move (subRoom) - Move to a subroom within a room if you're near it.`);
 			break;
 		case "user":
 		case "nick":
-			if (roomID == "") {keyboardBuffer.push("You need to join a room first.\n")} else {
+			if(arg1 == "") {keyboardBuffer.push("Username cannot be blank.\n")} else {
 				userID = arg1;
-				let userData = {
-					"type":"put",
-					"data": {
-						"roomID": roomID,
-						"blockID": roomID+"_users",
-						"data": [
-							{
-								"name": userID,
-								"health": 200,
-							}
-						]
-					}
-				}
-				socket.send(JSON.stringify(userData));
+				if(roomID != "") {initUserAndRoom();}
 			}
-
 			break;
 		case "join":
-			roomID = arg1;
+		case "room":
+			if(arg1 == "") {
+				keyboardBuffer.push("Joined the hub room.\n");
+				roomID = "hub";
+			} else {
+				roomID = arg1;
+			}
+			if(userID != "") {initUserAndRoom();}
 			break;
 		case "ping":
 			await pingSite().then(function() {
-				keyboardBuffer.push("Pong! "+ping+"\n");
+				keyboardBuffer.push("Pong! "+ping+"ms\n");
 			});
 			break;
 		case "bag":
@@ -62,14 +48,20 @@ Room-specific commands:
 		case "switch":
 			break;
 		case "list":
-			await Actions.GetUsersOnline(roomID).then(r => {
-				for (const n in r["data"]["data"]) {
-					console.log(r["data"]["data"]);
-					// If [n][0] equals [0][0], which it does for the first player, it becomes
-					// [0]. so we need to account for that. And I guess we can't just use || to do that.
-					if(n == 0) keyboardBuffer.push(r["data"]["data"][0]["name"]+"\n");
-					else keyboardBuffer.push(r["data"]["data"][n][0]["name"]+"\n");
-				}
+			console.log(activePlayers);
+			for (let n in activePlayers) {
+				let p = activePlayers[n];
+				keyboardBuffer.push(p["name"]+" ("+p["owner"]+")\n");
+			};
+			break;
+		case "battle":
+			startBattle();
+			break;
+		case "music":
+			let f = new FileReader();
+			fetch('./addicti.mod').then(function(r){
+				setModule(f.readAsArrayBuffer(r));
+				play();
 			});
 			break;
 		// Below are commands that shouldn't really be here,
@@ -78,7 +70,7 @@ Room-specific commands:
 		// Most will be moved later in development(tm).
 		case "activeDropdown":
 			await exampleUser.then(function(resp) {
-				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"],"userDropdown");
+				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"],"userDropdown","{index}","{name}");
 			});
 			break;
 		case "active":
@@ -88,16 +80,20 @@ Room-specific commands:
 			});
 			break;
 		case "userDropdown":
-			await Actions.GetUsersOnline(roomID).then(r => {
-				dropdown(mousePos["x"],mousePos["y"],"users",r["data"]["data"],"active","{index}","{name}");
-				//,"arg1":list.indexOf(l)
-			});
+			dropdown(mousePos["x"],mousePos["y"],"users",activePlayers,"active",arg1,arg2);
 			break;
 		case "attack":
 			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
+		case "debug":
+			if(window.location.hostname == "localhost") {
+				await Actions.MemoryDump(roomID).then(r => console.log(r));
+			} else {
+				keyboardBuffer.push(invalidMessage);
+			}
+			break;
 		default: 
-			keyboardBuffer.push("Invalid or unimplemented command.\n");
+			keyboardBuffer.push(invalidMessage);
 			break;
 	}
 }

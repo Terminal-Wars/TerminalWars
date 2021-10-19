@@ -19,6 +19,9 @@ export const HEIGHT = 600;
 export const OB_WIDTH = ((SWIDTH-WIDTH)/2); export const OB_HEIGHT = ((SHEIGHT-HEIGHT)/2);
 // The scale multiplier.
 export const MUL = Math.floor(SHEIGHT/HEIGHT);
+// The dpi
+export const DPI = document.querySelector('#dpi').offsetHeight;
+console.log(DPI);
 
 // From here, we'll scale the canvas based on the user's actual screen size.
 cO.width = WIDTH; cO.height = HEIGHT;
@@ -88,8 +91,11 @@ class DrawClass {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
 				await this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
-			default:
+			case "string":
 				await drawChars(content,x,y,mode);
+				break;
+			default:
+				debugBox2.innerHTML = typeof(content);
 				break;
 		}
 	}

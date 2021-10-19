@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
-
+	"fmt"
 	"github.com/gorilla/websocket"
 )
 
@@ -23,11 +23,11 @@ type Hub struct {
 	unregister chan *Client
 
 	mu     sync.Mutex
-	data   map[blockID]blockData
+	data   map[blockKey]blockData
 	expiry map[string]struct{} // room ID
 }
 
-type blockID struct {
+type blockKey struct {
 	roomID, blockID string
 }
 
@@ -42,7 +42,7 @@ func NewHub() *Hub {
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
-		data:       make(map[blockID]blockData),
+		data:       make(map[blockKey]blockData),
 		expiry:     make(map[string]struct{}),
 	}
 }
@@ -70,7 +70,7 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) putData(id blockID, newdata interface{}) {
+func (h *Hub) putData(id blockKey, newdata interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	_, ok := h.data[id]
@@ -81,6 +81,7 @@ func (h *Hub) putData(id blockID, newdata interface{}) {
 				h.data[id].Data.(map[string]interface{})[k] = v
 			}
 		case []interface{}:
+			fmt.Println("current len of block:", len(newdata))
 			d := h.data[id]
 			data := d.Data.([]interface{})
 		Outer:
@@ -89,12 +90,15 @@ func (h *Hub) putData(id blockID, newdata interface{}) {
 				name := ent["name"].(string)
 				for i, oldent := range data {
 					if oldent.(map[string]interface{})["name"].(string) == name {
+						fmt.Printf("block with name %s already present in block, replacing\n", name)
 						data[i] = ent
 						continue Outer
 					}
 				}
-				d.Data = append(data, ent)
+				data = append(data, ent)
 			}
+			d.Data = data
+			fmt.Println("new length of block:", len(data))
 			h.data[id] = d
 		default:
 			log.Println("ioi thats not a map or an array")
@@ -119,10 +123,23 @@ func (h *Hub) putData(id blockID, newdata interface{}) {
 	}
 }
 
-func (h *Hub) getData(id blockID) (blockData, bool) {
+func (h *Hub) getRoom(roomID string) map[string]blockData {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	bd, ok := h.data[id]
+	n := 0
+	data := make(map[string]blockData, n)
+	for key, block := range h.data {
+		if key.roomID == roomID {
+			data[key.blockID] = block
+		}
+	}
+	return data
+}
+
+func (h *Hub) getBlock(roomID, blockID string) (blockData, bool) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	bd, ok := h.data[blockKey{roomID, blockID}]
 	return bd, ok
 }
 

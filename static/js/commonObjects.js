@@ -25,14 +25,6 @@ export async function loadDefaultObjects() {
 }
 export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
 	// TODO: make it so a dropdown disappears when the mouse moves away from it.
-	// impromptu function to avoid some small but repeated code
-	function nameReturn(array) {
-		let name;
-		// account for some arrays, which have the name in a nested array.
-		if(array[0] != undefined) {name = array[0]["name"];}
-		else name = (array["prettyname"] || array["name"]);
-		return name;
-	}
 	// this for loop mostly uses the index anyways so just use for
 	for(let n in objects) {
 		if(objects[n]["sid"] == sid) {
@@ -45,14 +37,14 @@ export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
 	// first we want to get the longest one
 	// (todo: oh come on there has to be a better way)
 	list.forEach(function(l) {
-		let name = nameReturn(l);
+		let name = (l["prettyname"] || l["name"]);
 		if(name.length*8 >= width) {width = name.length*8}
 	});
 	// Then we initialize the dropdown object with default values.
 	let dropdown = {"id":objects.length,"sid":sid,"type":"dropdown","x":x+width/2+2,"y":y+height,"width":width/2+2,"height":height,"z":9999,"event_num":list.length, "events":[], "z":objects.length};
 	// then we loop that list again and add the entries to that dropdown.
 	list.forEach(function(l) {
-		let name = nameReturn(l);
+		let name = (l["prettyname"] || l["name"]);
 		// this would normally be put in a function but it would be weird and slower
 		// to do that because of {index}, which means we would need to remake it every loop.
 		let arg1_ = arg1.replace("{index}",list.indexOf(l),1).replace("{name}",name,1);

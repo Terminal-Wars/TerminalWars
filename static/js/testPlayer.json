@@ -1,13 +1,15 @@
 [{
-	"ownerID": "ioi",
-	"userID": "8-BIT",
+	"name": "8-BIT",
+	"owner": "ioi",
 	"aggressive": "true",
 	"hp": 20,
-	"diceType": 20,
-	"diceAmount": 1,
-	"diceModAttack": 0,
-	"diceModDefense": -5,
-	"bio": "8-BIT is a loaded arcade machine, both in the lethal sense, and the literal sense. He's heavy, and moves slow. Because of this, 8-BIT rolls with a -5 for his defense rolls.",
+	"info": {
+		"diceType": 20,
+		"diceAmount": 1,
+		"diceModAttack": 0,
+		"diceModDefense": -5,
+		"bio": "8-BIT is a loaded arcade machine, both in the lethal sense, and the literal sense. He's heavy, and moves slow. Because of this, 8-BIT rolls with a -5 for his defense rolls."
+	},
 	"passives": [
 		{
 			"name": "arcademachine",
@@ -45,12 +47,14 @@
 			{
 				"0": ["attack","opponent",5],
 				"1": ["bot", {
-					"ownerID": "8-BIT",
-					"userID": "TrackballBooster", 
-					"aggressive": "true",
-					"hp": 3,
-					"diceType": -1,
-					"diceValue": 5,
+					"name": "TrackballBooster", 
+					"owner": "8-BIT",
+					"info": {
+						"aggressive": "true",
+						"hp": 3,
+						"diceType": -1,
+						"diceValue": 5
+					},
 					"passives": [
 						{
 							"name": "damageboost",

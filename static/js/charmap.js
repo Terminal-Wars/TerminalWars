@@ -1,10 +1,11 @@
-import {ctx} from './canvas.js';
-import {WIDTH, HEIGHT} from './canvas.js';
+import {ctx, WIDTH, HEIGHT} from './canvas.js';
+import {socket} from './socket.js'; // ??? ????????? ??????????????
 export const characters = ["`","1","2","3","4","5","6","7","8","9","0","-","=","~","!","@","#","$","%","^","&","*","(",")","_","+","[","]","\\","{","}","|",";","\'",":","\"",",",".","/","<",">","?","q","w","e","r","t","y","u","i","o","p","a","s","d","f","g","h","j","k","l","z","x","c","v","b","n","m","Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M","à","è","ì","ò","ù","À","È","Ì","Ò","Ù","á","é","í","ó","ú","ý","Á","É","Í","Ó","Ú","Ý","â","ê","î","ô","û","Â","Ê","Î","Ô","Û","ã","ñ","õ","Ã","Ñ","Õ","ä","ë","ï","ö","ü","ÿ","Ä","Ë","Ï","Ö","Ü","Ÿ","å","Å","æ","Æ","œ","Œ","ç","Ç","ð","Ð","ø","Ø","¿","¡","ß",""];
 const charmap = new Image(1288,64);
 charmap.src = 'static/gfx/charmap.webp';
+const tempUserImage = new Image(32,32);
+tempUserImage.src = 'static/gfx/temporary_user_icon.webp';
 let lineHeight;
-
 // Mode Table:
 // 0: black 12px normal
 // 1: black 12px bold
@@ -24,17 +25,33 @@ async function drawChar(char, x, y, mode=0,opacity) {
 }
 export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity,maxY=Infinity, opacity=1) {
 	let offset = x;
+	let omode = mode;
 	for(let i in string) {
 		let k = string.charAt(i);
 		switch(k) {
 			case "\n":
-				y += 12;
-				x = -8+offset;
+				mode = omode;
+				y += 16;
+				x = offset;
+				break;
+			case "\b":
+				mode = 1;
+				break;
+			// Image
+			case "\0":
+				ctx.drawImage(tempUserImage,0,0,32,32,x,y,32,32);
+				x += 35;
+				break;
+			// Indent for images
+			case "\xFF":
+				x += 35;
+				break;
 			default:
-				if(y <= minY+12 || y >= maxY-24)  {continue;}
+				if(y <= minY+16 || y >= maxY-24)  {continue;}
 				await drawChar(k,x,y,mode,opacity);
 				x += 8;
-			if(x >= offset+maxX) {x = offset; y += 12;}
+				break;
+			if(x >= offset+maxX) {x = offset; y += 16;}
 		}
 	}
 }
