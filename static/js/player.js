@@ -113,7 +113,8 @@ export async function onActivate(active, target, advance=true) {
 	// Advance the turn.
 	// todo: when passives are added, make this only apply to actives.
 	if(advance) {
-		advanceTurn();
+		socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":"","text":"℡advanceTurn"}}));
+		socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":"","text":"℡setOurTurn"}}));
 	}
 }
 
@@ -133,6 +134,7 @@ export async function getParticipants() {
 		let serverResult = Actions.GetBattle(roomID).then(function(r) {
 			return r["data"]["data"]["participants"];
 		});
+		participants = serverResult;
 		return asyncResult(serverResult);
 	} else {
 		return participants;
@@ -199,8 +201,6 @@ export async function advanceTurn() {
 		if(turn < activePlayers.length-1) turn++
 		else turn = 0;
 		uploadTurn(turn);
-		socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":"","text":"℡setOurTurn"}}))
-		setOurTurn();
 	})
 }
 
@@ -220,6 +220,7 @@ export async function uploadTurn(turn) {
 export async function setOurTurn() { // whereas advanceTurn() advances the turn counter,
 									 // this updates the "ourTurn" value if it's our turn.
     await Promise.all([getParticipants(),getTurn()]).then(async(p) => {
+    	console.log(p[0].indexOf(ourPlayer["name"])+" == "+p[1]);
 		if(p[0].indexOf(ourPlayer["name"]) == p[1]) ourTurn = 1;
 		else ourTurn = 0;
 	});

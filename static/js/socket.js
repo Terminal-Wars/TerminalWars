@@ -4,7 +4,7 @@ import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 import {delay} from './commonFunctions.js';
 import {keyboardBuffer} from './keyboard.js';
-import {setOurTurn} from './player.js';
+import {setOurTurn, advanceTurn} from './player.js';
 
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
 const wsurl = wsproto + "://" + window.location.host + "/socket";
@@ -81,6 +81,9 @@ socket.addEventListener('message', async function (event) {
         } else {
           // if the message does start with it, it signifies that a select function should be run.
           switch(text.replace("℡","",1)) {
+            case "advanceTurn":
+              advanceTurn();
+              break;
             case "setOurTurn":
               setOurTurn();
               break;

@@ -85,7 +85,7 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
 		case "debug":
-			if(window.location.hostname == "localhost") {
+			if(window.location.hostname == "localhost" || window.location.hostname.startsWith("192.168")) {
 				await Actions.MemoryDump(roomID).then(r => console.log(r));
 			} else {
 				keyboardBuffer.push(invalidMessage);
