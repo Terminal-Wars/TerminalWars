@@ -6,7 +6,8 @@ export let keyboardBuffer = [];
 
 document.addEventListener("keydown", async function(e) {
 	// On Firefox, doing a forward slash causes the search menu to come up
-	if(e.key == "/") {e.preventDefault()}
+	if(e.key == "/") e.preventDefault();
+	if(curObject["type"] == "desktop") {Objects.setCurrent(Objects.highestZ()); }
 	switch(curObject["win_type"]) {
 		// Terminal actions
 		case "text":
@@ -34,5 +35,6 @@ document.addEventListener("keydown", async function(e) {
 					break;
 
 			};
+			break;
 	}
 });
