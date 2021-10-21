@@ -23,6 +23,7 @@
 			"bio": "Shoots a burst of laser beams",
 			"instruction": "Rolling a non-damage dealing d20+2. If the d20 connects, roll a 5d10; the difference between your d20 roll and the opponent's defense roll against it is used as a negative modifier to the 5d10's total, with the addition of a 5. The opponent rolls normally to defend the 5d10.",
 			"cooldown": 2,
+			"self": "false",
 			"on_activate": [
 				{
 					"0": ["roll",1,20,2,
@@ -42,11 +43,12 @@
 			"prettyname": "Damage Boost",
 			"bio": "After dealing 5 damage, drop a trackball booster on the floor, that gives {tense:you} andcallies' attacks 1 additional damage. The booster has 3HP and has a base defense roll of 5.",
 			"cooldown": 5,
+			"self": "true",
 			"on_activate": [
 			{
 				"0": ["attack","opponent",5],
-				"1": ["bot", {
-					"name": "{sender}",
+				"1": ["bot", [{
+					"name": "",
 					"character": "TrackballBooster", 
 					"info": {
 						"aggressive": "true",
@@ -59,10 +61,10 @@
 							"name": "damageboost",
 							"prettyname": "Damage Boost",
 							"on_activate": {
-								"0": ["add","team","attack",1]
+								"0": ["add","{team}","attack",1]
 							},
 							"on_deactivate": { 
-								"0": ["sub","team","attack",1]
+								"0": ["sub","{team}","attack",1]
 							}
 						}
 					],
@@ -85,7 +87,7 @@
 							"repeat": "damageboost" 
 						}
 					]
-				}]
+				}]]
 			}
 			]
 		},
@@ -94,6 +96,7 @@
 			"prettyname": "Cheat Cartridge",
 			"cooldown": 4,
 			"limit": 3,
+			"self": "false",
 			"bio": "If Damage Booster is still active, you can use this on the opponent's turn to dodge their attack and make the booster take the damage or take the damage for the booster (with the booster's base defense). The booster will not receive double damage from tanking for 8-BIT. This can only be used three times.",
 			"attacks": [
 				{

@@ -20,9 +20,8 @@ func New() (*Server, error) {
 	mux := chi.NewMux()
 	mux.Get("/", s.getEditor)
 	mux.Get("/blank", s.getBlank)
-	mux.Get("/editor", s.getEditor)
 	mux.Method(http.MethodGet, "/socket", s.ws)
-	mux.Handle("/static/*", http.FileServer(http.Dir(".")))
+	mux.Handle("/*", http.FileServer(http.Dir("./root/")))
 	s.mux = mux
 	return s, nil
 }

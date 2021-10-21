@@ -7,13 +7,15 @@ import {delay} from './commonFunctions.js';
 export async function loadDefaultObjects() {
 	// The desktop background
 	objects.push({"id":0,"type":"desktop","x":0,"y":0,"width":800,"height":600,"color1":"#3a53ab","color2":"#18244d","z":0});
-	// The desktop objects (currently unimplemented)
-	//objects.push({"id":"0","type":"shortcut","name":"a","x":48,"y":48,"width":32,"height":32,"fillStyle":"red"});
+	// The desktop icons
+	let icon = new Image(128,128);
+	icon.src = "static/gfx/icons/editor.png";
+	objects.push({"id":1,"type":"shortcut","text":"About","x":16,"y":16,"width":32,"height":32,"icon":icon});
 	//objects.push({"id":"0","type":"shortcut","x":48,"y":48,"width":32,"height":32,"fillStyle":"red"});
 
 	// The dice layer; more on this in canvas.js.
-	objects.push({"id":1,"type":"dice_layer","x":0,"y":0,"width":0,"height":0,"z":0});
-	objects.push({"id":2,"type":"window","title":"Terminal","win_type":"text","x":400,"y":225,"width":200,"height":200,"z":1,
+	objects.push({"id":2,"type":"dice_layer","x":0,"y":0,"width":0,"height":0,"z":0});
+	objects.push({"id":3,"type":"window","title":"Terminal","win_type":"text","x":400,"y":225,"width":200,"height":200,"z":1,
 				  "texts":{0: "", 1: ""}, "event_num":3,
 				  "events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{ourTurn}","image":term_buttons,"ox":0,"oy":0,
 							"command":{"command": "activeDropdown"}},

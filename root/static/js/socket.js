@@ -4,7 +4,7 @@ import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 import {delay} from './commonFunctions.js';
 import {keyboardBuffer} from './keyboard.js';
-import {setOurTurn, advanceTurn} from './player.js';
+import {setOurTurn, advanceTurn, initActivePlayers} from './player.js';
 
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
 const wsurl = wsproto + "://" + window.location.host + "/socket";
@@ -86,6 +86,9 @@ socket.addEventListener('message', async function (event) {
               break;
             case "setOurTurn":
               setOurTurn();
+              break;
+            case "initActivePlayers":
+              initActivePlayers();
               break;
           }
         }

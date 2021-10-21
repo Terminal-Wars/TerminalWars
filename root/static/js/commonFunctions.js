@@ -1,5 +1,6 @@
 import {userID, roomID} from './commands.js';
 import {diceSum, foeDiceSum, ourTurn} from './player.js';
+import {socket} from './socket.js';
 export async function delay(time, variable=undefined) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {resolve(variable);},time);
@@ -25,4 +26,7 @@ export function replacePlaceholders(value, target) {
     else value = value.replace("{loggedIn}",0,99);
     return value;
   }
+}
+export function broadcast(text, user="", blank=false) {
+  socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":user,"text":text,"blank":blank}}));
 }

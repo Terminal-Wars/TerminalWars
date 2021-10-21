@@ -215,6 +215,12 @@ async function draw(o) {
 					});
 				}
 				await tmp();
+				break;
+			case "shortcut":
+				await Draw.image(o["icon"],0,0,32,32,o["x"],o["y"],o["width"],o["height"]);
+				await Draw.box(o["x"],o["y"]+36,o["text"].length*8,16,"#feffb3");
+				await drawChars(o["text"])
+				break;
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {

@@ -2,6 +2,7 @@ import {objects, Objects, curObject} from './main.js';
 import {socket} from './socket.js';
 import {command, userID, roomID} from './commands.js';
 import {shiftYBy} from './canvas.js';
+import {broadcast} from './commonFunctions.js';
 export let keyboardBuffer = [];
 
 document.addEventListener("keydown", async function(e) {
@@ -11,7 +12,6 @@ document.addEventListener("keydown", async function(e) {
 	switch(curObject["win_type"]) {
 		// Terminal actions
 		case "text":
-			if(e.key.length <= 1) curObject["texts"][1] += e.key;
 			switch(e.key) {
 				case "Enter":
 					if(curObject["texts"][1].charAt(0) == "/") {
@@ -32,6 +32,18 @@ document.addEventListener("keydown", async function(e) {
 					break;
 				case "ArrowDown":
 					shiftYBy(-1);
+					break;
+				// Any blacklisted words
+				case "Shift":
+				case "Control":
+				case "Alt":
+				case "Super":
+				case "Meta":
+				case "Command":
+				case "WakeUp": // What a Thinkpad sends when the Fn key is pressed.
+					break;
+				default:
+					curObject["texts"][1] += e.key;
 					break;
 
 			};
