@@ -1,10 +1,9 @@
-import {Objects, objects, curObject, mousePos} from './main.js';
+import {Objects, objects, curObject, mousePos, debugBox2, debugBox3} from './main.js';
 import {width, height, sWidth, sHeight, obWidth, obHeight} from './canvas.js';
 import { command, userID, roomID} from './commands.js';
-
+import {launch} from './programs.js';
 // The mouse position for other files to use.
 let mousePosHeld = [{"x":0,"y":0}];
-
 // mouse variables
 let mouseDown = 0; let winMoveMode = 0;
 // modifier based on the width and height of the window.
@@ -23,25 +22,37 @@ async function windowUpdate(val) {
 		for(let i = 0; i <= objects.length-1; i++) {
 			let s = objects[i];
 			let tmpArray;
-			// If the mouse cursor clicked within an object on the z level that we are on, and it's at the z level we're at...
+			let mouse = objects[1];
+			// If the mouse cursor is within an object on the z level that we are on, and it's at the z level we're at...
+			// (No!! you can't move the tmpArray thing out of the if statement and replace mousePosHeld with it! because um...fuck you! that's why!)
 			if(s["z"] == n && (mousePosHeld["x"] >= s["x"]-(s["width"]) && mousePosHeld["x"] <= s["x"]+(s["width"])) && (mousePosHeld["y"] >= s["y"]-(s["height"]) && mousePosHeld["y"] <= s["y"]+(s["height"]))) {
 				Objects.setCurrent(s);
-				// detection for window objects
-				if(s["type"] == "window" && mousePosHeld["y"] >= s["y"]-s["height"] && mousePosHeld["y"] <= s["y"]-s["height"]+22) {winMoveMode = 1} else {winMoveMode = 0}
-				// Get some more information about the window.
+				// Handle movement of windows via their title bar.
+				if(s["type"] == "window" && mousePosHeld["y"] >= s["y"]-s["height"] && mousePosHeld["y"] <= s["y"]-s["height"]+22) {winMoveMode = 1}
+				// Now we handle any events in the window.
 				async function eventUpdate() {for(let i in s["events"]) {
+					if(val == "active") {tmpArray = mousePosHeld} else {tmpArray = mousePos};
 					let e = s["events"][i];
 					// Bit of a bizarre way of doing things, but it's less messy.
 					if(e["anchor"] == "positive") {xa = s["x"]+s["width"]; ya = s["y"]+s["height"];}
 					if(e["anchor"] == "negative") {xa = s["x"]-s["width"]; ya = s["y"]-s["height"]};
-					if(val == "active") {tmpArray = mousePosHeld} else {tmpArray = mousePos};
-					if((userID != "" && roomID != "") && tmpArray["x"] >= xa+e["x"] && tmpArray["y"] >= ya+e["y"] && tmpArray["x"] <= xa+e["x"]+e["width"] && tmpArray["y"] <= ya+e["y"]+e["height"]) {
+					if(e["anchor"] == "none") {xa = s["x"]; ya = s["y"]};
+					// If we're actually hovering over an object...
+					if(tmpArray["x"] >= xa+e["x"] && tmpArray["y"] >= ya+e["y"] && tmpArray["x"] <= xa+e["x"]+e["width"] && tmpArray["y"] <= ya+e["y"]+e["height"]) {
 						e[val] = 1;
-						if(val == "active") command(e["command"]["command"], (e["command"]["arg1"]||null), (e["command"]["arg2"]||null));
+						if(val == "active") {
+							let ec = e["command"];
+							if(ec["command"] != undefined) command(ec["command"], (ec["arg1"]||null), (ec["arg2"]||null));
+							if(ec["launch"] != undefined) launch(ec["launch"]);
+						}
 					} else {
 						e[val] = 0;
 					}
-				}}; eventUpdate();
+					if(mouse["x"] >= xa+e["x"] && mouse["y"] >= ya+e["y"] && mouse["x"] <= xa+e["x"]+e["width"] && mouse["y"] <= ya+e["y"]+e["height"]) {
+						mouse["fill"] = "blue";
+					}
+				}}; 
+				eventUpdate();
 				n=0;
 			}
 		}
@@ -81,4 +92,5 @@ document.addEventListener("mouseup", function(e) {
 			objects[i]["events"][n]["active"] = 0;
 		}
 	}
+	winMoveMode = 0;
 });

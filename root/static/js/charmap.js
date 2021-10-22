@@ -29,15 +29,17 @@ export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity
 	for(let i in string) {
 		let k = string.charAt(i);
 		switch(k) {
+			// Newline
 			case "\n":
 				mode = omode;
 				y += 16;
 				x = offset;
 				break;
+			// Bold characters
 			case "\b":
 				mode = 1;
 				break;
-			// Image
+			// Images (currently one is avaliable)
 			case "\0":
 				ctx.drawImage(tempUserImage,0,0,32,32,x,y,32,32);
 				x += 35;
@@ -46,12 +48,16 @@ export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity
 			case "\xFF":
 				x += 35;
 				break;
+			// Reset all formatting.
+			case "\x01":
+				mode = 0;
+				break;
 			default:
 				if(y <= minY+16 || y >= maxY-24)  {continue;}
 				await drawChar(k,x,y,mode,opacity);
 				x += 8;
 				break;
-			if(x >= offset+maxX) {x = offset; y += 16;}
 		}
+		if(x >= offset+maxX) {x = offset; y += 16;}
 	}
 }
