@@ -4,7 +4,7 @@ import {delay, solve} from './commonFunctions.js';
 import {command, userID, roomID} from './commands.js';
 import {keyboardBuffer} from './keyboard.js';
 import {ping} from './ping.js';
-import {asyncResult, replacePlaceholders, broadcast} from './commonFunctions.js';
+import {replacePlaceholders, broadcast} from './commonFunctions.js';
 
 export let diceSum = 0; export let foeDiceSum = 0;
 export let turn = -1; // Cached value for whoever's turn it is.
@@ -24,7 +24,7 @@ class User {
 		this.aggressive = data["aggressive"];
 		this.hp = data["hp"];
 		this.info = data["info"];
-		this.passives = data["passives"];
+		//this.passives = data["passives"];
 		//this.actives = data["actives"];
 	}
 }
@@ -35,8 +35,8 @@ export function addUser(user, arr, us=false) {
 		"character": arr[0]["character"],
 		"aggressive": arr[0]["aggressive"],
 		"hp": arr[0]["hp"],
-		"info": arr[0]["info"],
-		"passives": arr[0]["passives"]
+		"info": arr[0]["info"]
+		//"passives": arr[0]["passives"]
 		//"actives": arr["actives"]
 	});
 	if(us) ourPlayer = player;
@@ -49,6 +49,8 @@ export function addUser(user, arr, us=false) {
 	}));
 	return 0;
 }
+
+export async function updateOurUser() {addUser(userID, ourPlayer, true)};
 
 export async function initActivePlayers() {
 	let activePlayersTemp = [];
@@ -67,10 +69,16 @@ export async function initActivePlayers() {
 }
 
 export async function initUserAndRoom() {
-	await asyncResult(exampleUser).then(r => addUser(userID, r, true))
+	await exampleUser.then(r => addUser(userID, r, true))
 	.then(broadcast("has joined.\n",userID,true))
 	.then(broadcast("℡initActivePlayers"))
 	.then(initActivePlayers());
+}
+
+export async function initPassives(user) {
+	for(n in user["passives"]) {
+		onActivate(user["passives"][n]["on_activate"])
+	}
 }
 
 export async function onActivate(active, target, advance=true) {
@@ -98,8 +106,9 @@ export async function onActivate(active, target, advance=true) {
 						diceSum += r["value"];
 					});
 				}
-				keyboardBuffer.push("modifer -> "+solve(cmd[3])+"\n");
-				diceSum += solve(cmd[3]);
+				let mod = solve(cmd[3])+solve(ourPlayer["info"]["diceModAttack"] || 0);
+				keyboardBuffer.push("modifer -> "+mod+"\n");
+				diceSum += solve(mod);
 				// todo: know the opponent so that we can factor in their roll type, amount, etc.
 				await dice(20,true).then(r => {foeDiceSum += r["value"]});
 				if(diceSum > foeDiceSum) {
@@ -116,6 +125,18 @@ export async function onActivate(active, target, advance=true) {
 			case "bot":
 				addUser(userID+"楩"+activePlayers.length, cmd[1]);
 				initActivePlayers();
+				break;
+			case "add":
+			case "sub":
+				if(cmd[2] != "skip") { // WE'LL DO TEAMS LATER OK
+					if(cmd[0] == "sub") cmd[3] *= 1; // if i can reuse code i will, fuck you
+					if(cmd[1] == userID) {
+						ourPlayer["info"][cmd[2]] += cmd[3];
+						await updateOurUser();
+					} else {
+						// todo: handle modifying other player's values.
+					}
+				}
 				break;
 			case undefined:
 				console.error(cmd);
@@ -140,7 +161,7 @@ export async function getTurn() {
 			if(["data"]["ok"]) return r["data"]["data"]["turn"];
 			else return -2;
 		});
-		return asyncResult(serverResult);
+		return serverResult;
 	} else {
 		return turn;
 	}
@@ -152,7 +173,7 @@ export async function getParticipants() {
 			else return [""];
 		});
 		participants = serverResult;
-		return asyncResult(serverResult);
+		return serverResult;
 	} else {
 		return participants;
 	}

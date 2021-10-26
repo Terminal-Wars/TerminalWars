@@ -13,13 +13,13 @@ export function solve(str) {
   if(str.match(re)) return str;
   return Function('"use strict";return ('+str+')')();
 }
-export async function asyncResult(result) {let lol = await result; return lol;} // Hacky way of getting the exact value we need from an asynchronous promise.
 
 export function replacePlaceholders(value, target) { 
   if(typeof(value) != "string") {return value;} else {
     value = value.replace("{myRoll}",diceSum,99)
             .replace("{enemyRoll}",foeDiceSum,99)
             .replace("{sender}",userID,99)
+            .replace("{me}",userID,99)
             .replace("{opponent}",target,99)
             .replace("{ourTurn}",ourTurn,99);
     if(userID != "") value = value.replace("{loggedIn}",1,99);

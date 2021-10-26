@@ -12,7 +12,7 @@ export async function terminal() {
 			{"type":"button","anchor": "positive","x":-39,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{loggedIn}","image":term_buttons,"ox":0,"oy":16,
 			"command":{"command": "bag"}},
 			{"type":"button","anchor": "positive","x":-20,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{loggedIn}","image":term_buttons,"ox":0,"oy":32,
-			"command":{"command": "user"}}]
+			"command":{"command": "switch"}}]
 	});
 }
 
