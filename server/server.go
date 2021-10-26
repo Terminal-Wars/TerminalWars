@@ -21,7 +21,7 @@ func New() (*Server, error) {
 	mux.Get("/", s.getEditor)
 	mux.Get("/blank", s.getBlank)
 	mux.Method(http.MethodGet, "/socket", s.ws)
-	mux.Handle("/*", http.FileServer(http.Dir("./root/")))
+	mux.Handle("/static/*", http.FileServer(http.Dir(".")))
 	s.mux = mux
 	return s, nil
 }
