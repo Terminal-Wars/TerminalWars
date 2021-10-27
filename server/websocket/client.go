@@ -108,6 +108,7 @@ func (c *Client) readPump() {
 			p, err := json.Marshal(resp)
 			if err != nil {
 				log.Println("error marshaling json:", err)
+				continue
 			}
 			c.hub.broadcast <- p
 		case PutRequest:
@@ -115,6 +116,7 @@ func (c *Client) readPump() {
 			err := json.Unmarshal(req.Data, &data)
 			if err != nil {
 				log.Println("malformed json from client:", err)
+				continue
 			}
 			c.hub.putData(blockKey{data.RoomID, data.BlockID}, data.Data)
 		case GetRequest:
@@ -122,6 +124,7 @@ func (c *Client) readPump() {
 			err := json.Unmarshal(req.Data, &data)
 			if err != nil {
 				log.Println("malformed json from client:", err)
+				continue
 			}
 			var resp Response
 
@@ -145,6 +148,7 @@ func (c *Client) readPump() {
 			p, err := json.Marshal(resp)
 			if err != nil {
 				log.Println("error marshaling json:", err)
+				continue
 			}
 			go func() {
 				c.send <- p
@@ -177,11 +181,13 @@ func (c *Client) writePump() {
 			}
 			err := c.conn.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
+				log.Println("error writing message to client:", err)
 				return
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				log.Println("error pinging client:", err)
 				return
 			}
 		}

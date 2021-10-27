@@ -19,7 +19,7 @@ func New() (*Server, error) {
 	s.ws = websocket.NewHub()
 	mux := chi.NewMux()
 	mux.Get("/", s.getEditor)
-	mux.Get("/editor", s.getEditor)
+	mux.Get("/blank", s.getBlank)
 	mux.Method(http.MethodGet, "/socket", s.ws)
 	mux.Handle("/static/*", http.FileServer(http.Dir(".")))
 	s.mux = mux
@@ -43,4 +43,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getEditor(w http.ResponseWriter, r *http.Request) {
 	s.tmpl.ExecuteTemplate(w, "editor.html", nil)
+}
+
+func (s *Server) getBlank(w http.ResponseWriter, r *http.Request) {
+	s.tmpl.ExecuteTemplate(w, "blank", nil)
 }

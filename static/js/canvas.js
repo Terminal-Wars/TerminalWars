@@ -1,8 +1,8 @@
-import { objects, objects_dice, debugBox, debugBox2, notices } from './main.js';
+import { objects, objects_dice, debugBox, debugBox2, notices, mousePos } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
-
+import { replacePlaceholders } from './commonFunctions.js';
 // The canvas
 export let cO = document.querySelector('.draw');
 export let ctx = cO.getContext('2d');
@@ -46,8 +46,6 @@ cO.style.height = fHeight+"px"; cO.style.maxHeight = fHeight+"px";
 
 // Any images we need
 // todo: make a seperate .json file with all of these in it and just use arrays instead.
-export const term_buttons = new Image();
-term_buttons.src = 'static/gfx/term_buttons.webp';
 export const diceblock = new Image();
 diceblock.src = 'static/gfx/diceblock.webp';
 export const dice_font = new Image();
@@ -78,10 +76,11 @@ class DrawClass {
 		await this.box(x, y, width+1, height+1,"black");
 		await this.box(x, y, width, height,"white");
 	}
-	async button(x, y, width, height, content, ox, oy,active,hover,type) {
+	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled) {
 		let mode = 0;
-		// Buttons cannot be pressed until the user is logged in.
-		if(userID == "" || roomID == "") {ox += 16;}
+		if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
+		debugBox2.innerHTML = "";
+		if(enabled == 0) ox += 16;
 		if(type == "button") {
 			await this.box(x-1, y-1, width+2, height+2,"black");
 			if(active == 0) {
@@ -93,14 +92,14 @@ class DrawClass {
 			}
 			await this.box(x+1, y+1, width-2, height-2,"#b5b5b5");
 		}
-		if(type == "flat") { // flat
+		if(type == "flat" || type == "extraflat") { // flat
 			mode = 0;
-			if(hover == 1) {
+			if(type == "flat" && hover == 1) {
 				await this.box(x,y,width,height,"#15539e");
 				mode = 2;
 			}
 		}
-		debugBox2.innerHTML = "";
+		//debugBox2.innerHTML = "";
 		// Draw either an image or some text
 		switch(typeof(content)) {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
@@ -110,7 +109,7 @@ class DrawClass {
 				await drawChars(content,x,y,mode);
 				break;
 			default:
-				debugBox2.innerHTML = typeof(content);
+				//debugBox2.innerHTML = typeof(content);
 				break;
 		}
 	}
@@ -160,7 +159,7 @@ async function draw(o) {
 				await drawChars(o["title"], o["x"]-(o["title"].length*3), ya_n+6,3);
 				switch(o["win_type"]) {
 					// terminal window
-					case "text":
+					case "terminal":
 						// anything from the keyboard buffer gets added to the text box in this loop.
 						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
 						// only arrays.
@@ -175,22 +174,27 @@ async function draw(o) {
 						await temp();
 						// big box
 						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
-						await drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),0,384,ya_n+12,rh-24);
+						await drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),0,rw-24,ya_n+12,rh-24);
 						// scrollbar 
 						if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
 						// small box
 						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
 						await drawChars(o["texts"][1], xa_n+8,ya_p-24);
 						terminalWinID = o["id"];
+						break;
+					case "text":
+						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29);
+						await drawChars(o["text"], xa_n+8,ya_n+27,0,rw-16);
+						break;
 				}
-				break;
+			break;
 			case "desktop":
 				await Draw.box(0,0,width,height,o["color1"]);
 				//await Draw.gradient(0,0,0,height,width,height,o["color1"],o["color2"])
-				break;
+			break;
 			case "dropdown":
 				await Draw.base(xa_n, ya_n, rw, rh);
-				break;
+			break;
 			case "dice_layer":
 				// This is a slow, but working way, of making sure that the dice objects (which are in a different array)
 				// are drawn behind the terminal window. They could just be in the objects array too, but they're in a different
@@ -198,7 +202,7 @@ async function draw(o) {
 				for(let i = 0; i <= objects_dice.length; i++) {
 	    			await draw(objects_dice[i]);
 				}
-				break;
+			break;
 			case "dice":
 				let terminal = objects[terminalWinID];
 				async function tmp() {
@@ -213,12 +217,20 @@ async function draw(o) {
 					});
 				}
 				await tmp();
+			break;
+			case "shortcut":
+				await Draw.image(o["icon"],0,0,32,32,o["x"],o["y"],o["width"],o["height"]);
+				await Draw.box(o["x"]-o["text"].length-1,o["y"]+36,2+o["text"].length*8,16,"#feffb3");
+				await drawChars(o["text"],(o["x"]-o["text"].length),o["y"]+36,0);
+			break;
+			case "mouse":
+			break; // it's handled below.
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {
 					await drawChars(o.text,xa_n+3,ya_n+3,Infinity,-1*Infinity,Infinity,o["opacity"]);
 				}
-				break;
+			break;
 		}
 		// Draw any button events here.
 		for(let i = 0; i < o["event_num"]; i++) {
@@ -226,8 +238,17 @@ async function draw(o) {
 			// Bit of a bizarre way of doing things, but it's less messy.
 			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
-			await Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]),e["ox"],e["oy"],e["active"],e["hover"],e["type"]);
+			if(e["anchor"] == "none") {xa = o["x"]; ya = o["y"]}
+			await Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
 		}
+}
+
+export async function mouse() {
+	let mouse = objects[1];
+	mouse["x"] = mousePos["x"];
+	mouse["y"] = mousePos["y"];
+	await Draw.box(mouse["x"],mouse["y"],16,16,mouse["fill"]);
+	frameCount[0]++;
 }
 
 export async function drawGFX() {
@@ -235,5 +256,7 @@ export async function drawGFX() {
 	for(let i = 0; i <= objects.length; i++) {
 		await draw(objects[i]);
 	}
+	// The mouse is drawn seperately to ensure it's never below anything.
+	//await mouse();
 }
 

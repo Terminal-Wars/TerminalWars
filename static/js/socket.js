@@ -1,8 +1,11 @@
+import {notices} from './main.js';
 import {cO} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 import {delay} from './commonFunctions.js';
 import {keyboardBuffer} from './keyboard.js';
+import {setOurTurn, advanceTurn, initActivePlayers} from './player.js';
+
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
 const wsurl = wsproto + "://" + window.location.host + "/socket";
 export let socket = new WebSocket(wsurl);
@@ -42,8 +45,8 @@ export class ActionsClass {
         return userinfo["data"]["health"];
       })
   }
-  async HasBattleStarted(room) {
-      socket.send(`{"type": "get","data":{"roomID":"${room}","blockID":"battleInProgress"}}`);
+  async GetBattle(room) {
+      socket.send(`{"type": "get","data":{"roomID":"${room}","blockID":"battle"}}`);
       return this.BufferReturn();
   }
   async MemoryDump(room) {
@@ -75,6 +78,19 @@ socket.addEventListener('message', async function (event) {
               lastSpeaker = speaker;
             }
           }
+        } else {
+          // if the message does start with it, it signifies that a select function should be run.
+          switch(text.replace("℡","",1)) {
+            case "advanceTurn":
+              advanceTurn();
+              break;
+            case "setOurTurn":
+              setOurTurn();
+              break;
+            case "initActivePlayers":
+              initActivePlayers();
+              break;
+          }
         }
       }
       if(data["type"] == "get") {
@@ -84,5 +100,5 @@ socket.addEventListener('message', async function (event) {
 
 socket.addEventListener('close', async function (event) {
     cO.remove();
-    alert("The server was closed. Please wait a moment and then reload the page.");
+    notices.innerHTML = "The server was closed. Please wait a moment and then reload the page.";
 });

@@ -47,14 +47,14 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "switch":
 			break;
 		case "list":
-			console.log(activePlayers);
 			for (let n in activePlayers) {
 				let p = activePlayers[n];
-				keyboardBuffer.push(p["name"]+" ("+p["owner"]+")\n");
+				keyboardBuffer.push(p["character"]+" ("+p["name"]+")\n");
 			};
 			break;
 		case "battle":
-			startBattle();
+			arg1 = arg1.replace("restart",true,5)
+			startBattle(arg1);
 			break;
 		case "music":
 			let f = new FileReader();
@@ -85,7 +85,7 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
 		case "debug":
-			if(window.location.hostname == "localhost") {
+			if(window.location.hostname == "localhost" || window.location.hostname.startsWith("192.168")) {
 				await Actions.MemoryDump(roomID).then(r => console.log(r));
 			} else {
 				keyboardBuffer.push(invalidMessage);

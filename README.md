@@ -1,3 +1,3 @@
-# TerminalWars
+![**TerminalWars** is an attempt to create a multiplayer D&D-like experience that is less serious, and focused more on comedy. While\ he game can certainly be played seriously, thanks to it's extensive character creation system, campaigns can also be stupid simple, because when creating a character there are three values that are actually required. Furthermore, while the experience of a text adventure is retained, players can also have images next to their name. They're also able to create minigames using PICO-8, and make people play them as part of their attack. While you have to use your imagination, you can also express your character visually too. The game is currently in early alpha. Please report any bugs you find to the below url: www.github.com/IoIxD/TerminalWars/issues](https://terminalwa.rs/static/etc/github_desc.png)
 
-Work in progress side project for something for me and some friends
+[The latest stable demo is avaliable here](http://terminalwa.rs)

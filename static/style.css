@@ -2,7 +2,7 @@
 body {background: url('gfx/background.webp'), black;}
 canvas {display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     box-shadow: 3px 3px 5px 5px rgba(0,0,0,0.5);
-    border: 1px solid black;
+    border: 3px solid black;
     image-rendering: optimizeSpeed!important;
     image-rendering: -moz-crisp-edges!important;
     image-rendering: -o-crisp-edges!important;
@@ -12,38 +12,6 @@ canvas {display: block; position: absolute; top: 50%; left: 50%; transform: tran
     -ms-interpolation-mode: nearest-neighbor!important;
     font-smoothing: none; -webkit-font-smoothing : none;
 }
-.debug, .debug2 {color: white; user-select: none; pointer-events: none; display: block;}
+*[class^="debug"] {color: white; user-select: none; pointer-events: none; display: block;}
 .notices {display: block; width: 15%; height: 25%; font-size: 1em; position: absolute; top: 50%; left: 0; color: red; font-weight: bold; text-align: left;}
 #dpi {height:  1in; width: 1in; display: block;}
-/* General
-@font-face {font-family: "Terminus"; src: url("/static/font/Terminus.ttf") format("truetype");}
-@font-face {font-family: "TerminusBold"; src: url("/static/font/TerminusBold.ttf") format("truetype");}
-@font-face {font-family: "OldSerif"; src: url("/static/font/MSSansSerif.ttf") format("truetype");}
-
-html, body {background: #3a53ab; overflow: hidden;}
-html *, body * {font-family: sans-serif; font-smooth: never!important; -webkit-font-smoothing: none!important;}
-
-Globals
-.window, .window .titlebar { Regular Bevel
-	box-shadow: inset 1px 1px 0 0 rgba(255,255,255,0.5),
-	 			 inset -1px -1px 0 0 rgba(0,0,0,0.5);
-}
-.window .contents { Inverted Bevel
-	box-shadow: inset -1px -1px 1px 0 rgba(255,255,255,0.75),
-	 			inset 1px 1px 1px 0 rgba(0,0,0,0.75);
-}
-
-Windows
-.window {position: absolute; transform: translate(-50%,-50%); background: lightgray; border: 1px solid black;}
-.window .titlebar {position: absolute; top: 0; left: 0; width: 99%; margin: .5%; height: 1.3vw; line-height: 1.3vw;background: linear-gradient(to right, darkred, red); color: white; font-size: .85vw; font-weight: bold; text-align: center;}
-.window .contents {display: block; width: 99%; height: 90%; margin: calc(1.5vw + .5%) auto; background: #fcfcfc; color: black; font-size: .9vw; position: relative; font-family: "OldSerif", "Comic Sans MS"!important; filter: contrast(1)!important;} 
-
-Terminal Window
-.window #entry, .window #logs, .window #logs:after {}
-.window #entry {background: #fafafa; outline: none;border: 0; border-top: 1px solid black; width: 99%; position: absolute;bottom: 0;left: 0; height: 1vw; font-size: .9vw;}
-.window #logs {padding-top: .5vw; padding-left: .5vw; width: 95%; height: 95%; display: block; }
-.window #logs:after {content: ""; font-size: 1vw; font-weight: bold; animation: cursorblink 1s linear infinite; display: block;}
-@keyframes cursorblink {
-	0%, 100% {content: "|"}
-	50% {content: ""}
-}

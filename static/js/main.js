@@ -18,6 +18,8 @@ export let mousePos = [{"x":0,"y":0}];
 // for any debug messages.
 export let debugBox = document.querySelector(".debug");
 export let debugBox2 = document.querySelector(".debug2");
+export let debugBox3 = document.querySelector(".debug3");
+export let debugBox4 = document.querySelector(".debug4");
 export let notices = document.querySelector(".notices");
 
 export class ObjectClass {
@@ -66,7 +68,7 @@ async function init() { // redundant, but it's here for compatibility
   await loadDefaultObjects();
   await pingSite();
   await setInterval(pingSite,3000); // ping the site and update it every three seconds.
-  await setInterval(frameCounter, 1000);
+  if(window.location.hostname == "localhost") await setInterval(frameCounter, 1000);
   // todo: make this dynamic or togglable for the final release
   await setInterval(loop, 5);
   await setInterval(loop60, 1000/15);
