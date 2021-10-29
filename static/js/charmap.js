@@ -1,6 +1,7 @@
 import {ctx} from './canvas.js';
 import {socket} from './socket.js'; // ??? ????????? ?????????????? this can't be removed by the way????????
-export const characters = ["`","1","2","3","4","5","6","7","8","9","0","-","=","~","!","@","#","$","%","^","&","*","(",")","_","+","[","]","\\","{","}","|",";","\'",":","\"",",",".","/","<",">","?","q","w","e","r","t","y","u","i","o","p","a","s","d","f","g","h","j","k","l","z","x","c","v","b","n","m","Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M","à","è","ì","ò","ù","À","È","Ì","Ò","Ù","á","é","í","ó","ú","ý","Á","É","Í","Ó","Ú","Ý","â","ê","î","ô","û","Â","Ê","Î","Ô","Û","ã","ñ","õ","Ã","Ñ","Õ","ä","ë","ï","ö","ü","ÿ","Ä","Ë","Ï","Ö","Ü","Ÿ","å","Å","æ","Æ","œ","Œ","ç","Ç","ð","Ð","ø","Ø","¿","¡","ß",""];
+export const characters = ["`","1","2","3","4","5","6","7","8","9","0","-","=","~","!","@","#","$","%","^","&","*","(",")","_","+","[","]","\\","{","}","|",";","\'",":","\"",",",".","/","<",">","?","q","w","e","r","t","y","u","i","o","p","a","s","d","f","g","h","j","k","l","z","x","c","v","b","n","m","Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M","à","è","ì","ò","ù","À","È","Ì","Ò","Ù","á","é","í","ó","ú","ý","Á","É","Í","Ó","Ú","Ý","â","ê","î","ô","û","Â","Ê","Î","Ô","Û","ã","ñ","õ","Ã","Ñ","Õ","ä","ë","ï","ö","ü","ÿ","Ä","Ë","Ï","Ö","Ü","Ÿ","å","Å","ç","Ç","ð","Ð","ø","Ø","¿","¡","ß"," ",""];
+export const charlength = [3,  4,  6,  6,  7,  6,  6,  6,  6,  6,  6,  4,  8,  7,  7,  6,  8,  6,  8,  5,  8,  4,  7,  6,  3,  6,  5,  5,  2,   2,  2,  2,  4,  2,   1,  6,   6,  2,  6,  6,  8,  6,  4,  8,  5,  4,  4,  6,  6,  4,  6,  5,  6,  5,  6,  6,  6,  6,  3,  6,  4,  6,  7,  6,  6,  8,  7,  8,  8,  8,  8,  8,  7,  8,  8,  6,  7,  8,  6,  7,  7,  7,  7,  7,  7,  7,  8,  8,  5,  6,  4,  6,  6,  8,  6,  4,  8,  7,  5,  6,  6,  8,  8,  5,  6,  4,  6,  6,  7,  7,  6,  4,  8,  7,  7,  5,  7,  8,  8,  8,  8,  8,  5,  7,  7,  8,  6,  8,  6,  2,  7,  8,  8,  5,  6,  4,  6,  6,  6,  8,  7,  4,  8,  7,  7,  5,  8,  5,  7,  6,  8,  6,  8,  5,  2,  7,  8,0];
 const charmap = new Image(1288,64);
 charmap.src = 'static/gfx/charmap.webp';
 const tempUserImage = new Image(32,32);
@@ -28,12 +29,15 @@ export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity
 	let omode = mode;
 	for(let i in string) {
 		let k = string.charAt(i);
+		let k_last = string.charAt(i-1);
+		let k_next = string.charAt(i+1);
 		switch(k) {
 			// Newline
 			case "\n":
 				mode = omode;
 				y += 16;
 				x = offset;
+				if(k_next == " ") x -= 8;
 				break;
 			// Bold characters
 			case "\b":
@@ -52,10 +56,26 @@ export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity
 			case "\x01":
 				mode = 0;
 				break;
+			case " ":
+				if(x != offset) x += 8;
+				break;
 			default:
 				if(y <= minY+16 || y >= maxY-24)  {continue;}
-				await drawChar(k,x,y,mode,opacity);
-				x += 8;
+				if(x >= offset+maxX-8 && k_last != " ") 
+					await drawChar("-",x,y,mode,opacity).then(function() {
+					x = offset;
+					y += 16;
+					drawChar(k,x,y,mode,opacity)
+				})
+				else if(x >= offset+maxX-8 && k_last == " ") {
+					x = offset;
+					y += 16;
+					drawChar(k,x,y,mode,opacity)
+				}
+				else {
+					drawChar(k,x,y,mode,opacity)
+				}
+				x += charlength[characters.indexOf(k)]+1;
 				break;
 		}
 		if(x >= offset+maxX) {x = offset; y += 16;}

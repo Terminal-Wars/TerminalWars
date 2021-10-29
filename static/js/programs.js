@@ -17,9 +17,9 @@ export async function terminal() {
 }
 
 export async function about() {
-	objects.push({"id":objects.length,"type":"window","title":"About","text":"TerminalWars is an attempt to\ncreate a multiplayer D&D-like\nexperience that is less serious,\nand focused more on comedy. While\nthe game can certainly be played\nseriously, thanks to it's extensive character creation system, campaignscan also be stupid simple, because\nwhen creating a character there are three values that are actually\nrequired. Furthermore, while the\nexperience of a text adventure is\nretained, players can also have\nimages next to their name. They're\nalso able to create minigames using PICO-8, and make people play them aspart of their attack. While you haveto use your imagination, you can\nalso express your character visuallytoo.\n\nThe game is currently in \bearly\n\balpha.\x01 Please report any bugs you \nfind to the below url:\n\nwww.github.com/IoIxD/TerminalWars/issues","win_type":"text","x":150,"y":300,"width":150,"height":250,"z":objects.length+1})
+	objects.push({"id":objects.length,"win_type":"text","x":150,"y":300,"width":150,"height":250,"z":objects.length+1,"type":"window","title":"About","text":"TerminalWars is an attempt to create a multiplayer D&D-like experience that can be used for basic, more story driven campaigns. While the game can certainly be played seriously, thanks to it's extensive character creation system, campaigns can also be stupid simple, because when creating a character there are three values that are actually required. Furthermore, while the experience of a text adventure is retained, players can also have images next to their name. They're also able to create minigames using PICO-8, and make people play them aspart of their attack. While you haveto use your imagination, you can also express your character visually too.\n\nThe game is currently in \bearly \balpha.\x01 Please report any bugs you find to the below url: www.github.com/IoIxD/TerminalWars/issues"})
 }
-
+// 
 // Function for launching programs from arrays in other files (which is most of the time)
 export async function launch(name) {
 	switch(name) {
