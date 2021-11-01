@@ -14,8 +14,8 @@ ctx.imageSmoothingEnabled = false;
 export const width = 800;
 export const height = 600;
 // DPI (currently unused, todo: find a way to fix the dpi bug using this)
-export const DPI = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
-export const DPI_MUL = Math.ceil(DPI/96);
+export let dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
+export const DPI_MUL = Math.ceil(dpi/96);
 
 export let sWidth = 0;
 export let sHeight = 0;
@@ -252,7 +252,8 @@ export async function mouse() {
 }
 
 export async function drawGFX() {
-	if(DPI > 96) {notices.innerHTML = "Your monitor has a higher DPI then the game supports, and due to a known bug this will cause the game to look slightly wrong."}
+	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
+	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right."} else {notices.innerHTML = "";}
 	for(let i = 0; i <= objects.length; i++) {
 		await draw(objects[i]);
 	}
