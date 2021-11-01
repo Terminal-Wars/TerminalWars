@@ -30,17 +30,20 @@ function init() {
 	// The remaining width/height
 	obWidth = ((sWidth-width)/2); obHeight = ((sHeight-height)/2);
 	// The scale multiplier.
-	mul = Math.floor(sHeight/height);
+	mul = Math.round(sHeight/height);
+	if(mul == 0) mul = 1;
+	let ratio = window.devicePixelRatio;
+	if(ratio >= 1) {ratio = 1}
 	// Final width and height after all this.
-	fWidth = (width*mul); fHeight = (height*mul);
+	fWidth = (width*mul) / ratio; fHeight = (height*mul) / ratio;
 }
 init();
 window.addEventListener('resize',init);
 
 // From here, we'll scale the canvas based on the user's actual screen size.
 cO.width = width; cO.height = height;
-cO.style.width = fWidth / window.devicePixelRatio+"px"; cO.style.maxWidth = fWidth / window.devicePixelRatio+"px"; 
-cO.style.height = fHeight / window.devicePixelRatio+"px"; cO.style.maxHeight = fHeight/ window.devicePixelRatio+"px";
+cO.style.width = fWidth+"px"; cO.style.maxWidth = fWidth+"px"; 
+cO.style.height = fHeight+"px"; cO.style.maxHeight = fHeight+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = Sheight+"px";
 
 // Any images we need
@@ -258,7 +261,7 @@ export async function mouse() {
 
 export async function drawGFX() {
 	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
-	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right."} else {notices.innerHTML = "";}
+	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right.<br><em>On higher DPI screens the game will never look right due to a bug.</em>"} else {notices.innerHTML = "";}
 	for(let i = 0; i <= objects.length; i++) {
 		await draw(objects[i]);
 	}

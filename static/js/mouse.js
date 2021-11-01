@@ -7,7 +7,7 @@ let mousePosHeld = [{"x":0,"y":0}];
 // mouse variables
 let mouseDown = 0; let winMoveMode = 0;
 // modifier based on the width and height of the window.
-let wmod = (width/sWidth); let hmod = (height/sHeight);
+let wmod = (width/sWidth)/ window.devicePixelRatio; let hmod = (height/sHeight)/ window.devicePixelRatio;
 // x and y anchor (for event positioning)
 let xa, ya = 0;
 
