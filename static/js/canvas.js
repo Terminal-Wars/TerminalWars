@@ -7,21 +7,20 @@ import { replacePlaceholders } from './commonFunctions.js';
 export let cO = document.querySelector('.draw');
 export let ctx = cO.getContext('2d');
 ctx.imageSmoothingEnabled = false;
-
-//ctx.mozImageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
 
 // The default, set width and height.
 export const width = 800;
 export const height = 600;
 // DPI (currently unused, todo: find a way to fix the dpi bug using this)
-export const DPI = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
-export const DPI_MUL = Math.ceil(DPI/96);
+export let dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
+export const DPI_MUL = Math.ceil(dpi/96);
 
 export let sWidth = 0;
 export let sHeight = 0;
 export let obWidth = 0;
 export let obHeight = 0;
-export let mul = 0;
+export let mul = 1;
 export let fWidth = 0;
 export let fHeight = 0;
 
@@ -40,8 +39,8 @@ window.addEventListener('resize',init);
 
 // From here, we'll scale the canvas based on the user's actual screen size.
 cO.width = width; cO.height = height;
-cO.style.width = fWidth+"px"; cO.style.maxWidth = fWidth+"px"; 
-cO.style.height = fHeight+"px"; cO.style.maxHeight = fHeight+"px";
+cO.style.width = fWidth / window.devicePixelRatio+"px"; cO.style.maxWidth = fWidth / window.devicePixelRatio+"px"; 
+cO.style.height = fHeight / window.devicePixelRatio+"px"; cO.style.maxHeight = fHeight/ window.devicePixelRatio+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = Sheight+"px";
 
 // Any images we need
@@ -71,15 +70,14 @@ export function shiftYBy(num) {shiftY += num;}
 
 // Common UI elements
 class DrawClass {
-	async textbox(x, y, width, height) {
-		await this.box(x-1, y-1, width+2, height+2,"#808080");
-		await this.box(x, y, width+1, height+1,"black");
-		await this.box(x, y, width, height,"white");
+	async textbox(x, y, width, height,thisCtx=ctx) {
+		await this.box(x-1, y-1, width+2, height+2,"#808080",thisCtx);
+		await this.box(x, y, width+1, height+1,"black",thisCtx);
+		await this.box(x, y, width, height,"white",thisCtx);
 	}
 	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled) {
 		let mode = 0;
 		if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
-		debugBox2.innerHTML = "";
 		if(enabled == 0) ox += 16;
 		if(type == "button") {
 			await this.box(x-1, y-1, width+2, height+2,"black");
@@ -106,7 +104,7 @@ class DrawClass {
 				await this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
 			case "string":
-				await drawChars(content,x,y,mode);
+				await drawChars({"string":content,"x":x,"y":y,"mode":mode});
 				break;
 			default:
 				//debugBox2.innerHTML = typeof(content);
@@ -121,9 +119,9 @@ class DrawClass {
 	}
 	// These functions may seem redundant, but having these here allows us
 	// to execute them asynchronously, as well as have cleaner code.
-	async box(x,y,width,height,fillStyle) {
-		ctx.fillStyle = fillStyle;
-		ctx.fillRect(x,y,width,height);
+	async box(x,y,width,height,fillStyle,thisCtx=ctx) {
+		thisCtx.fillStyle = fillStyle;
+		thisCtx.fillRect(x,y,width,height);
 	}
 	async gradient(x1,y1,x2,y2,width,height,color1,color2) {
 		let gradient = ctx.createLinearGradient(x1, y1, x2, y2);
@@ -133,9 +131,9 @@ class DrawClass {
 		ctx.fillRect(x1, y1, width, height);
 	}
 	async image(image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null,opacity=1) {
-		ctx.globalAlpha = opacity;
+		if(opacity != 1) ctx.globalAlpha = opacity;
 		ctx.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
-		ctx.globalAlpha = 1;
+		if(opacity != 1) ctx.globalAlpha = 1;
 	}
 }
 const Draw = new DrawClass();
@@ -156,10 +154,13 @@ async function draw(o) {
 				// red gradient
 				await Draw.gradient(xa_n+2, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000")
 				// title
-				await drawChars(o["title"], o["x"]-(o["title"].length*3), ya_n+6,3);
+				await drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3});
 				switch(o["win_type"]) {
 					// terminal window
 					case "terminal":
+						let bigBoxText = document.createElement('canvas'); 
+						bigBoxText.width = rw-8; bigBoxText.height = rh-56;
+						let bigBoxTextCtx = bigBoxText.getContext('2d');
 						// anything from the keyboard buffer gets added to the text box in this loop.
 						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
 						// only arrays.
@@ -174,17 +175,19 @@ async function draw(o) {
 						await temp();
 						// big box
 						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
-						await drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),0,rw-24,ya_n+12,rh-24);
-						// scrollbar 
-						if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
+						await Draw.box(0, 0, rw-10, rh-58, "white", bigBoxTextCtx);
+						await drawChars({"ctx":bigBoxTextCtx,"string":o["texts"][0],"x":4,"y":4+(shiftY*12)});
+						await Draw.image(bigBoxText, 0,0, rw-6, rh-53, xa_n+6, ya_n+25,rw-6,rh-53)
+						// scrollbar  (todo: make this work)
+						// if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
 						// small box
 						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
-						await drawChars(o["texts"][1], xa_n+8,ya_p-24);
+						await drawChars({"string":o["texts"][1],"x":xa_n+8,"y":ya_p-24});
 						terminalWinID = o["id"];
 						break;
 					case "text":
 						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29);
-						await drawChars(o["text"], xa_n+8,ya_n+27,0,rw-16);
+						await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16});
 						break;
 				}
 			break;
@@ -210,7 +213,7 @@ async function draw(o) {
 					if(o["foe"]) ymod = 48;
 					Draw.image(diceblock,0,0+ymod,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
 					ctx.globalCompositeOperation = "soft-light";
-					async function drawDice() {drawChars(`${o["value"]}`,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),1,Infinity,-1*Infinity,Infinity,o["opacity"])}; 
+					async function drawDice() {drawChars({"string":`${o["value"]}`,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]})}; 
 					// we do drawDice twice as a hack to make the text more visible.
 					drawDice().then(drawDice()).then(function() {
 						ctx.globalCompositeOperation = "source-over";
@@ -221,14 +224,14 @@ async function draw(o) {
 			case "shortcut":
 				await Draw.image(o["icon"],0,0,32,32,o["x"],o["y"],o["width"],o["height"]);
 				await Draw.box(o["x"]-o["text"].length-1,o["y"]+36,2+o["text"].length*8,16,"#feffb3");
-				await drawChars(o["text"],(o["x"]-o["text"].length),o["y"]+36,0);
+				await drawChars({"string":o["text"],"x":(o["x"]-o["text"].length),"y":o["y"]+36,"mode":0});
 			break;
 			case "mouse":
 			break; // it's handled below.
 			default:
 				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
 				if(o.text != undefined) {
-					await drawChars(o.text,xa_n+3,ya_n+3,Infinity,-1*Infinity,Infinity,o["opacity"]);
+					await drawChars({"string":o.text,"x":xa_n+3,"y":ya_n+3,"opacity":o["opacity"]});
 				}
 			break;
 		}
@@ -238,6 +241,8 @@ async function draw(o) {
 			// Bit of a bizarre way of doing things, but it's less messy.
 			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
+			if(e["anchor"] == "posneg") {xa = o["x"]+o["width"]; ya = o["y"]-o["height"];}
+			if(e["anchor"] == "negpos") {xa = o["x"]-o["width"]; ya = o["y"]+o["height"]};
 			if(e["anchor"] == "none") {xa = o["x"]; ya = o["y"]}
 			await Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
 		}
@@ -252,7 +257,8 @@ export async function mouse() {
 }
 
 export async function drawGFX() {
-	if(DPI > 96) {notices.innerHTML = "Your monitor has a higher DPI then the game supports, and due to a known bug this will cause the game to look slightly wrong."}
+	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
+	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right."} else {notices.innerHTML = "";}
 	for(let i = 0; i <= objects.length; i++) {
 		await draw(objects[i]);
 	}

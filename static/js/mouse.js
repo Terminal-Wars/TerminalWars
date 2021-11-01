@@ -1,6 +1,6 @@
 import {Objects, objects, curObject, mousePos, debugBox2, debugBox3} from './main.js';
 import {width, height, sWidth, sHeight, obWidth, obHeight} from './canvas.js';
-import { command, userID, roomID} from './commands.js';
+import { command, userID, roomID, privateCommand} from './commands.js';
 import {launch} from './programs.js';
 // The mouse position for other files to use.
 let mousePosHeld = [{"x":0,"y":0}];
@@ -36,13 +36,16 @@ async function windowUpdate(val) {
 					// Bit of a bizarre way of doing things, but it's less messy.
 					if(e["anchor"] == "positive") {xa = s["x"]+s["width"]; ya = s["y"]+s["height"];}
 					if(e["anchor"] == "negative") {xa = s["x"]-s["width"]; ya = s["y"]-s["height"]};
-					if(e["anchor"] == "none") {xa = s["x"]; ya = s["y"]};
+					if(e["anchor"] == "posneg") {xa = s["x"]+s["width"]; ya = s["y"]-s["height"];}
+					if(e["anchor"] == "negpos") {xa = s["x"]-s["width"]; ya = s["y"]+s["height"]};
+					if(e["anchor"] == "none") {xa = s["x"]; ya = s["y"]}
 					// If we're actually hovering over an object...
 					if(tmpArray["x"] >= xa+e["x"] && tmpArray["y"] >= ya+e["y"] && tmpArray["x"] <= xa+e["x"]+e["width"] && tmpArray["y"] <= ya+e["y"]+e["height"]) {
 						e[val] = 1;
 						if(val == "active") {
 							let ec = e["command"];
 							if(ec["command"] != undefined) command(ec["command"], (ec["arg1"]||null), (ec["arg2"]||null));
+							if(ec["p_command"] != undefined) privateCommand(ec["p_command"], (ec["arg1"]||null), (ec["arg2"]||null));
 							if(ec["launch"] != undefined) launch(ec["launch"]);
 						}
 					} else {

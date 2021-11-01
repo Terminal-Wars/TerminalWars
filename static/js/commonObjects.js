@@ -12,7 +12,7 @@ export async function loadDefaultObjects() {
 	// The desktop icons
 	let icon = new Image(128,128);
 	icon.src = "static/gfx/icons/editor.png";
-	objects.push({"id":1,"type":"shortcut","text":"About","x":16,"y":16,"width":32,"height":32,"z":1,"icon":icon,"event_num":1,
+	objects.push({"id":1,"type":"shortcut","text":"About","x":17,"y":16,"width":32,"height":32,"z":1,"icon":icon,"event_num":1,
 				 "events": [{"type":"extraflat","anchor": "none","x":0,"y":0,"width":32,"height":32,"active":0,"hover":0,"enabled":1,"command":{"launch": "about"}}]});
 	//objects.push({"id":"0","type":"shortcut","x":48,"y":48,"width":32,"height":32,"fillStyle":"red"});
 
@@ -48,7 +48,7 @@ export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
 		// to do that because of {index}, which means we would need to remake it every loop.
 		let arg1_ = arg1.replace("{index}",list.indexOf(l),1).replace("{name}",name,1);
 		let arg2_ = arg2.replace("{index}",list.indexOf(l),1).replace("{name}",name,1);
-		dropdown.events.push({"type":"flat","anchor":"negative","x":3,"y":y_,"width":width,"height":15,"active":0,"hover":0,"text":name,"command":{"command":command,"arg1":arg1_,"arg2":arg2_}})
+		dropdown.events.push({"type":"flat","anchor":"negative","x":3,"y":y_,"width":width,"height":15,"active":0,"hover":0,"text":name,"command":{"p_command":command,"arg1":arg1_,"arg2":arg2_}})
 		y_ += 17;
 	});
 	objects.push(dropdown);

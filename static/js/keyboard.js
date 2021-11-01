@@ -1,10 +1,11 @@
 import {objects, Objects, curObject} from './main.js';
 import {socket} from './socket.js';
 import {command, userID, roomID} from './commands.js';
-import {shiftYBy} from './canvas.js';
+import {shiftYBy, terminalWinID} from './canvas.js';
 import {broadcast} from './commonFunctions.js';
 export let keyboardBuffer = [];
-
+export let savedLines = [""];
+export let savedLineNum = 0;
 document.addEventListener("keydown", async function(e) {
 	// On Firefox, doing a forward slash causes the search menu to come up
 	if(e.key == "/") e.preventDefault();
@@ -22,16 +23,26 @@ document.addEventListener("keydown", async function(e) {
 						if(userID == "") {keyboardBuffer.push("You haven't chosen a username. Use /nick to set one.\n");}
 						if(userID != "" && roomID != "") {socket.send(`{"type":"broadcast","data":{"userID":"${userID}", "roomID":"${roomID}", "text":"${curObject["texts"][1]}\\n"}}`);}
 					}
+					savedLines.push(curObject["texts"][1]);
 					curObject["texts"][1] = curObject["texts"][1].replace(/^(.*)$/, "");
 					break;
 				case "Backspace":
 					curObject["texts"][1] = curObject["texts"][1].replace(/(.){0,1}$/, "");
 					break;
 				case "ArrowUp":
-					shiftYBy(1);
-					break;
 				case "ArrowDown":
-					shiftYBy(-1);
+					// for the sake of cleaner code
+					if(savedLineNum <= savedLines.length && savedLineNum >= 0) {
+						switch(e.key) {
+							case "ArrowUp":
+								savedLineNum++;
+								break;
+							case "ArrowDown":
+								savedLineNum--;
+								break;
+						}
+						curObject["texts"][1] = savedLines[savedLines.length-savedLineNum];
+					}
 					break;
 				// Any blacklisted words
 				case "Shift":
