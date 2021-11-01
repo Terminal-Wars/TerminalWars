@@ -61,7 +61,6 @@ export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity
 				if(x != offset) x += 8;
 				break;
 			default:
-				debugBox2.innerHTML = y+", "+minY+", "+maxY;
 				if(y <= minY || y >= maxY)  {continue;}
 				if(x >= offset+maxX-8 && k_last != " ") 
 					await drawChar("-",x,y,mode,opacity).then(function() {

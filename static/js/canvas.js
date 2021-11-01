@@ -174,8 +174,8 @@ async function draw(o) {
 						// big box
 						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
 						await drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),0,rw-40,ya_n+24,ya_n+rh-52);
-						// scrollbar 
-						if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
+						// scrollbar  (todo: make this work)
+						// if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
 						// small box
 						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
 						await drawChars(o["texts"][1], xa_n+8,ya_p-24);

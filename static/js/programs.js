@@ -13,8 +13,8 @@ export async function terminal() {
 			"command":{"p_command": "bag"}},
 			{"type":"button","anchor": "positive","x":-20,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{loggedIn}","image":term_buttons,"ox":0,"oy":32,
 			"command":{"p_command": "switch"}},
-			{"type":"button","anchor":"posneg","x":-21,"y":26,"width":16,"height":16,"active":0,"hover":0,"enabled":1,"command":{"p_command":"shiftYBy","arg1":1}},
-			{"type":"button","anchor":"positive","x":-21,"y":-50,"width":16,"height":16,"active":0,"hover":0,"enabled":1,"command":{"p_command":"shiftYBy","arg1":-1}}
+			{"type":"button","anchor":"posneg","x":-21,"y":26,"width":16,"height":16,"active":0,"hover":0,"enabled":1,"image":term_buttons,"ox":0,"oy":48,"command":{"p_command":"shiftYBy","arg1":1}},
+			{"type":"button","anchor":"positive","x":-21,"y":-50,"width":16,"height":16,"active":0,"hover":0,"enabled":1,"image":term_buttons,"ox":0,"oy":64,"command":{"p_command":"shiftYBy","arg1":-1}}
 			]
 	});
 }
