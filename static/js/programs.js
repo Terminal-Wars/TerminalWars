@@ -6,13 +6,16 @@ term_buttons.src = 'static/gfx/term_buttons.webp';
 
 export async function terminal() {
 	objects.push({"id":objects.length,"type":"window","title":"Terminal","win_type":"terminal","x":400,"y":225,"width":200,"height":200,"z":objects.length+1,
-		"texts":{0: "", 1: ""}, "event_num":3,
+		"texts":{0: "", 1: ""}, "event_num":5,
 		"events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{ourTurn}","image":term_buttons,"ox":0,"oy":0,
-			"command":{"command": "activeDropdown"}},
+			"command":{"p_command": "activeDropdown"}},
 			{"type":"button","anchor": "positive","x":-39,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{loggedIn}","image":term_buttons,"ox":0,"oy":16,
-			"command":{"command": "bag"}},
+			"command":{"p_command": "bag"}},
 			{"type":"button","anchor": "positive","x":-20,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{loggedIn}","image":term_buttons,"ox":0,"oy":32,
-			"command":{"command": "switch"}}]
+			"command":{"p_command": "switch"}},
+			{"type":"button","anchor":"posneg","x":-21,"y":26,"width":16,"height":16,"active":0,"hover":0,"enabled":1,"command":{"p_command":"shiftYBy","arg1":1}},
+			{"type":"button","anchor":"positive","x":-21,"y":-50,"width":16,"height":16,"active":0,"hover":0,"enabled":1,"command":{"p_command":"shiftYBy","arg1":-1}}
+			]
 	});
 }
 

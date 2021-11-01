@@ -1,3 +1,4 @@
+import {debugBox2} from './main.js';
 import {ctx} from './canvas.js';
 import {socket} from './socket.js'; // ??? ????????? ?????????????? this can't be removed by the way????????
 export const characters = ["`","1","2","3","4","5","6","7","8","9","0","-","=","~","!","@","#","$","%","^","&","*","(",")","_","+","[","]","\\","{","}","|",";","\'",":","\"",",",".","/","<",">","?","q","w","e","r","t","y","u","i","o","p","a","s","d","f","g","h","j","k","l","z","x","c","v","b","n","m","Q","W","E","R","T","Y","U","I","O","P","A","S","D","F","G","H","J","K","L","Z","X","C","V","B","N","M","à","è","ì","ò","ù","À","È","Ì","Ò","Ù","á","é","í","ó","ú","ý","Á","É","Í","Ó","Ú","Ý","â","ê","î","ô","û","Â","Ê","Î","Ô","Û","ã","ñ","õ","Ã","Ñ","Õ","ä","ë","ï","ö","ü","ÿ","Ä","Ë","Ï","Ö","Ü","Ÿ","å","Å","ç","Ç","ð","Ð","ø","Ø","¿","¡","ß"," ",""];
@@ -60,7 +61,8 @@ export async function drawChars(string,x,y,mode=1,maxX=Infinity,minY=-1*Infinity
 				if(x != offset) x += 8;
 				break;
 			default:
-				if(y <= minY+16 || y >= maxY-24)  {continue;}
+				debugBox2.innerHTML = y+", "+minY+", "+maxY;
+				if(y <= minY || y >= maxY)  {continue;}
 				if(x >= offset+maxX-8 && k_last != " ") 
 					await drawChar("-",x,y,mode,opacity).then(function() {
 					x = offset;

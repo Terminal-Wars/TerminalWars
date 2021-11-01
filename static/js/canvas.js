@@ -79,7 +79,6 @@ class DrawClass {
 	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled) {
 		let mode = 0;
 		if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
-		debugBox2.innerHTML = "";
 		if(enabled == 0) ox += 16;
 		if(type == "button") {
 			await this.box(x-1, y-1, width+2, height+2,"black");
@@ -174,7 +173,7 @@ async function draw(o) {
 						await temp();
 						// big box
 						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
-						await drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),0,rw-24,ya_n+12,rh-24);
+						await drawChars(o["texts"][0],xa_n+8,ya_n+35+(shiftY*12),0,rw-40,ya_n+24,ya_n+rh-52);
 						// scrollbar 
 						if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
 						// small box
@@ -238,6 +237,8 @@ async function draw(o) {
 			// Bit of a bizarre way of doing things, but it's less messy.
 			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
+			if(e["anchor"] == "posneg") {xa = o["x"]+o["width"]; ya = o["y"]-o["height"];}
+			if(e["anchor"] == "negpos") {xa = o["x"]-o["width"]; ya = o["y"]+o["height"]};
 			if(e["anchor"] == "none") {xa = o["x"]; ya = o["y"]}
 			await Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
 		}

@@ -6,6 +6,7 @@ import {mousePos, Objects} from './main.js';
 import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
 import {delay} from './commonFunctions.js';
 import {play, stop, setModule} from './micromod/interface.js';
+import {shiftYBy} from './canvas.js';
 export let userID = ""; export let roomID = "test"; 
 export let shakeNum = 0; export let usersInRoom;
 
@@ -63,10 +64,13 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 				play();
 			});
 			break;
-		// Below are commands that shouldn't really be here,
-		// but they are because I don't feel like moving them to another file,
-		// for one reason or another. They cannot be executed via the console.
-		// Most will be moved later in development(tm).
+		default: 
+			keyboardBuffer.push(invalidMessage);
+			break;
+	}
+}
+export async function privateCommand(cmd, arg1="", arg2="", arg3="") {
+	switch(cmd) {
 		case "activeDropdown":
 			await exampleUser.then(function(resp) {
 				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"],"userDropdown","{index}","{name}");
@@ -84,15 +88,15 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "attack":
 			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
+		case "shiftYBy":
+			shiftYBy(arg1);
+			break;
 		case "debug":
 			if(window.location.hostname == "localhost" || window.location.hostname.startsWith("192.168")) {
 				await Actions.MemoryDump(roomID).then(r => console.log(r));
 			} else {
 				keyboardBuffer.push(invalidMessage);
 			}
-			break;
-		default: 
-			keyboardBuffer.push(invalidMessage);
 			break;
 	}
 }

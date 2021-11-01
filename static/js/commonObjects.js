@@ -48,7 +48,7 @@ export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
 		// to do that because of {index}, which means we would need to remake it every loop.
 		let arg1_ = arg1.replace("{index}",list.indexOf(l),1).replace("{name}",name,1);
 		let arg2_ = arg2.replace("{index}",list.indexOf(l),1).replace("{name}",name,1);
-		dropdown.events.push({"type":"flat","anchor":"negative","x":3,"y":y_,"width":width,"height":15,"active":0,"hover":0,"text":name,"command":{"command":command,"arg1":arg1_,"arg2":arg2_}})
+		dropdown.events.push({"type":"flat","anchor":"negative","x":3,"y":y_,"width":width,"height":15,"active":0,"hover":0,"text":name,"command":{"p_command":command,"arg1":arg1_,"arg2":arg2_}})
 		y_ += 17;
 	});
 	objects.push(dropdown);
