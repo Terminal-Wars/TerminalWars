@@ -12,7 +12,7 @@ export async function loadDefaultObjects() {
 	// The desktop icons
 	let icon = new Image(128,128);
 	icon.src = "static/gfx/icons/editor.png";
-	objects.push({"id":1,"type":"shortcut","text":"About","x":16,"y":16,"width":32,"height":32,"z":1,"icon":icon,"event_num":1,
+	objects.push({"id":1,"type":"shortcut","text":"About","x":17,"y":16,"width":32,"height":32,"z":1,"icon":icon,"event_num":1,
 				 "events": [{"type":"extraflat","anchor": "none","x":0,"y":0,"width":32,"height":32,"active":0,"hover":0,"enabled":1,"command":{"launch": "about"}}]});
 	//objects.push({"id":"0","type":"shortcut","x":48,"y":48,"width":32,"height":32,"fillStyle":"red"});
 
