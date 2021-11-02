@@ -271,7 +271,10 @@ export async function drawGFX() {
 		total += frameCount[n];
 	}
 	total /= frameCount.length;
-	debugBox.innerHTML = "<h2>"+Math.round(total*10)/10+"ns<sup>*</sup></h2><small><sup>*</sup>The average amount of nanoseconds taken to draw the last few frames";
+	let total_d = 0;
+	if(total >= 0) total_d = Math.round(total);
+	else total_d = Math.round(total*10)/10; 
+	debugBox.innerHTML = "<h2>"+total_d+"ns<sup>*</sup></h2><small><sup>*</sup>The average amount of nanoseconds taken to draw the last few frames";
 	// The mouse is drawn seperately to ensure it's never below anything.
 	//await mouse();
 }
