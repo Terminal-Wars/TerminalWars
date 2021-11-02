@@ -97,3 +97,7 @@ document.addEventListener("mouseup", function(e) {
 	}
 	winMoveMode = 0;
 });
+document.addEventListener("wheel", function(e) {
+	privateCommand("shiftYBy",Math.round(e.deltaY*0.05)*-1);
+	console.log(e.deltaY);
+});
