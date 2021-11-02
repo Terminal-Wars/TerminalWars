@@ -23,7 +23,7 @@ export let obHeight = 0;
 export let mul = 1;
 export let fWidth = 0;
 export let fHeight = 0;
-
+export let ratio = window.devicePixelRatio;
 function init() {
 	// The monitor width
 	sWidth = window.innerWidth; sHeight = window.innerHeight;
@@ -32,7 +32,6 @@ function init() {
 	// The scale multiplier.
 	mul = Math.round(sHeight/height);
 	if(mul == 0) mul = 1;
-	let ratio = window.devicePixelRatio;
 	if(ratio >= 1) {ratio = 1}
 	// Final width and height after all this.
 	fWidth = (width*mul) / ratio; fHeight = (height*mul) / ratio;
@@ -61,7 +60,7 @@ export let shiftY = 0; export let termHeight = 1;
 
 
 // The frame counter. This is an array so that we can modify it from other files.
-export let frameCount = [0];
+export let frameCount = [];
 
 // The ID of the terminal window, for dice rolls.
 export let terminalWinID = 0;
@@ -143,7 +142,6 @@ const Draw = new DrawClass();
 
 // The function for drawing objects.
 async function draw(o) {
-		frameCount[0]++; 
 		if(o === undefined) {return;}
 		// Some common variables
 		let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
@@ -256,15 +254,24 @@ export async function mouse() {
 	mouse["x"] = mousePos["x"];
 	mouse["y"] = mousePos["y"];
 	await Draw.box(mouse["x"],mouse["y"],16,16,mouse["fill"]);
-	frameCount[0]++;
 }
 
 export async function drawGFX() {
 	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
 	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right.<br><em>On higher DPI screens the game will never look right due to a bug.</em>"} else {notices.innerHTML = "";}
+	let start = (performance.now() + performance.timeOrigin);
 	for(let i = 0; i <= objects.length; i++) {
 		await draw(objects[i]);
 	}
+	let time = Math.round((performance.now() + performance.timeOrigin)-start);
+	if(frameCount.length >= 100) frameCount.shift();
+	frameCount.push(time);
+	let total = 0;
+	for(let n in frameCount) {
+		total += frameCount[n];
+	}
+	total /= frameCount.length;
+	debugBox.innerHTML = "<h2>"+Math.round(total*10)/10+"ns<sup>*</sup></h2><small><sup>*</sup>The average amount of nanoseconds taken to draw the last few frames";
 	// The mouse is drawn seperately to ensure it's never below anything.
 	//await mouse();
 }
