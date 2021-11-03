@@ -5,7 +5,7 @@ import {launch} from './programs.js';
 // The mouse position for other files to use.
 let mousePosHeld = [{"x":0,"y":0}];
 // mouse variables
-let mouseDown = 0; let winMoveMode = 0;
+let mouseDown = 0; let winMoveMode = 0; let mouseDownFor = 0;
 // modifier based on the width and height of the window.
 let wmod = (width/sWidth); let hmod = (height/sHeight);
 // x and y anchor (for event positioning)
@@ -61,6 +61,18 @@ async function windowUpdate(val) {
 		}
 	}
 }
+async function mouseDownLoop() {
+	let mouseDownLocal = mouseDown;
+	if(mouseDownLocal) {
+		mouseDownFor++;
+		// After the mouse has been held down for awhile
+		if(mouseDownFor >= 30) {
+			await windowUpdate("active");
+		}
+		mouseDownLoop();
+	} 
+	return 0;
+}
 // On every mouse movement
 document.addEventListener("mousemove", async function(e) {
 	// The current mouse position
@@ -83,7 +95,7 @@ document.addEventListener("mousedown", async function(e) {
 	mouseDown = 1;
 	// The "old" mouse position variables get set.
 	mousePosHeld["x"] = Math.round(e.clientX-obWidth); mousePosHeld["y"] = Math.round(e.clientY-obHeight);
-	await windowUpdate("active");
+	//await windowUpdate("active");
 });
 // When the mouse button is released.
 document.addEventListener("mouseup", function(e) {

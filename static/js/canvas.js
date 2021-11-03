@@ -9,6 +9,9 @@ export let ctx = cO.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 ctx.mozImageSmoothingEnabled = false;
 
+//export let bigBoxText = document.querySelector('.drawTerminalWindowText');
+//export let bigBoxTextCtx = bigBoxText.getContext('2d');
+
 // The default, set width and height.
 export const width = 800;
 export const height = 600;
@@ -142,7 +145,7 @@ const Draw = new DrawClass();
 
 // The function for drawing objects.
 async function draw(o) {
-		if(o === undefined) {return;}
+		if(o === undefined) {return;} // seemingly 
 		// Some common variables
 		let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
 		let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
@@ -160,7 +163,8 @@ async function draw(o) {
 					// terminal window
 					case "terminal":
 						let bigBoxText = document.createElement('canvas'); 
-						bigBoxText.width = rw-8; bigBoxText.height = rh-56;
+						let box_width = rw-6; let box_height = rh-53;
+						bigBoxText.width = box_width-2; bigBoxText.height = box_height-3;
 						let bigBoxTextCtx = bigBoxText.getContext('2d');
 						// anything from the keyboard buffer gets added to the text box in this loop.
 						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
@@ -176,9 +180,8 @@ async function draw(o) {
 						await temp();
 						// big box
 						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
-						await Draw.box(0, 0, rw-10, rh-58, "white", bigBoxTextCtx);
-						await drawChars({"ctx":bigBoxTextCtx,"string":o["texts"][0],"x":4,"y":4+(shiftY*12)});
-						await Draw.image(bigBoxText, 0,0, rw-6, rh-53, xa_n+6, ya_n+25,rw-6,rh-53)
+						await drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
+						// await Draw.image(bigBoxText, 0,0, rw-6, rh-53, xa_n+6, ya_n+25,rw-6,rh-53)
 						// scrollbar  (todo: make this work)
 						// if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
 						// small box
@@ -257,19 +260,29 @@ export async function mouse() {
 }
 
 export async function drawGFX() {
+	// refresh the dpi
 	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
+	// display an error message if it's above 96
 	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right.<br><em>On higher DPI screens the game will never look right due to a bug.</em>"} else {notices.innerHTML = "";}
+	// get the current time in nano seconds
 	let start = (performance.now() + performance.timeOrigin);
+	// for each object...
 	for(let i = 0; i <= objects.length; i++) {
+		// draw it
 		await draw(objects[i]);
 	}
+	// get the nanosecond time again, subtract it from the last time...
 	let time = Math.round((performance.now() + performance.timeOrigin)-start);
-	if(frameCount.length >= 100) frameCount.shift();
+	// if the array containing all the previous times is over 10, shift it.
+	if(frameCount.length >= 50) frameCount.shift();
+	// push our new time to that array.
 	frameCount.push(time);
+	// for each number in that array, add it to a total.
 	let total = 0;
 	for(let n in frameCount) {
 		total += frameCount[n];
 	}
+	// divide that total by the length of the array.
 	total /= frameCount.length;
 	let total_d = 0;
 	if(total >= 0) total_d = Math.round(total);

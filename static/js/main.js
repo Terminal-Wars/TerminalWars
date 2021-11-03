@@ -1,4 +1,4 @@
-import {drawGFX, frameCount} from './canvas.js';
+import {drawGFX} from './canvas.js';
 import {degrade} from './degrade.js';
 import {drawParticles} from './particles.js';
 
@@ -57,11 +57,6 @@ async function loop60() {
   await diceUpdate();
 }
 export let curObject = objects[0];
-
-async function frameCounter() {
-  debugBox.innerHTML = "Objects drawn in the last second: "+frameCount[0];
-  frameCount[0] = 0;
-}
 
 async function init() { // redundant, but it's here for compatibility
   await loadDefaultObjects();
