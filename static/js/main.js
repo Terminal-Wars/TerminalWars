@@ -1,4 +1,4 @@
-import {drawGFX} from './canvas.js';
+import {drawGFX, frameCount, frameTime, resetFrameTime} from './canvas.js';
 import {degrade} from './degrade.js';
 import {drawParticles} from './particles.js';
 
@@ -59,15 +59,19 @@ async function loop60() {
 }
 export let curObject = objects[0];
 
+async function frameCounter() {
+  debugBox.innerHTML = frameTime+" FPS";
+  resetFrameTime();
+}
+
 async function init() { // redundant, but it's here for compatibility
-  await loadDefaultObjects();
-  await pingSite();
-  await setInterval(pingSite,3000); // ping the site and update it every three seconds.
-  //if(window.location.hostname == "localhost") await setInterval(frameCounter, 1000);
-  // todo: make this dynamic or togglable for the final release
-  //await setInterval(loop, 5);
+  loadDefaultObjects();
+  pingSite();
+  setInterval(pingSite,3000); // ping the site and update it every three seconds.
+  if(window.location.hostname == "localhost") setInterval(frameCounter, 1000);
+
   loop();
-  await setInterval(loop60, 1000/15);
+  setInterval(loop60, 1000/15);
   //setInterval(lowerPriorityLoop, 1000/30);
 }
 init();

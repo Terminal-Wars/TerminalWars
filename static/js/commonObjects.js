@@ -20,7 +20,7 @@ export async function loadDefaultObjects() {
 	objects.push({"id":2,"type":"dice_layer","x":0,"y":0,"width":0,"height":0,"z":0});
 	
 	// The terminal (which was moved to programs.js)
-	await terminal();
+	//await terminal();
 }
 export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
 	// TODO: make it so a dropdown disappears when the mouse moves away from it.

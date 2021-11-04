@@ -13,7 +13,7 @@ canvas {display: block; position: absolute; top: 50%; left: 50%; transform: tran
     font-smoothing: none; -webkit-font-smoothing : none;
     cursor: none!important;
 }
-.drawTerminalWindowText {display: none!important;}
+.drawBuffer {display: none!important;}
 *[class^="debug"] {color: white; user-select: none; pointer-events: none; display: block;}
 .notices {display: block; width: 15%; height: 25%; font-size: 1em; position: absolute; top: 50%; left: 0; color: red; font-weight: bold; text-align: left;}
 #dpi {height:  1in; width: 1in; display: block;}

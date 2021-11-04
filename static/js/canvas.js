@@ -5,11 +5,24 @@ import { userID, roomID } from './commands.js';
 import { replacePlaceholders } from './commonFunctions.js';
 
 import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../gfx/images.js';
+
+// The rendering method, which is WebGL by default.
+export let renderType = "2d";
 // The canvas
-export let cO = document.querySelector('.draw');
-export let ctx = cO.getContext('2d');
+export let drawBuffer = document.querySelector('.drawBuffer');
+export let ctx = drawBuffer.getContext(renderType);
 ctx.imageSmoothingEnabled = false;
 ctx.mozImageSmoothingEnabled = false;
+
+export let drawFinal = document.querySelector('.draw');
+export let ctxFinal = drawFinal.getContext(renderType);
+
+// If we can't do webgl, fall back to CPU rendering.
+if(ctxFinal === null) {
+	renderType = "2d";
+	ctx = drawBuffer.getContext(renderType);
+	ctxFinal = drawFinal.getContext(renderType);
+}
 
 //export let bigBoxText = document.querySelector('.drawTerminalWindowText');
 //export let bigBoxTextCtx = bigBoxText.getContext('2d');
@@ -45,9 +58,10 @@ init();
 window.addEventListener('resize',init);
 
 // From here, we'll scale the canvas based on the user's actual screen size.
-cO.width = width; cO.height = height;
-cO.style.width = fWidth+"px"; cO.style.maxWidth = fWidth+"px"; 
-cO.style.height = fHeight+"px"; cO.style.maxHeight = fHeight+"px";
+drawBuffer.width = width; drawBuffer.height = height;
+drawFinal.width = width; drawFinal.height = height;
+drawFinal.style.width = fWidth+"px"; drawFinal.style.maxWidth = fWidth+"px"; 
+drawFinal.style.height = fHeight+"px"; drawFinal.style.maxHeight = fHeight+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = Sheight+"px";
 
 // Any images we need
@@ -59,9 +73,11 @@ let xa, ya = 0;
 // Some terminal specific variables which need to be global.
 export let shiftY = 0; export let termHeight = 1;
 
-
-// The frame counter. This is an array so that we can modify it from other files.
+// The frame counters
+export let frameTime = 0;
 export let frameCount = [];
+// and we need a function to reset frame time from the other file grahh
+export async function resetFrameTime() {frameTime = 0;}
 
 // The ID of the terminal window, for dice rolls.
 export let terminalWinID = 0;
@@ -126,20 +142,45 @@ class DrawClass {
 	// These functions may seem redundant, but having these here allows us
 	// to execute them asynchronously, as well as have cleaner code.
 	async box(x,y,width,height,fillStyle,thisCtx=ctx) {
-		thisCtx.fillStyle = fillStyle;
-		thisCtx.fillRect(x,y,width,height);
+		if(renderType == "webgl") {
+
+		} else {
+			thisCtx.fillStyle = fillStyle;
+			thisCtx.fillRect(x,y,width,height);
+		}
+
 	}
 	async gradient(x1,y1,x2,y2,width,height,color1,color2) {
-		let gradient = ctx.createLinearGradient(x1, y1, x2, y2);
-		gradient.addColorStop(0, color1);
-		gradient.addColorStop(1, color2);
-		ctx.fillStyle = gradient;
-		ctx.fillRect(x1, y1, width, height);
+		if(renderType == "webgl") {
+
+		} else {
+			let gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+			gradient.addColorStop(0, color1);
+			gradient.addColorStop(1, color2);
+			ctx.fillStyle = gradient;
+			ctx.fillRect(x1, y1, width, height);
+		}
 	}
-	async image(image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null,opacity=1) {
-		if(opacity != 1) ctx.globalAlpha = opacity;
-		ctx.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
-		if(opacity != 1) ctx.globalAlpha = 1;
+	async image(arr) {
+		//image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null,opacity=1
+		let image = arr["image"] || null;
+		let sx = arr["sx"] || 0;
+		let sy = arr["sy"] || 0;
+		let sWidth = arr["sWidth"] || arr["width"] || 0;
+		let sHeight = arr["sHeight"] || arr["height"] || 0;
+		let dx = arr["dx"] || arr["x"] || 0;
+		let dy = arr["dy"] || arr["y"] || 0;
+		let dWidth = arr["dWidth"] || arr["width"] || 0;
+		let dHeight = arr["dHeight"] || arr["height"] || 0;
+		let opacity = arr["opacity"] || 1;
+		let ctxNew = arr["ctx"] || ctx;
+		if(renderType == "webgl") {
+
+		} else {
+			if(opacity != 1) ctxNew.globalAlpha = opacity;
+			ctxNew.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
+			if(opacity != 1) ctxNew.globalAlpha = 1;
+		}
 	}
 }
 const Draw = new DrawClass();
@@ -187,7 +228,8 @@ async function draw(o) {
 								await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
 								await drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"ctx":bigBoxTextCtx});
 								// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
-								Draw.image(bigBoxText,0,0,box_width,box_height,xa_n+6,ya_n+25,box_width,box_height)
+								Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":box_width,
+									"height":box_height,"x":xa_n+6,"y":ya_n+25});
 								//canvas.js:185 Uncaught (in promise) TypeError: Failed to execute 'createImageBitmap' on 'Window': The provided value is not of type '(Blob or HTMLCanvasElement or HTMLImageElement or HTMLVideoElement or ImageBitmap or ImageData or OffscreenCanvas or SVGImageElement or VideoFrame)'.
 
 								// scrollbar  (todo: make this work)
@@ -204,8 +246,8 @@ async function draw(o) {
 						}
 					break;
 					case "desktop":
-						Draw.image(testingBG,0,0,testingBG.width,testingBG.height,0,0,width,height);
-						//Draw.box(0,0,width,height,o["color1"]);
+						//Draw.image(testingBG,0,0,testingBG.width,testingBG.height,0,0,width,height);
+						Draw.box(0,0,width,height,o["color1"]);
 						//Draw.gradient(0,0,0,height,width,height,o["color1"],o["color2"])
 					break;
 					case "dropdown":
@@ -224,7 +266,7 @@ async function draw(o) {
 						async function tmp() {
 							let ymod = 0;
 							if(o["foe"]) ymod = 48;
-							Draw.image(diceblock,0,0+ymod,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
+							Draw.image({"image":diceblock,"sy":ymod,"width":16,"height":16,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]});
 							ctx.globalCompositeOperation = "soft-light";
 							async function drawDice() {await drawChars({"string":`${o["value"]}`,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]})}; 
 							// we do drawDice twice as a hack to make the text more visible.
@@ -235,7 +277,7 @@ async function draw(o) {
 						tmp();
 					break;
 					case "shortcut":
-						Draw.image(o["icon"],0,0,32,32,o["x"],o["y"],o["width"],o["height"]);
+						Draw.image({"image":o["icon"],"width":o["width"],"height":o["height"],"x":o["x"],"y":o["y"]});
 						Draw.box(o["x"]-o["text"].length-1,o["y"]+36,2+o["text"].length*8,16,"#feffb3");
 						await drawChars({"string":o["text"],"x":(o["x"]-o["text"].length),"y":o["y"]+36,"mode":0});
 					break;
@@ -261,7 +303,7 @@ async function draw(o) {
 				}
 			} catch(ex) {
 				Draw.box(0,0,width,height,"black");
-				await Draw.image(sad_poopotron,0,0,256,256,(width/2)-128,(height/3)-128,256,256);
+				await Draw.image({"image":sad_poopotron,"width":256,"height":256,"x":(width/2)-128,"y":(height/3)-128});
 				await drawChars({"string":ex.stack,"x":(width/2)-((ex.message.length)*8/2),"y":(height/2)+64,"mode":3})
 				fatalError = 1;
 			}
@@ -273,7 +315,7 @@ export async function mouse() {
 		let mouse = objects[1];
 		mouse["x"] = mousePos["x"];
 		mouse["y"] = mousePos["y"];
-		Draw.image(cursor,0,0,8,8,mouse["x"],mouse["y"],8,8);
+		Draw.image({"image":cursor,"width":8,"height":8,"x":mouse["x"],"y":mouse["y"]});
 	}
 
 }
@@ -283,31 +325,15 @@ export async function drawGFX() {
 	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
 	// display an error message if it's above 96
 	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right.<br><em>On higher DPI screens the game will never look right due to a bug.</em>"} else {notices.innerHTML = "";}
-	// get the current time in nano seconds
-	let start = (performance.now() + performance.timeOrigin);
 	// for each object...
 	for(let i = 0; i <= objects.length; i++) {
 		// draw it
 		draw(objects[i]);
 	}
-	// get the nanosecond time again, subtract it from the last time...
-	let time = Math.round((performance.now() + performance.timeOrigin)-start);
-	// if the array containing all the previous times is over 10, shift it.
-	if(frameCount.length >= 50) frameCount.shift();
-	// push our new time to that array.
-	frameCount.push(time);
-	// for each number in that array, add it to a total.
-	let total = 0;
-	for(let n in frameCount) {
-		total += frameCount[n];
-	}
-	// divide that total by the length of the array.
-	total /= frameCount.length;
-	let total_d = 0;
-	if(total >= 0) total_d = Math.round(total);
-	else total_d = Math.round(total*10)/10; 
-	debugBox.innerHTML = "<h2>"+total_d+"ns<sup>*</sup></h2><small><sup>*</sup>The average amount of nanoseconds taken to draw the last few frames";
 	// The mouse is drawn seperately to ensure it's never below anything.
 	await mouse();
+	// Finally, draw everything we've drawn to the actual frame.
+	Draw.image({"image":drawBuffer,"width":drawBuffer.width,"height":drawBuffer.height,"ctx":ctxFinal});
+	frameTime++;
 }
 
