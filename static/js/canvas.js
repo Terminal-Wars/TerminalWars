@@ -289,8 +289,8 @@ async function draw(o) {
 					break;
 				}
 				// Draw any button events here.
-				for(let i = 0; i < o["event_num"]+3; i++) {
-					let e = (o["events"][i] && globalEvents);
+				for(let i = 0; i < o["event_num"]; i++) {
+					let e = o["events"][i];
 					// Bit of a bizarre way of doing things, but it's less messy.
 					if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 					if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
