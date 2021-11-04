@@ -11,6 +11,7 @@ canvas {display: block; position: absolute; top: 50%; left: 50%; transform: tran
     image-rendering: optimize-contrast!important;
     -ms-interpolation-mode: nearest-neighbor!important;
     font-smoothing: none; -webkit-font-smoothing : none;
+    cursor: none!important;
 }
 .drawTerminalWindowText {display: none!important;}
 *[class^="debug"] {color: white; user-select: none; pointer-events: none; display: block;}

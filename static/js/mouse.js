@@ -77,7 +77,7 @@ async function mouseDownLoop() {
 document.addEventListener("mousemove", async function(e) {
 	// The current mouse position
 	mousePos["x"] = Math.round(e.clientX-obWidth); mousePos["y"] = Math.round(e.clientY-obHeight);
-	await windowUpdate("hover");
+	windowUpdate("hover");
 	if(mouseDown) {
 	// The distance that we've moved between the last mouse position we have and the current one.
 	let xd = Math.round(mousePos["x"]-mousePosHeld["x"]); let yd = Math.round(mousePos["y"]-mousePosHeld["y"]);
@@ -95,7 +95,7 @@ document.addEventListener("mousedown", async function(e) {
 	mouseDown = 1;
 	// The "old" mouse position variables get set.
 	mousePosHeld["x"] = Math.round(e.clientX-obWidth); mousePosHeld["y"] = Math.round(e.clientY-obHeight);
-	//await windowUpdate("active");
+	windowUpdate("active");
 });
 // When the mouse button is released.
 document.addEventListener("mouseup", function(e) {

@@ -3,6 +3,8 @@ import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
 import { replacePlaceholders } from './commonFunctions.js';
+
+import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../gfx/images.js';
 // The canvas
 export let cO = document.querySelector('.draw');
 export let ctx = cO.getContext('2d');
@@ -50,10 +52,6 @@ cO.style.height = fHeight+"px"; cO.style.maxHeight = fHeight+"px";
 
 // Any images we need
 // todo: make a seperate .json file with all of these in it and just use arrays instead.
-export const diceblock = new Image();
-diceblock.src = 'static/gfx/diceblock.webp';
-export const dice_font = new Image();
-dice_font.src = 'static/gfx/dice_font.webp';
 
 // X and Y anchors, seperate from the ones from within the switch case in the drawGFX function.
 let xa, ya = 0;
@@ -73,32 +71,35 @@ export let terminalWinID = 0;
 // todo: clamp function
 export function shiftYBy(num) {shiftY += num;}
 
+// Variable that gets set if we run into a fatal error
+export let fatalError = 0;
+
 // Common UI elements
 class DrawClass {
 	async textbox(x, y, width, height,thisCtx=ctx) {
-		await this.box(x-1, y-1, width+2, height+2,"#808080",thisCtx);
-		await this.box(x, y, width+1, height+1,"black",thisCtx);
-		await this.box(x, y, width, height,"white",thisCtx);
+		this.box(x-1, y-1, width+2, height+2,"#808080",thisCtx);
+		this.box(x, y, width+1, height+1,"black",thisCtx);
+		this.box(x, y, width, height,"white",thisCtx);
 	}
 	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled) {
 		let mode = 0;
 		if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
 		if(enabled == 0) ox += 16;
 		if(type == "button") {
-			await this.box(x-1, y-1, width+2, height+2,"black");
+			this.box(x-1, y-1, width+2, height+2,"black");
 			if(active == 0) {
-				await this.box(x-1, y-1, width+1, height+1,"white");
-				await this.box(x, y, width, height,"#dfdfdf");
-				await this.box(x+1, y+1, width-1, height-1,"#808080");
+				this.box(x-1, y-1, width+1, height+1,"white");
+				this.box(x, y, width, height,"#dfdfdf");
+				this.box(x+1, y+1, width-1, height-1,"#808080");
 			} else {
-				await this.box(x, y, width, height,"#808080");
+				this.box(x, y, width, height,"#808080");
 			}
-			await this.box(x+1, y+1, width-2, height-2,"#b5b5b5");
+			this.box(x+1, y+1, width-2, height-2,"#b5b5b5");
 		}
 		if(type == "flat" || type == "extraflat") { // flat
 			mode = 0;
 			if(type == "flat" && hover == 1) {
-				await this.box(x,y,width,height,"#15539e");
+				this.box(x,y,width,height,"#15539e");
 				mode = 2;
 			}
 		}
@@ -106,10 +107,10 @@ class DrawClass {
 		// Draw either an image or some text
 		switch(typeof(content)) {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
-				await this.image(content,ox,oy,width,height,x,y,width,height);
+				this.image(content,ox,oy,width,height,x,y,width,height);
 				break;
 			case "string":
-				await drawChars({"string":content,"x":x,"y":y,"mode":mode});
+				drawChars({"string":content,"x":x,"y":y,"mode":mode});
 				break;
 			default:
 				//debugBox2.innerHTML = typeof(content);
@@ -117,10 +118,10 @@ class DrawClass {
 		}
 	}
 	async base(x, y, w, h) {
-		await this.box(x+1, y+1, (w+1), (h)+1, "black");
-		await this.box(x+1, y+1, (w), (h), "#808080");
-		await this.box(x+1, y+1, (w)-1, (h)-1, "white");
-		await this.box(x+2, y+2, (w)-2, (h)-2, "#b5b5b5");
+		this.box(x+1, y+1, (w+1), (h)+1, "black");
+		this.box(x+1, y+1, (w), (h), "#808080");
+		this.box(x+1, y+1, (w)-1, (h)-1, "white");
+		this.box(x+2, y+2, (w)-2, (h)-2, "#b5b5b5");
 	}
 	// These functions may seem redundant, but having these here allows us
 	// to execute them asynchronously, as well as have cleaner code.
@@ -145,118 +146,136 @@ const Draw = new DrawClass();
 
 // The function for drawing objects.
 async function draw(o) {
-		if(o === undefined) {return;} // seemingly 
-		// Some common variables
-		let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
-		let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
-		let rw = o["width"]*2; let rh = o["height"]*2; // "remaining width and height"
-		// Get the type of it, and draw something different based on said type.
-		switch(o["type"]) {
-			case "window":
-				// gray base
-				await Draw.base(xa_n,ya_n,rw,rh);
-				// red gradient
-				await Draw.gradient(xa_n+2, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000")
-				// title
-				await drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3});
-				switch(o["win_type"]) {
-					// terminal window
-					case "terminal":
-						let bigBoxText = document.createElement('canvas'); 
-						let box_width = rw-6; let box_height = rh-53;
-						bigBoxText.width = box_width-2; bigBoxText.height = box_height-3;
-						let bigBoxTextCtx = bigBoxText.getContext('2d');
-						// anything from the keyboard buffer gets added to the text box in this loop.
-						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
-						// only arrays.
-						// also this is an impromptu async function for performance reasons.
-						async function temp() {if(keyboardBuffer.length >= 1) {
-							o["texts"][0] += keyboardBuffer[0];
-							keyboardBuffer.shift(0);
-							// we assume that every line in the keyboard buffer ends in a newline, and they pretty much always do.
-							termHeight++;
-							if(termHeight > 27) {shiftY--;}
-						}}
-						await temp();
-						// big box
-						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
-						await drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
-						// await Draw.image(bigBoxText, 0,0, rw-6, rh-53, xa_n+6, ya_n+25,rw-6,rh-53)
-						// scrollbar  (todo: make this work)
-						// if(termHeight > 27) await Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
-						// small box
-						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
-						await drawChars({"string":o["texts"][1],"x":xa_n+8,"y":ya_p-24});
-						terminalWinID = o["id"];
-						break;
-					case "text":
-						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29);
-						await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16});
-						break;
+		// If we haven't run into a fatal error
+		if(!fatalError) {
+			// Try to execute the function.
+			try {
+				if(o === undefined) {return;} // seemingly 
+				// Some common variables
+				let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
+				let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
+				let rw = o["width"]*2; let rh = o["height"]*2; // "remaining width and height"
+				// Get the type of it, and draw something different based on said type.
+				switch(o["type"]) {
+					case "window":
+						// gray base
+						Draw.base(xa_n,ya_n,rw,rh);
+						// red gradient
+						Draw.gradient(xa_n+2, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000")
+						// title
+						drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3});
+						switch(o["win_type"]) {
+							// terminal window
+							case "terminal":
+								let bigBoxText = document.createElement('canvas'); 
+								let box_width = rw-8; let box_height = rh-56;
+								bigBoxText.width = box_width; bigBoxText.height = box_height;
+								let bigBoxTextCtx = bigBoxText.getContext('2d');
+								// anything from the keyboard buffer gets added to the text box in this loop.
+								// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
+								// only arrays.
+								// also this is an impromptu async function for performance reasons.
+								async function temp() {if(keyboardBuffer.length >= 1) {
+									o["texts"][0] += keyboardBuffer[0];
+									keyboardBuffer.shift(0);
+									// we assume that every line in the keyboard buffer ends in a newline, and they pretty much always do.
+									termHeight++;
+									if(termHeight > 27) {shiftY--;}
+								}}
+								temp();
+								// big box
+								await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
+								await drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"ctx":bigBoxTextCtx});
+								// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
+								Draw.image(bigBoxText,0,0,box_width,box_height,xa_n+6,ya_n+25,box_width,box_height)
+								//canvas.js:185 Uncaught (in promise) TypeError: Failed to execute 'createImageBitmap' on 'Window': The provided value is not of type '(Blob or HTMLCanvasElement or HTMLImageElement or HTMLVideoElement or ImageBitmap or ImageData or OffscreenCanvas or SVGImageElement or VideoFrame)'.
+
+								// scrollbar  (todo: make this work)
+								// if(termHeight > 27) Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
+								// small box
+								await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
+								await drawChars({"string":o["texts"][1],"x":xa_n+8,"y":ya_p-24});
+								terminalWinID = o["id"];
+								break;
+							case "text":
+								await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29);
+								await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16});
+								break;
+						}
+					break;
+					case "desktop":
+						Draw.image(testingBG,0,0,testingBG.width,testingBG.height,0,0,width,height);
+						//Draw.box(0,0,width,height,o["color1"]);
+						//Draw.gradient(0,0,0,height,width,height,o["color1"],o["color2"])
+					break;
+					case "dropdown":
+						Draw.base(xa_n, ya_n, rw, rh);
+					break;
+					case "dice_layer":
+						// This is a slow, but working way, of making sure that the dice objects (which are in a different array)
+						// are drawn behind the terminal window. They could just be in the objects array too, but they're in a different
+						// one as a sacrifice to make diceUpdate faster.
+						for(let i = 0; i <= objects_dice.length; i++) {
+			    			draw(objects_dice[i]);
+						}
+					break;
+					case "dice":
+						let terminal = objects[terminalWinID];
+						async function tmp() {
+							let ymod = 0;
+							if(o["foe"]) ymod = 48;
+							Draw.image(diceblock,0,0+ymod,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
+							ctx.globalCompositeOperation = "soft-light";
+							async function drawDice() {await drawChars({"string":`${o["value"]}`,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]})}; 
+							// we do drawDice twice as a hack to make the text more visible.
+							drawDice().then(drawDice()).then(function() {
+								ctx.globalCompositeOperation = "source-over";
+							});
+						}
+						tmp();
+					break;
+					case "shortcut":
+						Draw.image(o["icon"],0,0,32,32,o["x"],o["y"],o["width"],o["height"]);
+						Draw.box(o["x"]-o["text"].length-1,o["y"]+36,2+o["text"].length*8,16,"#feffb3");
+						await drawChars({"string":o["text"],"x":(o["x"]-o["text"].length),"y":o["y"]+36,"mode":0});
+					break;
+					case "mouse":
+					break; // it's handled below.
+					default:
+						await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
+						if(o.text != undefined) {
+							await drawChars({"string":o.text,"x":xa_n+3,"y":ya_n+3,"opacity":o["opacity"]});
+						}
+					break;
 				}
-			break;
-			case "desktop":
-				await Draw.box(0,0,width,height,o["color1"]);
-				//await Draw.gradient(0,0,0,height,width,height,o["color1"],o["color2"])
-			break;
-			case "dropdown":
-				await Draw.base(xa_n, ya_n, rw, rh);
-			break;
-			case "dice_layer":
-				// This is a slow, but working way, of making sure that the dice objects (which are in a different array)
-				// are drawn behind the terminal window. They could just be in the objects array too, but they're in a different
-				// one as a sacrifice to make diceUpdate faster.
-				for(let i = 0; i <= objects_dice.length; i++) {
-	    			await draw(objects_dice[i]);
+				// Draw any button events here.
+				for(let i = 0; i < o["event_num"]; i++) {
+					let e = o["events"][i];
+					// Bit of a bizarre way of doing things, but it's less messy.
+					if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
+					if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
+					if(e["anchor"] == "posneg") {xa = o["x"]+o["width"]; ya = o["y"]-o["height"];}
+					if(e["anchor"] == "negpos") {xa = o["x"]-o["width"]; ya = o["y"]+o["height"]};
+					if(e["anchor"] == "none") {xa = o["x"]; ya = o["y"]}
+					Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
 				}
-			break;
-			case "dice":
-				let terminal = objects[terminalWinID];
-				async function tmp() {
-					let ymod = 0;
-					if(o["foe"]) ymod = 48;
-					Draw.image(diceblock,0,0+ymod,16,16,o["x"]+terminal["x"],o["y"]+(terminal["y"]-terminal["height"]),16,16,o["opacity"]);
-					ctx.globalCompositeOperation = "soft-light";
-					async function drawDice() {drawChars({"string":`${o["value"]}`,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]})}; 
-					// we do drawDice twice as a hack to make the text more visible.
-					drawDice().then(drawDice()).then(function() {
-						ctx.globalCompositeOperation = "source-over";
-					});
-				}
-				await tmp();
-			break;
-			case "shortcut":
-				await Draw.image(o["icon"],0,0,32,32,o["x"],o["y"],o["width"],o["height"]);
-				await Draw.box(o["x"]-o["text"].length-1,o["y"]+36,2+o["text"].length*8,16,"#feffb3");
-				await drawChars({"string":o["text"],"x":(o["x"]-o["text"].length),"y":o["y"]+36,"mode":0});
-			break;
-			case "mouse":
-			break; // it's handled below.
-			default:
-				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
-				if(o.text != undefined) {
-					await drawChars({"string":o.text,"x":xa_n+3,"y":ya_n+3,"opacity":o["opacity"]});
-				}
-			break;
-		}
-		// Draw any button events here.
-		for(let i = 0; i < o["event_num"]; i++) {
-			let e = o["events"][i];
-			// Bit of a bizarre way of doing things, but it's less messy.
-			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
-			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
-			if(e["anchor"] == "posneg") {xa = o["x"]+o["width"]; ya = o["y"]-o["height"];}
-			if(e["anchor"] == "negpos") {xa = o["x"]-o["width"]; ya = o["y"]+o["height"]};
-			if(e["anchor"] == "none") {xa = o["x"]; ya = o["y"]}
-			await Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
+			} catch(ex) {
+				Draw.box(0,0,width,height,"black");
+				await Draw.image(sad_poopotron,0,0,256,256,(width/2)-128,(height/3)-128,256,256);
+				await drawChars({"string":ex.stack,"x":(width/2)-((ex.message.length)*8/2),"y":(height/2)+64,"mode":3})
+				fatalError = 1;
+			}
 		}
 }
 
 export async function mouse() {
-	let mouse = objects[1];
-	mouse["x"] = mousePos["x"];
-	mouse["y"] = mousePos["y"];
-	await Draw.box(mouse["x"],mouse["y"],16,16,mouse["fill"]);
+	if(!fatalError) {
+		let mouse = objects[1];
+		mouse["x"] = mousePos["x"];
+		mouse["y"] = mousePos["y"];
+		Draw.image(cursor,0,0,8,8,mouse["x"],mouse["y"],8,8);
+	}
+
 }
 
 export async function drawGFX() {
@@ -269,7 +288,7 @@ export async function drawGFX() {
 	// for each object...
 	for(let i = 0; i <= objects.length; i++) {
 		// draw it
-		await draw(objects[i]);
+		draw(objects[i]);
 	}
 	// get the nanosecond time again, subtract it from the last time...
 	let time = Math.round((performance.now() + performance.timeOrigin)-start);
@@ -289,6 +308,6 @@ export async function drawGFX() {
 	else total_d = Math.round(total*10)/10; 
 	debugBox.innerHTML = "<h2>"+total_d+"ns<sup>*</sup></h2><small><sup>*</sup>The average amount of nanoseconds taken to draw the last few frames";
 	// The mouse is drawn seperately to ensure it's never below anything.
-	//await mouse();
+	await mouse();
 }
 

@@ -50,8 +50,9 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  await drawGFX();
-  await degrade(16); 
+  drawGFX();
+  degrade(16); 
+  requestAnimationFrame(loop);
 }
 async function loop60() {
   await diceUpdate();
@@ -64,7 +65,8 @@ async function init() { // redundant, but it's here for compatibility
   await setInterval(pingSite,3000); // ping the site and update it every three seconds.
   //if(window.location.hostname == "localhost") await setInterval(frameCounter, 1000);
   // todo: make this dynamic or togglable for the final release
-  await setInterval(loop, 5);
+  //await setInterval(loop, 5);
+  loop();
   await setInterval(loop60, 1000/15);
   //setInterval(lowerPriorityLoop, 1000/30);
 }

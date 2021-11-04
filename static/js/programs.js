@@ -1,9 +1,5 @@
 import {objects} from './main.js';
-
-// relevant images
-export const term_buttons = new Image();
-term_buttons.src = 'static/gfx/term_buttons.webp';
-
+import {testingBG, term_buttons} from '../gfx/images.js';
 export async function terminal() {
 	objects.push({"id":objects.length,"type":"window","title":"Terminal","win_type":"terminal","x":400,"y":225,"width":200,"height":200,"z":objects.length+1,
 		"texts":{0: "", 1: ""}, "event_num":5,
