@@ -4,6 +4,12 @@ import {width, height, obWidth, obHeight} from './canvas.js';
 import {keyboardBuffer} from './keyboard.js';
 import {delay} from './commonFunctions.js';
 import {terminal} from './programs.js';
+
+// Global events that should be on every window
+export let globalEvents = [
+	{"type": "button","anchor":"positive","x":0,"y":0,"width":16,"height":16}
+]
+
 export async function loadDefaultObjects() {
 	// The desktop background
 	objects.push({"id":0,"type":"desktop","x":0,"y":0,"width":800,"height":600,"color1":"#3a53ab","color2":"#18244d","z":0});
@@ -20,7 +26,7 @@ export async function loadDefaultObjects() {
 	objects.push({"id":2,"type":"dice_layer","x":0,"y":0,"width":0,"height":0,"z":0});
 	
 	// The terminal (which was moved to programs.js)
-	//await terminal();
+	await terminal();
 }
 export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
 	// TODO: make it so a dropdown disappears when the mouse moves away from it.

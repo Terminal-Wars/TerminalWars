@@ -1,9 +1,5 @@
-* {margin: 0; font-family: Verdana;}
-body {background: url('gfx/background.webp'), black;}
-canvas {display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
-    box-shadow: 3px 3px 5px 5px rgba(0,0,0,0.5);
-    border: 3px solid black;
-    image-rendering: optimizeSpeed!important;
+* {margin: 0; font-family: Verdana;
+image-rendering: optimizeSpeed!important;
     image-rendering: -moz-crisp-edges!important;
     image-rendering: -o-crisp-edges!important;
     image-rendering: -webkit-optimize-contrast!important;
@@ -11,9 +7,20 @@ canvas {display: block; position: absolute; top: 50%; left: 50%; transform: tran
     image-rendering: optimize-contrast!important;
     -ms-interpolation-mode: nearest-neighbor!important;
     font-smoothing: none; -webkit-font-smoothing : none;
+}
+
+body {background: url('gfx/background.webp'), black;}
+canvas {display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    box-shadow: 3px 3px 5px 5px rgba(0,0,0,0.5);
+    border: 3px solid black;
     cursor: none!important;
 }
 .drawBuffer {display: none!important;}
 *[class^="debug"] {color: white; user-select: none; pointer-events: none; display: block;}
 .notices {display: block; width: 15%; height: 25%; font-size: 1em; position: absolute; top: 50%; left: 0; color: red; font-weight: bold; text-align: left;}
 #dpi {height:  1in; width: 1in; display: block;}
+
+
+.error {position: absolute; left: 0; top: 0; width: 100%; height: 100%; background:black;}
+.error img {display: block; position: absolute; left: 50%; top: 25%; transform: translate(-50%, -50%);}
+.error span {font-size: 80%; color: white; font-weight: bold; display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);}

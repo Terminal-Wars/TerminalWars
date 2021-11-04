@@ -3,6 +3,7 @@ import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
 import { replacePlaceholders } from './commonFunctions.js';
+import { globalEvents } from './commonObjects.js';
 
 import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../gfx/images.js';
 
@@ -23,9 +24,6 @@ if(ctxFinal === null) {
 	ctx = drawBuffer.getContext(renderType);
 	ctxFinal = drawFinal.getContext(renderType);
 }
-
-//export let bigBoxText = document.querySelector('.drawTerminalWindowText');
-//export let bigBoxTextCtx = bigBoxText.getContext('2d');
 
 // The default, set width and height.
 export const width = 800;
@@ -123,7 +121,7 @@ class DrawClass {
 		// Draw either an image or some text
 		switch(typeof(content)) {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
-				this.image(content,ox,oy,width,height,x,y,width,height);
+				this.image({"image":content,"sx":ox,"sy":oy,"width":width,"height":height,"x":x,"y":y});
 				break;
 			case "string":
 				drawChars({"string":content,"x":x,"y":y,"mode":mode});
@@ -291,8 +289,8 @@ async function draw(o) {
 					break;
 				}
 				// Draw any button events here.
-				for(let i = 0; i < o["event_num"]; i++) {
-					let e = o["events"][i];
+				for(let i = 0; i < o["event_num"]+3; i++) {
+					let e = (o["events"][i] && globalEvents);
 					// Bit of a bizarre way of doing things, but it's less messy.
 					if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
 					if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
@@ -302,9 +300,8 @@ async function draw(o) {
 					Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
 				}
 			} catch(ex) {
-				Draw.box(0,0,width,height,"black");
-				await Draw.image({"image":sad_poopotron,"width":256,"height":256,"x":(width/2)-128,"y":(height/3)-128});
-				await drawChars({"string":ex.stack,"x":(width/2)-((ex.message.length)*8/2),"y":(height/2)+64,"mode":3})
+				document.querySelector('.error').style.display = 'block';
+				document.querySelector('.error span').innerHTML = ex.stack.replace(/\n/g,"<br>",4);
 				fatalError = 1;
 			}
 		}
@@ -328,7 +325,7 @@ export async function drawGFX() {
 	// for each object...
 	for(let i = 0; i <= objects.length; i++) {
 		// draw it
-		draw(objects[i]);
+		await draw(objects[i]);
 	}
 	// The mouse is drawn seperately to ensure it's never below anything.
 	await mouse();

@@ -69,7 +69,6 @@ async function init() { // redundant, but it's here for compatibility
   pingSite();
   setInterval(pingSite,3000); // ping the site and update it every three seconds.
   if(window.location.hostname == "localhost") setInterval(frameCounter, 1000);
-
   loop();
   setInterval(loop60, 1000/15);
   //setInterval(lowerPriorityLoop, 1000/30);
