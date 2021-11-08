@@ -4,6 +4,7 @@ import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
 import { replacePlaceholders } from './commonFunctions.js';
 import { globalEvents } from './commonObjects.js';
+import { degrade} from './degrade.js';
 
 import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../gfx/images.js';
 
@@ -227,7 +228,7 @@ async function draw(o) {
 								await drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"ctx":bigBoxTextCtx});
 								// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
 								Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":box_width,
-									"height":box_height,"x":xa_n+6,"y":ya_n+25});
+									"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
 								//canvas.js:185 Uncaught (in promise) TypeError: Failed to execute 'createImageBitmap' on 'Window': The provided value is not of type '(Blob or HTMLCanvasElement or HTMLImageElement or HTMLVideoElement or ImageBitmap or ImageData or OffscreenCanvas or SVGImageElement or VideoFrame)'.
 
 								// scrollbar  (todo: make this work)
@@ -329,8 +330,24 @@ export async function drawGFX() {
 	}
 	// The mouse is drawn seperately to ensure it's never below anything.
 	await mouse();
-	// Finally, draw everything we've drawn to the actual frame.
-	Draw.image({"image":drawBuffer,"width":drawBuffer.width,"height":drawBuffer.height,"ctx":ctxFinal});
+	// Degrade (and eventually dither) the image
+	await degrade(16);
+	// Finally, draw everything we've drawn to the actual frame, using an
+	// impromptu async function to draw it in chunks.
+	async function temp() {
+		const DIVIDE = 3;
+		for(let y = -1; y <= DIVIDE; y++) {
+			for(let x = 0; x <= DIVIDE; x++) {
+				let widthChunk = (drawBuffer.width)/DIVIDE;
+				let heightChunk = (drawBuffer.height)/DIVIDE;
+				Draw.image({"image":drawBuffer,"sx":x*widthChunk,"sy":y*heightChunk,"x":x*widthChunk,"y":y*heightChunk,"width":widthChunk,"height":heightChunk,"ctx":ctxFinal});
+			}
+		}
+	}
+	await temp();
 	frameTime++;
 }
 
+// 2: 0.2 ns
+// 3: 0.3 ns
+// 4: 0.5 ns

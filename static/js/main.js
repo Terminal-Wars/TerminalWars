@@ -51,7 +51,6 @@ export const Objects = new ObjectClass;
 
 async function loop() {
   drawGFX();
-  degrade(16); 
   requestAnimationFrame(loop);
 }
 async function loop60() {
