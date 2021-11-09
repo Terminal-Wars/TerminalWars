@@ -2,7 +2,7 @@ import { objects, objects_dice, debugBox, debugBox2, debugBox3,debugBox4, notice
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
-import { replacePlaceholders } from './commonFunctions.js';
+import { replacePlaceholders, clamp } from './commonFunctions.js';
 import { globalEvents } from './commonObjects.js';
 import { degrade} from './degrade.js';
 
@@ -74,8 +74,8 @@ export let cachedImage = [];
 let xa, ya = 0;
 
 // Some terminal specific variables which need to be global.
-export let shiftY = 0; export let termHeight = 1;
-
+export let shiftY = 0; export let termHeight = 0;
+export let longestLine = 0;
 // The frame counters
 export let frameTime = 0;
 export let frameCount = [];
@@ -92,6 +92,9 @@ export function shiftYBy(num) {shiftY += num;}
 
 // Variable that gets set if we run into a fatal error
 export let fatalError = 0;
+
+// reducer for the array function.
+const reducer = (previousValue, currentValue) => previousValue + currentValue;
 
 // Common UI elements
 class DrawClass {
@@ -185,6 +188,9 @@ class DrawClass {
 			if(opacity != 1) ctxNew.globalAlpha = 1;
 		}
 	}
+	async imageRAW(data, x, y, ctxNew=ctx) {
+		ctxNew.putImageData(data,x,y);
+	}
 }
 const Draw = new DrawClass();
 
@@ -219,20 +225,33 @@ async function draw(o) {
 								// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6,
 								// only arrays.
 								// also this is an impromptu async function for performance reasons.
-								async function temp() {if(keyboardBuffer.length >= 1) {
+								if(keyboardBuffer.length >= 1) {
 									o["texts"][0] += keyboardBuffer[0];
+									if(longestLine <= keyboardBuffer[0].length) longestLine = keyboardBuffer[0].length;
 									keyboardBuffer.shift(0);
 									// we assume that every line in the keyboard buffer ends in a newline, and they pretty much always do.
 									termHeight++;
 									if(termHeight > 27) {shiftY--;}
-								}}
-								temp();
+								}
 								// big box
 								await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
-								await drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"ctx":bigBoxTextCtx});
+								Draw.box(0,0,box_width,box_height,"white",bigBoxTextCtx)
+								drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"ctx":bigBoxTextCtx});
 								// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
-								Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":box_width,
-									"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
+								//Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":longestLine*8,"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
+								const DIVIDE = 8;
+								for(let y = 0; y < clamp(termHeight,0,DIVIDE); y++) {
+									for(let x = 0; x < clamp(longestLine/(DIVIDE)+1,0,DIVIDE); x++) {
+										async function temp2() {
+											let widthChunk = box_width/DIVIDE;
+											let heightChunk = box_height/DIVIDE;
+											//Draw.image({"image":bigBoxText,"sx":x*widthChunk,"sy":y*heightChunk,"width":widthChunk,"height":heightChunk,"x":xa_n+6+(x*widthChunk),"y":ya_n+25+(y*heightChunk)})
+											Draw.imageRAW(bigBoxTextCtx.getImageData(x*widthChunk,y*heightChunk,clamp(widthChunk,1,longestLine*8),clamp(heightChunk,1,termHeight*32)),xa_n+6+(x*widthChunk),ya_n+25+(y*heightChunk));
+										}
+										temp2();
+									}
+								}
+								
 								//canvas.js:185 Uncaught (in promise) TypeError: Failed to execute 'createImageBitmap' on Draw.image'Window': The provided value is not of type '(Blob or HTMLCanvasElement or HTMLImageElement or HTMLVideoElement or ImageBitmap or ImageData or OffscreenCanvas or SVGImageElement or VideoFrame)'.
 
 								// scrollbar  (todo: make this work)
@@ -338,26 +357,26 @@ export async function drawGFX() {
 	await degrade(16);
 	// Finally, draw everything we've drawn to the actual frame, using an
 	// impromptu async function to draw it in chunks.
-	async function temp() {
-		const DIVIDE = 8;
+		const DIVIDE = 4;
 		for(let y = 0; y < DIVIDE; y++) {
 			if(cachedImage[y] == undefined) {cachedImage[y] = []; console.log(y);}
 			for(let x = 0; x < DIVIDE; x++) {
-				let widthChunk = (drawBuffer.width)/DIVIDE;
-				let heightChunk = (drawBuffer.height)/DIVIDE;
-				let pixels = ctx.getImageData(x*widthChunk,y*heightChunk,widthChunk-1,heightChunk-1);
-				let pixeldata = pixels.data;
-				debugBox3.innerHTML = (cachedImage[y][x] == pixels.data);
-				if(pixels.data == cachedImage[y][x]) {
-				} else {
-					cachedImage[y][x] = pixels.data;
-					ctxFinal.putImageData(pixels,x*widthChunk,y*heightChunk)
+				async function temp() {
+					let widthChunk = (drawBuffer.width)/DIVIDE;
+					let heightChunk = (drawBuffer.height)/DIVIDE;
+					let pixels = ctx.getImageData(x*widthChunk,y*heightChunk,widthChunk,heightChunk);
+					/*let pixeldata = pixels.data.reduce(reducer);
+					debugBox3.innerHTML = (cachedImage[y][x]+", "+pixeldata);
+					if(cachedImage[y][x] == pixeldata) {} else {
+						cachedImage[y][x] = pixeldata;*/
+						ctxFinal.putImageData(pixels,x*widthChunk,y*heightChunk);/*
+						console.log("image drawn");
+					}
+					debugBox4.innerHTML = (cachedImage[y][x] == pixeldata);*/
 				}
-				debugBox4.innerHTML = (cachedImage[y][x] == pixels.data);
+				temp();
 			}
 		}
-	}
-	await temp();
 	frameTime++;
 }
 

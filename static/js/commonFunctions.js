@@ -30,3 +30,4 @@ export function replacePlaceholders(value, target) {
 export function broadcast(text, user="", blank=false) {
   socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":user,"text":text,"blank":blank}}));
 }
+export function clamp(num,min,max) {return Math.min(Math.max(num, min),max)}
