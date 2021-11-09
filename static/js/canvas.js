@@ -1,4 +1,4 @@
-import { objects, objects_dice, debugBox, debugBox2, notices, mousePos } from './main.js';
+import { objects, objects_dice, debugBox, debugBox2, debugBox3,debugBox4, notices, mousePos } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
@@ -11,14 +11,15 @@ import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../gfx/i
 // The rendering method, which is WebGL by default.
 export let renderType = "2d";
 // The canvas
-export let drawBuffer = document.querySelector('.drawBuffer');
+export let drawBuffer = document.createElement('canvas');
 export let ctx = drawBuffer.getContext(renderType);
+export let ctxBitmap = drawBuffer.getContext("bitmaprenderer");
+
 ctx.imageSmoothingEnabled = false;
 ctx.mozImageSmoothingEnabled = false;
 
 export let drawFinal = document.querySelector('.draw');
 export let ctxFinal = drawFinal.getContext(renderType);
-
 // If we can't do webgl, fall back to CPU rendering.
 if(ctxFinal === null) {
 	renderType = "2d";
@@ -62,6 +63,9 @@ drawFinal.width = width; drawFinal.height = height;
 drawFinal.style.width = fWidth+"px"; drawFinal.style.maxWidth = fWidth+"px"; 
 drawFinal.style.height = fHeight+"px"; drawFinal.style.maxHeight = fHeight+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = Sheight+"px";
+
+// The cached screen, for avoiding redrawing things we don't need to.
+export let cachedImage = [];
 
 // Any images we need
 // todo: make a seperate .json file with all of these in it and just use arrays instead.
@@ -229,7 +233,7 @@ async function draw(o) {
 								// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
 								Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":box_width,
 									"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
-								//canvas.js:185 Uncaught (in promise) TypeError: Failed to execute 'createImageBitmap' on 'Window': The provided value is not of type '(Blob or HTMLCanvasElement or HTMLImageElement or HTMLVideoElement or ImageBitmap or ImageData or OffscreenCanvas or SVGImageElement or VideoFrame)'.
+								//canvas.js:185 Uncaught (in promise) TypeError: Failed to execute 'createImageBitmap' on Draw.image'Window': The provided value is not of type '(Blob or HTMLCanvasElement or HTMLImageElement or HTMLVideoElement or ImageBitmap or ImageData or OffscreenCanvas or SVGImageElement or VideoFrame)'.
 
 								// scrollbar  (todo: make this work)
 								// if(termHeight > 27) Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
@@ -335,12 +339,21 @@ export async function drawGFX() {
 	// Finally, draw everything we've drawn to the actual frame, using an
 	// impromptu async function to draw it in chunks.
 	async function temp() {
-		const DIVIDE = 3;
-		for(let y = -1; y <= DIVIDE; y++) {
-			for(let x = 0; x <= DIVIDE; x++) {
+		const DIVIDE = 8;
+		for(let y = 0; y < DIVIDE; y++) {
+			if(cachedImage[y] == undefined) {cachedImage[y] = []; console.log(y);}
+			for(let x = 0; x < DIVIDE; x++) {
 				let widthChunk = (drawBuffer.width)/DIVIDE;
 				let heightChunk = (drawBuffer.height)/DIVIDE;
-				Draw.image({"image":drawBuffer,"sx":x*widthChunk,"sy":y*heightChunk,"x":x*widthChunk,"y":y*heightChunk,"width":widthChunk,"height":heightChunk,"ctx":ctxFinal});
+				let pixels = ctx.getImageData(x*widthChunk,y*heightChunk,widthChunk-1,heightChunk-1);
+				let pixeldata = pixels.data;
+				debugBox3.innerHTML = (cachedImage[y][x] == pixels.data);
+				if(pixels.data == cachedImage[y][x]) {
+				} else {
+					cachedImage[y][x] = pixels.data;
+					ctxFinal.putImageData(pixels,x*widthChunk,y*heightChunk)
+				}
+				debugBox4.innerHTML = (cachedImage[y][x] == pixels.data);
 			}
 		}
 	}

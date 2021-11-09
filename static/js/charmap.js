@@ -19,9 +19,9 @@ let lineHeight;
 // 7: white 10px bold
 
 async function drawChar(char, x, y, mode=0,opacity,ctxNew) {
-	if(opacity != 1) ctxNew.globalAlpha = opacity;
+	//if(opacity != 1) ctxNew.globalAlpha = opacity;
 	ctxNew.drawImage(charmap,8*characters.indexOf(char),0+(16*mode),8,16,x,y,8,16);
-	if(opacity != 1) ctxNew.globalAlpha = 1;
+	//if(opacity != 1) ctxNew.globalAlpha = 1;
 }
 export async function drawChars(arr) {
 	let string = (arr["string"] || "");
