@@ -236,12 +236,12 @@ async function draw(o) {
 								// big box
 								await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
 								Draw.box(0,0,box_width,box_height,"white",bigBoxTextCtx)
-								drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"ctx":bigBoxTextCtx});
+								drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"maxX":box_width,"ctx":bigBoxTextCtx});
 								// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
 								//Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":longestLine*8,"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
 								const DIVIDE = 8;
 								for(let y = 0; y < clamp(termHeight,0,DIVIDE); y++) {
-									for(let x = 0; x < clamp(longestLine/(DIVIDE)+1,0,DIVIDE); x++) {
+									for(let x = 0; x < clamp(longestLine,0,DIVIDE); x++) {
 										async function temp2() {
 											let widthChunk = box_width/DIVIDE;
 											let heightChunk = box_height/DIVIDE;

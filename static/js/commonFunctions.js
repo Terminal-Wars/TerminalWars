@@ -31,3 +31,12 @@ export function broadcast(text, user="", blank=false) {
   socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":user,"text":text,"blank":blank}}));
 }
 export function clamp(num,min,max) {return Math.min(Math.max(num, min),max)}
+
+export function average(arr) {
+  let result = 0;
+  for(let n in arr) {
+    result += arr[n];
+  }
+  result /= arr.length;
+  return result;
+}
