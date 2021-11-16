@@ -76,7 +76,7 @@ loadDefaultObjects();
 pingSite();
 setInterval(pingSite,3000); // ping the site and update it every three seconds.
 // we don't use requestAnimationFrame because this NEEDS to execute once a second
-if(window.location.hostname == "localhost") setInterval(frameCounter, 1000);
+setInterval(frameCounter, 1000);
 loop();
 //setInterval(loop, 3);
 setInterval(loop60, 1000/15);
