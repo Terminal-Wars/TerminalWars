@@ -35,11 +35,23 @@ async function windowUpdate(val) {
 					if(val == "active") {tmpArray = mousePosHeld} else {tmpArray = mousePos};
 					let e = s["events"][i];
 					// Bit of a bizarre way of doing things, but it's less messy.
-					if(e["anchor"] == "positive") {xa = s["x"]+s["width"]; ya = s["y"]+s["height"];}
-					if(e["anchor"] == "negative") {xa = s["x"]-s["width"]; ya = s["y"]-s["height"]};
-					if(e["anchor"] == "posneg") {xa = s["x"]+s["width"]; ya = s["y"]-s["height"];}
-					if(e["anchor"] == "negpos") {xa = s["x"]-s["width"]; ya = s["y"]+s["height"]};
-					if(e["anchor"] == "none") {xa = s["x"]; ya = s["y"]}
+					switch(e["anchor"]) {
+						case "positive":
+							xa = s["x"]+s["width"]; ya = s["y"]+s["height"];
+							break;
+						case "negative":
+							xa = s["x"]-s["width"]; ya = s["y"]-s["height"];
+							break;
+						case "posneg":
+							xa = s["x"]+s["width"]; ya = s["y"]-s["height"];
+							break;
+						case "negpos":
+							xa = s["x"]-s["width"]; ya = s["y"]+s["height"]
+							break;
+						case "none":
+							xa = s["x"]; ya = s["y"];
+							break;
+					}
 					// If we're actually hovering over an object...
 					if(tmpArray["x"] >= xa+e["x"] && tmpArray["y"] >= ya+e["y"] && tmpArray["x"] <= xa+e["x"]+e["width"] && tmpArray["y"] <= ya+e["y"]+e["height"]) {
 						e[val] = 1;

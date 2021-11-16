@@ -27,7 +27,6 @@ export async function loadDefaultObjects() {
 	
 	// The terminal (which was moved to programs.js)
 	terminal();
-
 }
 export async function dropdown(x,y,sid,list,command="",arg1="",arg2="") {
 	// TODO: make it so a dropdown disappears when the mouse moves away from it.

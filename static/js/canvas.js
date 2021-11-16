@@ -370,6 +370,7 @@ export async function mouse() {
 }
 
 export async function drawGFX() {
+	
 	// refresh the dpi
 	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
 	// display an error message if it's above 96
@@ -384,9 +385,9 @@ export async function drawGFX() {
 	// Degrade (and eventually dither) the image
 	await degrade(16);
 	// Finally, draw everything we've drawn to the actual frame, using an
+
 	const DIVIDE = 4;
 	for(let y = 0; y < DIVIDE; y++) {
-		if(cachedImage[y] == undefined) {cachedImage[y] = [];}
 		for(let x = 0; x < DIVIDE; x++) {
 			// impromptu async function to draw it in chunks.
 			async function temp() {
