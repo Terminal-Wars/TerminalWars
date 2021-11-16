@@ -147,17 +147,18 @@ class DrawClass {
 			// Apparently canvas strokes start at a half a pixel, so we need to correct this.
 			ctx.moveTo(arr[1]+0.5, arr[2]+0.5);
 			ctx.strokeStyle = arr[0];
-			ctx.lineWidth = 0;
-			for(let i = 3; i < arr.length; i+=2) {
+			ctx.lineWidth = 1 * (ratio/ctx.backingStorePixelRatio);
+			ctx.lineCap = "square";
+			let i = 3;
+			for(i = 3; i < arr.length; i+=2) {
 				ctx.lineTo(arr[i]+0.5, arr[i+1]+0.5);
 			}
+			ctx.lineTo(arr[i-2]+0.5, arr[i-1]+0.5);
 			ctx.closePath();
 			ctx.stroke();
 		}
 	}
 	async textbox(x, y, width, height,thisCtx=ctx) {
-		//this.box(x-1, y-1, width+2, height+2,"#808080",thisCtx);
-		//this.box(x, y, width+1, height+1,"black",thisCtx);
 		this.polyline(["#808080",
 					   x-1,y+height,
 					   x-1,y-1,
@@ -173,15 +174,7 @@ class DrawClass {
 		if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
 		if(enabled == 0) ox += 16;
 		if(type == "button") {
-			this.box(x-1, y-1, width+2, height+2,"black");
-			if(active == 0) {
-				this.box(x-1, y-1, width+1, height+1,"white");
-				this.box(x, y, width, height,"#dfdfdf");
-				this.box(x+1, y+1, width-1, height-1,"#808080");
-			} else {
-				this.box(x, y, width, height,"#808080");
-			}
-			this.box(x+1, y+1, width-2, height-2,"#b5b5b5");
+			this.base(x,y,width,height,"black","#808080","#dfdfdf","white");
 		}
 		if(type == "flat" || type == "extraflat") { // flat
 			mode = 0;
@@ -190,7 +183,6 @@ class DrawClass {
 				mode = 2;
 			}
 		}
-		//debugBox2.innerHTML = "";
 		// Draw either an image or some text
 		switch(typeof(content)) {
 			case "object": // probably an image. if it's ever otherwise, this will be changed.
@@ -204,14 +196,31 @@ class DrawClass {
 				break;
 		}
 	}
-	async base(x, y, w, h) {
-		this.box(x+1, y+1, (w+1), (h)+1, "black");
-		this.box(x+1, y+1, (w), (h), "#808080");
-		this.box(x+1, y+1, (w)-1, (h)-1, "white");
+	async base(x, y, w, h, col1="black",col2="#808080",col3="white",col4="#dfdfdf") {
+		// the coordinates here are whack but it takes so, so long to get them setup that
+		// i don't feel like redo-ing them
+		this.polyline([col1,
+						x+w+1,y, // top right
+						x+w+1,y+h+1, //bottom right
+						x,y+h+1 // bottom left
+						]);
+		this.polyline([col2,
+						x+w,y+1, // top right
+						x+w,y+h, // bottom right
+						x+1,y+h // bottom left
+						]);
+		this.polyline([col3,
+						x+1,y+h-1, // bottom left
+						x+1,y+1, // top left
+						x+w-1,y+1]); // top right
+		this.polyline([col4,
+						x,y+h, // bottom left
+						x,y, // top left
+						x+w,y]); // top right
 		this.box(x+2, y+2, (w)-2, (h)-2, "#b5b5b5");
 	}
 }
-const Draw = new DrawClass();
+export const Draw = new DrawClass();
 
 // The function for drawing objects.
 async function draw(o) {
@@ -384,14 +393,10 @@ export async function drawGFX() {
 				let widthChunk = (drawBuffer.width)/DIVIDE;
 				let heightChunk = (drawBuffer.height)/DIVIDE;
 				let pixels = ctx.getImageData(x*widthChunk,y*heightChunk,widthChunk,heightChunk);
-					ctxFinal.putImageData(pixels,x*widthChunk,y*heightChunk);
+				ctxFinal.putImageData(pixels,x*widthChunk,y*heightChunk);
 			}
 			temp();
 		}
 	}
 	frameTime++;
 }
-
-// 2: 0.2 ns
-// 3: 0.3 ns
-// 4: 0.5 ns
