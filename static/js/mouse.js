@@ -62,18 +62,7 @@ async function windowUpdate(val) {
 		}
 	}
 }
-async function mouseDownLoop() {
-	let mouseDownLocal = mouseDown;
-	if(mouseDownLocal) {
-		mouseDownFor++;
-		// After the mouse has been held down for awhile
-		if(mouseDownFor >= 30) {
-			await windowUpdate("active");
-		}
-		mouseDownLoop();
-	} 
-	return 0;
-}
+
 // On every mouse movement
 document.addEventListener("mousemove", async function(e) {
 	// The current mouse position
@@ -85,7 +74,7 @@ document.addEventListener("mousemove", async function(e) {
 	// Are we dragging the topmost part of the window?
 	if(winMoveMode) {
 		// If so, move the window.
-		if(curObject["id"] > 0) {curObject["x"] += xd; curObject["y"] += yd};
+		if(curObject["id"] > 0) {curObject["x"] += Math.round(xd); curObject["y"] += Math.round(yd)};
 	} // Otherwise do nothing. 
 	// Change the last mouse position to the current one.
 	mousePosHeld["x"] = mousePos["x"]; mousePosHeld["y"] = mousePos["y"];
@@ -96,6 +85,7 @@ document.addEventListener("mousedown", async function(e) {
 	mouseDown = 1;
 	// The "old" mouse position variables get set.
 	mousePosHeld["x"] = Math.round(e.clientX-obWidth); mousePosHeld["y"] = Math.round(e.clientY-obHeight);
+	// todo: make it so we can hold down the mouse (using an event listener)
 	windowUpdate("active");
 });
 // When the mouse button is released.
@@ -111,6 +101,6 @@ document.addEventListener("mouseup", function(e) {
 	winMoveMode = 0;
 });
 document.addEventListener("wheel", function(e) {
+	// todo: let programs choose what to do with the scroll wheel, rather then make it specific to the terminal.
 	privateCommand("shiftYBy",Math.round(e.deltaY*0.05)*-1);
-	console.log(e.deltaY);
 });

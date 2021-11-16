@@ -32,11 +32,18 @@ export function broadcast(text, user="", blank=false) {
 }
 export function clamp(num,min,max) {return Math.min(Math.max(num, min),max)}
 
-export function average(arr) {
+export function average(arr, len=-1) {
   let result = 0;
-  for(let n in arr) {
-    result += arr[n];
+  if(len == -1) {
+    for(let n in arr) {
+      result += arr[n];
+    }
+    result /= arr.length;
+  } else {
+    for(n in len) {
+      result += arr[n];
+    }
+    result /= len;
   }
-  result /= arr.length;
   return result;
 }

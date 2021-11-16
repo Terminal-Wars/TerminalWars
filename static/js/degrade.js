@@ -1,5 +1,5 @@
-import {ctx, ctxFinal, width, height, fatalError, renderType} from './canvas.js';
-import {debugBox4} from './main.js';
+import {ctx, ctxFinal, width, height, renderType} from './canvas.js';
+import {fatalError} from './main.js';
 import {average} from './commonFunctions.js';
 export async function degradeChunk(x,y,width,height,depth) {
 	if(renderType == "2d") {
@@ -8,7 +8,7 @@ export async function degradeChunk(x,y,width,height,depth) {
 		let pixeldata = pixels.data;
 		let pixelSkipAhead = 4;
 		for(let i = 0; i < pixeldata.length; i += 4) {
-			colorBuffer.push(pixeldata[i]+pixeldata[i+1]+pixeldata[i+2]); if(colorBuffer.length > width) {colorBuffer.shift();}
+			colorBuffer.push(pixeldata[i]+pixeldata[i+1]+pixeldata[i+2]); if(colorBuffer.length > 2) {colorBuffer.shift();}
 			//debugBox4.innerHTML = (colorBuffer[0]+colorBuffer[1]+colorBuffer[2]+colorBuffer[3])/4;
 			if(colorBuffer[0] != colorBuffer[1]) {
 				pixelSkipAhead = 0;

@@ -22,6 +22,9 @@ export let debugBox3 = document.querySelector(".debug3");
 export let debugBox4 = document.querySelector(".debug4");
 export let notices = document.querySelector(".notices");
 
+// fatal error
+export let fatalError = 0;
+
 export class ObjectClass {
   amount() {
     return objects.length;
@@ -50,8 +53,14 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  drawGFX();
-  requestAnimationFrame(loop);
+  try {
+    drawGFX();
+    requestAnimationFrame(loop);
+  } catch(ex) {
+        document.querySelector('.error').style.display = 'block';
+        document.querySelector('.error span').innerHTML = ex.stack.replace(/\n/g,"<br>",4);
+        fatalError = 1;
+      }
 }
 async function loop60() {
   await diceUpdate();
