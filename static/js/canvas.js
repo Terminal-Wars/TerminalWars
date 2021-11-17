@@ -384,20 +384,7 @@ export async function drawGFX() {
 	await mouse();
 	// Degrade (and eventually dither) the image
 	await degrade(16);
-	// Finally, draw everything we've drawn to the actual frame, using an
-
-	const DIVIDE = 4;
-	for(let y = 0; y < DIVIDE; y++) {
-		for(let x = 0; x < DIVIDE; x++) {
-			// impromptu async function to draw it in chunks.
-			async function temp() {
-				let widthChunk = (drawBuffer.width)/DIVIDE;
-				let heightChunk = (drawBuffer.height)/DIVIDE;
-				let pixels = ctx.getImageData(x*widthChunk,y*heightChunk,widthChunk,heightChunk);
-				ctxFinal.putImageData(pixels,x*widthChunk,y*heightChunk);
-			}
-			temp();
-		}
-	}
+	// Finally, draw everything we've drawn to the actual frame
+	Draw.image({"image":drawBuffer,"x":0,"y":0,"width":width,"height":height});
 	frameTime++;
 }
