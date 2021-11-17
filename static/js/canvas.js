@@ -16,15 +16,14 @@ export let ctx = drawBuffer.getContext(renderType, {alpha: false}); // should be
 export let buffers = []; export let contexts = [];
 for(let x = 0; x <= 50; x++) {
 	let buffer = document.createElement('canvas');
-	let context = buffer.getContext(renderType, {alpha: false});
-	ctx.imageSmoothingEnabled = false;
-	ctx.mozImageSmoothingEnabled = false;
+	let context = buffer.getContext("2d", {alpha: false});
+	context.imageSmoothingEnabled = false;
+	context.mozImageSmoothingEnabled = false;
 	buffers.push(buffer);
 	contexts.push(context);
 }
 
 export let drawFinal = document.querySelector('.draw'); 
-
 export let ctxFinal = drawFinal.getContext(renderType);
 // If we can't do webgl, fall back to CPU rendering.
 if(ctxFinal === null) {
@@ -108,9 +107,19 @@ class DrawClass {
 			} else {
 				contexts[layernum].fillStyle = fillStyle;
 				contexts[layernum].fillRect(x,y,width,height);
+		console.log(fillStyle);
+		let tmparr = contexts[layernum].getImageData(0,0,width,height);
+		let result = 0;
+		for(let i = 0; i <= tmparr.length; i+=4) {
+			result += tmparr[i];
+			result += tmparr[i+1];
+			result += tmparr[i+2];
+		}
+		console.log(result);
+
 			}
 		}
-		catch(ex) {error(ex)};
+		catch(ex) {if(contexts[layernum] != undefined) {error(ex)}};
 
 	}
 	async gradient(x1,y1,x2,y2,width,height,color1,color2,layernum) {
@@ -125,22 +134,22 @@ class DrawClass {
 				contexts[layernum].fillRect(x1, y1, width, height);
 			}
 		}
-		catch(ex) {error(ex)};
+		catch(ex) {if(contexts[layernum] != undefined) {error(ex)}};
 	}
 	async image(arr) {
+		let image = arr["image"] || null;
+		let sx = arr["sx"] || 0;
+		let sy = arr["sy"] || 0;
+		let sWidth = arr["sWidth"] || arr["width"] || 0;
+		let sHeight = arr["sHeight"] || arr["height"] || 0;
+		let dx = arr["dx"] || arr["x"] || 0;
+		let dy = arr["dy"] || arr["y"] || 0;
+		let dWidth = arr["dWidth"] || arr["width"] || 0;
+		let dHeight = arr["dHeight"] || arr["height"] || 0;
+		let opacity = arr["opacity"] || 1;
+		let ctxNew = arr["ctx"] || ctx;
+		let layernum = arr["layernum"] || 0;
 		try {
-			let image = arr["image"] || null;
-			let sx = arr["sx"] || 0;
-			let sy = arr["sy"] || 0;
-			let sWidth = arr["sWidth"] || arr["width"] || 0;
-			let sHeight = arr["sHeight"] || arr["height"] || 0;
-			let dx = arr["dx"] || arr["x"] || 0;
-			let dy = arr["dy"] || arr["y"] || 0;
-			let dWidth = arr["dWidth"] || arr["width"] || 0;
-			let dHeight = arr["dHeight"] || arr["height"] || 0;
-			let opacity = arr["opacity"] || 1;
-			let ctxNew = arr["ctx"] || ctx;
-			let layernum = arr["layernum"]; // This is a required value.
 			if(renderType == "webgl") {
 
 			} else {
@@ -148,7 +157,7 @@ class DrawClass {
 				contexts[layernum].drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
 				if(opacity != 1) contexts[layernum].globalAlpha = 1;
 			}
-		} catch(ex) {error(ex)};
+		} catch(ex) {if(contexts[layernum] != undefined) {error(ex)}};
 	}
 	async imageRAW(data, x, y, layernum) {
 		try {
@@ -157,7 +166,7 @@ class DrawClass {
 			} else {
 				contexts[layernum].putImageData(data,x,y);
 			}
-		} catch(ex) {error(ex)};
+		} catch(ex) {if(contexts[layernum] != undefined) {error(ex)}};
 	}
 	async polyline(arr,layernum) {
 		try {
@@ -180,7 +189,7 @@ class DrawClass {
 					contexts[layernum].stroke();
 				}
 			}
-		} catch(ex) {error(ex)};
+		} catch(ex) {if(contexts[layernum] != undefined) {error(ex)}};
 	}
 	async textbox(x, y, width, height,layernum) {
 		try {
@@ -193,7 +202,7 @@ class DrawClass {
 						   x+width,y+height,
 						   x-1,y+height],layernum);
 			this.box(x, y, width, height,"white",layernum);
-		} catch(ex) {error(ex)};
+		} catch(ex) {if(contexts[layernum] != undefined) {error(ex)}};
 	}
 	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled,layernum) {
 		try {
@@ -222,7 +231,7 @@ class DrawClass {
 					//debugBox2.innerHTML = typeof(content);
 					break;
 			}
-		} catch(ex) {error(ex)}
+		} catch(ex) {if(contexts[layernum] != undefined) {error(ex)}}
 	}
 	async base(x, y, w, h, col1="black",col2="#808080",col3="white",col4="#dfdfdf",layernum) {
 		try {
@@ -247,141 +256,143 @@ class DrawClass {
 							x,y, // top left
 							x+w,y],layernum); // top right
 			this.box(x+2, y+2, (w)-2, (h)-2, "#b5b5b5",layernum);
-		} catch(ex) {error(ex)}
+		} catch(ex) {if(contexts[layernum] != undefined) {error(ex)}}
 	}
 }
 export const Draw = new DrawClass();
 
 // The function for drawing objects.
 async function draw(o,n) {
+	try{
 	// If we haven't run into a fatal error
 	if(!fatalError) {
-		if(o === undefined) {return;} // ¯\_(ツ)_/¯ 
-		// Some common variables
-		let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
-		let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
-		let rw = o["width"]*2; let rh = o["height"]*2; // "remaining width and height"
-		// Get the type of it, and draw something different based on said type.
-		switch(o["type"]) {
-			case "window":
-				// gray base
-				Draw.base(xa_n,ya_n,rw,rh,n);
-				// red gradient
-				Draw.gradient(xa_n+4, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000",n)
-				// title
-				drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3,"layernum":n});
-				switch(o["win_type"]) {
-					// terminal window
-					// todo: make a keyboard events system and move all of this into the terminal object itself.
-					case "terminal":
-						let bigBoxText = document.createElement('canvas'); 
-						let box_width = rw-8; let box_height = rh-56;
-						bigBoxText.width = box_width; bigBoxText.height = box_height;
-						let bigBoxTextCtx = bigBoxText.getContext('2d');
-						// anything from the keyboard buffer gets added to the text box in this loop.
-						// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6, only arrays.
-						if(keyboardBuffer.length >= 1) {
-							o["texts"][0] += keyboardBuffer[0];
-							if(longestLine <= keyboardBuffer[0].length) longestLine = keyboardBuffer[0].length;
-							keyboardBuffer.shift(0);
-							// we assume that every line in the keyboard buffer ends in a newline, and they pretty much always do.
-							termHeight++;
-							if(termHeight > 27) {shiftY--;}
-						}
-						// big box
-						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58, n);
-						Draw.box(0,0,box_width,box_height,"white",bigBoxTextCtx,n)
-						drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"maxX":box_width,"ctx":bigBoxTextCtx,n});
-						// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
-						//Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":longestLine*8,"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
-						const DIVIDE = 8;
-						for(let y = 0; y < clamp(termHeight,0,DIVIDE); y++) {
-							for(let x = 0; x < clamp(longestLine,0,DIVIDE); x++) {
-								async function temp2() {
-									let widthChunk = box_width/DIVIDE;
-									let heightChunk = box_height/DIVIDE;
-									Draw.imageRAW(bigBoxTextCtx.getImageData(x*widthChunk,y*heightChunk,clamp(widthChunk,1,longestLine*8),clamp(heightChunk,1,termHeight*32)),xa_n+6+(x*widthChunk),ya_n+25+(y*heightChunk),n);
-								}
-								temp2();
+	if(o === undefined) {return;} // ¯\_(ツ)_/¯ 
+	// Some common variables
+	let xa_n = o["x"]-o["width"]; let ya_n = o["y"]-o["height"]; // "x anchor negative" and "y anchor negative"
+	let xa_p = o["x"]+o["width"]; let ya_p = o["y"]+o["height"]; // "x anchor postive" and "y anchor positive"
+	let rw = o["width"]*2; let rh = o["height"]*2; // "remaining width and height"
+	// Get the type of it, and draw something different based on said type.
+	switch(o["type"]) {
+		case "window":
+			// gray base
+			Draw.base(xa_n,ya_n,rw,rh,n);
+			// red gradient
+			Draw.gradient(xa_n+4, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000",n)
+			// title
+			drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3,"layernum":n});
+			switch(o["win_type"]) {
+				// terminal window
+				// todo: make a keyboard events system and move all of this into the terminal object itself.
+				case "terminal":
+					let bigBoxText = document.createElement('canvas'); 
+					let box_width = rw-8; let box_height = rh-56;
+					bigBoxText.width = box_width; bigBoxText.height = box_height;
+					let bigBoxTextCtx = bigBoxText.getContext('2d');
+					// anything from the keyboard buffer gets added to the text box in this loop.
+					// it actually wouldn't normally need to be an array, but you can't modify variables exported from other files in ES6, only arrays.
+					if(keyboardBuffer.length >= 1) {
+						o["texts"][0] += keyboardBuffer[0];
+						if(longestLine <= keyboardBuffer[0].length) longestLine = keyboardBuffer[0].length;
+						keyboardBuffer.shift(0);
+						// we assume that every line in the keyboard buffer ends in a newline, and they pretty much always do.
+						termHeight++;
+						if(termHeight > 27) {shiftY--;}
+					}
+					// big box
+					await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58, n);
+					Draw.box(0,0,box_width,box_height,"white",bigBoxTextCtx,n)
+					drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"maxX":box_width,"ctx":bigBoxTextCtx,n});
+					// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
+					//Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":longestLine*8,"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
+					const DIVIDE = 8;
+					for(let y = 0; y < clamp(termHeight,0,DIVIDE); y++) {
+						for(let x = 0; x < clamp(longestLine,0,DIVIDE); x++) {
+							async function temp2() {
+								let widthChunk = box_width/DIVIDE;
+								let heightChunk = box_height/DIVIDE;
+								Draw.imageRAW(bigBoxTextCtx.getImageData(x*widthChunk,y*heightChunk,clamp(widthChunk,1,longestLine*8),clamp(heightChunk,1,termHeight*32)),xa_n+6+(x*widthChunk),ya_n+25+(y*heightChunk),n);
 							}
+							temp2();
 						}
-						// scrollbar  (todo: make this work)
-						// if(termHeight > 27) Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
-						// small box
-						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18,n);
-						await drawChars({"string":o["texts"][1],"x":xa_n+8,"y":ya_p-24,"layernum":n});
-						terminalWinID = o["id"];
-						break;
-					case "notecard":
-						let notecard_width = rw-8; let notecard_height = rh-27;
-						let notecardCtx = notecardCanvas.getContext('2d');
-						Draw.box(0,0,64,64,"red",notecardCtx,n);
-						const NOTECARD_CANVAS_DIVIDE = 8;
-						if(o["textbox"]) await Draw.textbox(xa_n+6, ya_n+25, notecard_width-2, notecard_height-2,n);
-						Draw.image({"image":notecardCanvas,"width":notecard_width,"height":notecard_height,"x":xa_n+6,"y":ya_n+25,"layernum":n});
-					case "text":
-						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29,n);
-						await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16,"layernum":n});
-						break;
+					}
+					// scrollbar  (todo: make this work)
+					// if(termHeight > 27) Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
+					// small box
+					await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18,n);
+					await drawChars({"string":o["texts"][1],"x":xa_n+8,"y":ya_p-24,"layernum":n});
+					terminalWinID = o["id"];
+					break;
+				case "notecard":
+					let notecard_width = rw-8; let notecard_height = rh-27;
+					let notecardCtx = notecardCanvas.getContext('2d');
+					Draw.box(0,0,64,64,"red",notecardCtx,n);
+					const NOTECARD_CANVAS_DIVIDE = 8;
+					if(o["textbox"]) await Draw.textbox(xa_n+6, ya_n+25, notecard_width-2, notecard_height-2,n);
+					Draw.image({"image":notecardCanvas,"width":notecard_width,"height":notecard_height,"x":xa_n+6,"y":ya_n+25,"layernum":n});
+				case "text":
+					await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29,n);
+					await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16,"layernum":n});
+					break;
+			}
+			break;
+			case "desktop":
+				//Draw.image(testingBG,0,0,testingBG.width,testingBG.height,0,0,width,height);
+				Draw.box(0,0,width,height,o["color1"]);
+				//Draw.gradient(0,0,width,height,width,height,o["color1"],o["color2"])
+			break;
+			case "dropdown":
+				Draw.base(xa_n, ya_n, rw, rh);
+			break;
+			case "dice_layer":
+				// This is a slow, but working way, of making sure that the dice objects (which are in a different array)
+				// are drawn behind the terminal window. They could just be in the objects array too, but they're in a different
+				// one as a sacrifice to make diceUpdate faster.
+				for(let i = 0; i <= objects_dice.length; i++) {
+	    			draw(objects_dice[i]);
 				}
-				break;
-				case "desktop":
-					//Draw.image(testingBG,0,0,testingBG.width,testingBG.height,0,0,width,height);
-					Draw.box(0,0,width,height,o["color1"]);
-					//Draw.gradient(0,0,width,height,width,height,o["color1"],o["color2"])
-				break;
-				case "dropdown":
-					Draw.base(xa_n, ya_n, rw, rh);
-				break;
-				case "dice_layer":
-					// This is a slow, but working way, of making sure that the dice objects (which are in a different array)
-					// are drawn behind the terminal window. They could just be in the objects array too, but they're in a different
-					// one as a sacrifice to make diceUpdate faster.
-					for(let i = 0; i <= objects_dice.length; i++) {
-		    			draw(objects_dice[i]);
-					}
-				break;
-				case "dice":
-					let terminal = objects[terminalWinID];
-					async function tmp() {
-						let ymod = 0;
-						if(o["foe"]) ymod = 48;
-						Draw.image({"image":diceblock,"sy":ymod,"width":16,"height":16,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]});
-						ctx.globalCompositeOperation = "soft-light";
-						async function drawDice() {await drawChars({"string":`${o["value"]}`,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]})}; 
-						// we do drawDice twice as a hack to make the text more visible.
-						drawDice().then(drawDice()).then(function() {
-							ctx.globalCompositeOperation = "source-over";
-						});
-					}
-					tmp();
-				break;
-				case "shortcut":
-					Draw.image({"image":o["icon"],"width":o["width"],"height":o["height"],"x":o["x"],"y":o["y"]});
-					Draw.box(o["x"]-o["text"].length-1,o["y"]+36,2+o["text"].length*8,16,"#feffb3");
-					await drawChars({"string":o["text"],"x":(o["x"]-o["text"].length),"y":o["y"]+36,"mode":0});
-				break;
-				case "mouse":
-				break; // it's handled below.
-				default:
-					await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
-					if(o.text != undefined) {
-						await drawChars({"string":o.text,"x":xa_n+3,"y":ya_n+3,"opacity":o["opacity"]});
-					}
-				break;
-			}
-			// Draw any button events here.
-			for(let i = 0; i < o["event_num"]; i++) {
-				let e = o["events"][i];
-				// Bit of a bizarre way of doing things, but it's less messy.
-				if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
-				if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
-				if(e["anchor"] == "posneg") {xa = o["x"]+o["width"]; ya = o["y"]-o["height"];}
-				if(e["anchor"] == "negpos") {xa = o["x"]-o["width"]; ya = o["y"]+o["height"]};
-				if(e["anchor"] == "none") {xa = o["x"]; ya = o["y"]}
-				Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
-			}
+			break;
+			case "dice":
+				let terminal = objects[terminalWinID];
+				async function tmp() {
+					let ymod = 0;
+					if(o["foe"]) ymod = 48;
+					Draw.image({"image":diceblock,"sy":ymod,"width":16,"height":16,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]});
+					ctx.globalCompositeOperation = "soft-light";
+					async function drawDice() {await drawChars({"string":`${o["value"]}`,"x":o["x"]+terminal["x"],"y":o["y"]+(terminal["y"]-terminal["height"]),"opacity":o["opacity"]})}; 
+					// we do drawDice twice as a hack to make the text more visible.
+					drawDice().then(drawDice()).then(function() {
+						ctx.globalCompositeOperation = "source-over";
+					});
+				}
+				tmp();
+			break;
+			case "shortcut":
+				Draw.image({"image":o["icon"],"width":o["width"],"height":o["height"],"x":o["x"],"y":o["y"]});
+				Draw.box(o["x"]-o["text"].length-1,o["y"]+36,2+o["text"].length*8,16,"#feffb3");
+				await drawChars({"string":o["text"],"x":(o["x"]-o["text"].length),"y":o["y"]+36,"mode":0});
+			break;
+			case "mouse":
+			break; // it's handled below.
+			default:
+				await Draw.box(xa_n, ya_n, rw, rh,o["fillStyle"]);
+				if(o.text != undefined) {
+					await drawChars({"string":o.text,"x":xa_n+3,"y":ya_n+3,"opacity":o["opacity"]});
+				}
+			break;
+		}
+		// Draw any button events here.
+		for(let i = 0; i < o["event_num"]; i++) {
+			let e = o["events"][i];
+			// Bit of a bizarre way of doing things, but it's less messy.
+			if(e["anchor"] == "positive") {xa = o["x"]+o["width"]; ya = o["y"]+o["height"];}
+			if(e["anchor"] == "negative") {xa = o["x"]-o["width"]; ya = o["y"]-o["height"]};
+			if(e["anchor"] == "posneg") {xa = o["x"]+o["width"]; ya = o["y"]-o["height"];}
+			if(e["anchor"] == "negpos") {xa = o["x"]-o["width"]; ya = o["y"]+o["height"]};
+			if(e["anchor"] == "none") {xa = o["x"]; ya = o["y"]}
+			Draw.button(xa+e["x"],ya+e["y"],e["width"],e["height"],(e["image"]||e["text"]||""),(e["ox"]||0),(e["oy"]||0),e["active"],e["hover"],e["type"],e["enabled"]);
+		}
 	}
+	} catch(ex) {error(ex)}
 }
 
 export async function mouse() {
@@ -394,22 +405,24 @@ export async function mouse() {
 
 }
 
-export async function drawGFX() {
-	
-	// refresh the dpi
-	dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
-	// display an error message if it's above 96
-	if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right.<br><em>On higher DPI screens the game will never look right due to a bug.</em>"} else {notices.innerHTML = "";}
-	// for each object...
-	for(let i = 0; i <= objects.length; i++) {
-		// draw it
-		await draw(objects[i],i);
-	}
-	// The mouse is drawn seperately to ensure it's never below anything.
-	// await mouse();
-	// Degrade (and eventually dither) the image
-	await degrade(16);
-	// Finally, draw everything we've drawn to the actual frame
-	Draw.image({"image":drawBuffer,"x":0,"y":0,"width":width,"height":height,"ctx":ctxFinal});
-	frameTime++;
+export async function drawGFX(num=0) {
+	try {
+		// refresh the dpi
+		dpi = document.querySelector('#dpi').offsetHeight * (window.devicePixelRatio || 1);
+		// display an error message if it's above 96
+		if(dpi > 96) {notices.innerHTML = "Please zoom in or out to make the game look right.<br><em>On higher DPI screens the game will never look right due to a bug.</em>"} else {notices.innerHTML = "";}
+		// for the object being drawn and each one above it...
+		for(let i = num; i <= objects.length; i++) {
+			// draw it
+			await draw(objects[i],i);
+			
+		}
+		await Draw.image({"image":buffers[num],"x":0,"y":0,"width":width,"height":height,"ctx":drawFinal});
+		// The mouse is drawn seperately to ensure it's never below anything.
+		// await mouse();
+		// Degrade (and eventually dither) the image
+		//await degrade(16);
+		// Finally, draw everything we've drawn to the actual frame
+		frameTime++;
+	} catch(ex) {error(ex);}
 }
