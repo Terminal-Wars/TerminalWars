@@ -53,14 +53,8 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  try {
-    drawGFX();
-    requestAnimationFrame(loop);
-  } catch(ex) {
-    document.querySelector('.error').style.display = 'block';
-    document.querySelector('.error span').innerHTML = ex.stack.replace(/\n/g,"<br>",4);
-    fatalError = 1;
-  }
+  try {drawGFX()} catch(ex) {error(ex)};
+  if(!fatalError) requestAnimationFrame(loop);
 }
 async function loop60() {
   diceUpdate();
@@ -70,6 +64,12 @@ export let curObject = objects[0];
 async function frameCounter() {
   debugBox.innerHTML = frameTime+" FPS";
   resetFrameTime();
+}
+
+export async function error(ex) {
+  document.querySelector('.error').style.display = 'block';
+  document.querySelector('.error span').innerHTML = ex.stack.replace(/\n/g,"<br>",4);
+  fatalError = 1;
 }
 
 loadDefaultObjects();
