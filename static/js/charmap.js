@@ -71,7 +71,7 @@ export async function drawChars(arr) {
 			default:
 				if(y <= minY || y >= maxY)  {continue;}
 				if(x >= offset+maxX-8 && k_last != " ") {
-					drawChar("-",x,y,mode,opacity);
+					drawChar("-",x,y,mode,opacity,ctxNew);
 					x = offset;
 					y += 16;
 					drawChar(k,x,y,mode,opacity,ctxNew)
