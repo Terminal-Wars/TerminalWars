@@ -385,6 +385,6 @@ export async function drawGFX() {
 	// Degrade (and eventually dither) the image
 	await degrade(16);
 	// Finally, draw everything we've drawn to the actual frame
-	Draw.image({"image":drawBuffer,"x":0,"y":0,"width":width,"height":height});
+	Draw.image({"image":drawBuffer,"x":0,"y":0,"width":width,"height":height,"ctx":ctxFinal});
 	frameTime++;
 }
