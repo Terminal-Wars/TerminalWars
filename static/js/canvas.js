@@ -1,4 +1,4 @@
-import { objects, objects_dice, debugBox, debugBox2, debugBox3,debugBox4, notices, mousePos, fatalError, error} from './main.js';
+import { objects, objects_dice, debugBox, debugBox2, debugBox3,debugBox4, notices, mousePos } from './main.js';
 import { keyboardBuffer } from './keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from './commands.js';
@@ -6,25 +6,20 @@ import { replacePlaceholders, clamp } from './commonFunctions.js';
 import { globalEvents } from './commonObjects.js';
 import { degrade} from './degrade.js';
 import { notecardCanvas } from './programs.js';
+import { fatalError } from './main.js';
 import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../gfx/images.js';
 
-// The rendering method, which is 2D by default, and pray to the lord we don't have to do WebGL ever
+// The rendering method, which is WebGL by default.
 export let renderType = "2d";
 // The canvas
-export let drawBuffer = document.createElement('canvas'); // should be unused
-export let ctx = drawBuffer.getContext(renderType, {alpha: false}); // should be unused
-export let buffers = []; export let contexts = [];
-for(let x = 0; x <= 50; x++) {
-	let buffer = document.createElement('canvas');
-	let context = buffer.getContext(renderType, {alpha: false});
-	ctx.imageSmoothingEnabled = false;
-	ctx.mozImageSmoothingEnabled = false;
-	buffers.push(buffer);
-	contexts.push(context);
-}
+export let drawBuffer = document.createElement('canvas');
+export let ctx = drawBuffer.getContext(renderType, {alpha: false});
+export let ctxBitmap = drawBuffer.getContext("bitmaprenderer");
 
-export let drawFinal = document.querySelector('.draw'); 
+ctx.imageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
 
+export let drawFinal = document.querySelector('.draw');
 export let ctxFinal = drawFinal.getContext(renderType);
 // If we can't do webgl, fall back to CPU rendering.
 if(ctxFinal === null) {
@@ -101,159 +96,134 @@ const reducer = (previousValue, currentValue) => previousValue + currentValue;
 
 // Common UI elements
 class DrawClass {
-	async box(x,y,width,height,fillStyle,layernum) {
-		try {
-			if(renderType == "webgl") {
+	async box(x,y,width,height,fillStyle,thisCtx=ctx) {
+		if(renderType == "webgl") {
 
-			} else {
-				contexts[layernum].fillStyle = fillStyle;
-				contexts[layernum].fillRect(x,y,width,height);
-			}
+		} else {
+			thisCtx.fillStyle = fillStyle;
+			thisCtx.fillRect(x,y,width,height);
 		}
-		catch(ex) {error(ex)};
 
 	}
-	async gradient(x1,y1,x2,y2,width,height,color1,color2,layernum) {
-		try {
-			if(renderType == "webgl") {
+	async gradient(x1,y1,x2,y2,width,height,color1,color2) {
+		if(renderType == "webgl") {
 
-			} else {
-				let gradient = contexts[layernum].createLinearGradient(x1, y1, x2, y2);
-				gradient.addColorStop(0, color1);
-				gradient.addColorStop(1, color2);
-				contexts[layernum].fillStyle = gradient;
-				contexts[layernum].fillRect(x1, y1, width, height);
-			}
+		} else {
+			let gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+			gradient.addColorStop(0, color1);
+			gradient.addColorStop(1, color2);
+			ctx.fillStyle = gradient;
+			ctx.fillRect(x1, y1, width, height);
 		}
-		catch(ex) {error(ex)};
 	}
 	async image(arr) {
-		try {
-			let image = arr["image"] || null;
-			let sx = arr["sx"] || 0;
-			let sy = arr["sy"] || 0;
-			let sWidth = arr["sWidth"] || arr["width"] || 0;
-			let sHeight = arr["sHeight"] || arr["height"] || 0;
-			let dx = arr["dx"] || arr["x"] || 0;
-			let dy = arr["dy"] || arr["y"] || 0;
-			let dWidth = arr["dWidth"] || arr["width"] || 0;
-			let dHeight = arr["dHeight"] || arr["height"] || 0;
-			let opacity = arr["opacity"] || 1;
-			let ctxNew = arr["ctx"] || ctx;
-			let layernum = arr["layernum"]; // This is a required value.
-			if(renderType == "webgl") {
+		//image=null,sx=null,sy=null,sWidth=null,sHeight=null,dx=null,dy=null,dWidth=null,dHeight=null,opacity=1
+		let image = arr["image"] || null;
+		let sx = arr["sx"] || 0;
+		let sy = arr["sy"] || 0;
+		let sWidth = arr["sWidth"] || arr["width"] || 0;
+		let sHeight = arr["sHeight"] || arr["height"] || 0;
+		let dx = arr["dx"] || arr["x"] || 0;
+		let dy = arr["dy"] || arr["y"] || 0;
+		let dWidth = arr["dWidth"] || arr["width"] || 0;
+		let dHeight = arr["dHeight"] || arr["height"] || 0;
+		let opacity = arr["opacity"] || 1;
+		let ctxNew = arr["ctx"] || ctx;
+		if(renderType == "webgl") {
 
-			} else {
-				if(opacity != 1) contexts[layernum].globalAlpha = opacity;
-				contexts[layernum].drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
-				if(opacity != 1) contexts[layernum].globalAlpha = 1;
-			}
-		} catch(ex) {error(ex)};
+		} else {
+			if(opacity != 1) ctxNew.globalAlpha = opacity;
+			ctxNew.drawImage(image,sx,sy,sWidth,sHeight,dx,dy,dWidth,dHeight);
+			if(opacity != 1) ctxNew.globalAlpha = 1;
+		}
 	}
-	async imageRAW(data, x, y, layernum) {
-		try {
-			if(renderType == "webgl") {
-
-			} else {
-				contexts[layernum].putImageData(data,x,y);
-			}
-		} catch(ex) {error(ex)};
+	async imageRAW(data, x, y, ctxNew=ctx) {
+		ctxNew.putImageData(data,x,y);
 	}
-	async polyline(arr,layernum) {
-		try {
-			if(renderType == "webgl") {
-			} else {
-				// Is our array, other then the opening color a multiple of two? If not, do nothing.
-				if(Math.round((arr.length-1)/2) == (arr.length-1)/2) {
-					contexts[layernum].beginPath();
-					// Apparently canvas strokes start at a half a pixel, so we need to correct this.
-					contexts[layernum].moveTo(arr[1]+0.5, arr[2]+0.5);
-					contexts[layernum].strokeStyle = arr[0];
-					contexts[layernum].lineWidth = 1 * (ratio/contexts[layernum].backingStorePixelRatio);
-					contexts[layernum].lineCap = "square";
-					let i = 3;
-					for(i = 3; i < arr.length; i+=2) {
-						ctx.lineTo(arr[i]+0.5, arr[i+1]+0.5);
-					}
-					contexts[layernum].lineTo(arr[i-2]+0.5, arr[i-1]+0.5);
-					contexts[layernum].closePath();
-					contexts[layernum].stroke();
-				}
+	async polyline(arr) {
+		// Is our array, other then the opening color a multiple of two? If not, do nothing.
+		if(Math.round((arr.length-1)/2) == (arr.length-1)/2) {
+			ctx.beginPath();
+			// Apparently canvas strokes start at a half a pixel, so we need to correct this.
+			ctx.moveTo(arr[1]+0.5, arr[2]+0.5);
+			ctx.strokeStyle = arr[0];
+			ctx.lineWidth = 1 * (ratio/ctx.backingStorePixelRatio);
+			ctx.lineCap = "square";
+			let i = 3;
+			for(i = 3; i < arr.length; i+=2) {
+				ctx.lineTo(arr[i]+0.5, arr[i+1]+0.5);
 			}
-		} catch(ex) {error(ex)};
+			ctx.lineTo(arr[i-2]+0.5, arr[i-1]+0.5);
+			ctx.closePath();
+			ctx.stroke();
+		}
 	}
-	async textbox(x, y, width, height,layernum) {
-		try {
-			this.polyline(["#808080",
-						   x-1,y+height,
-						   x-1,y-1,
-						   x+width,y-1],layernum);
-			this.polyline(["black",
-						   x+width,y-1,
-						   x+width,y+height,
-						   x-1,y+height],layernum);
-			this.box(x, y, width, height,"white",layernum);
-		} catch(ex) {error(ex)};
+	async textbox(x, y, width, height,thisCtx=ctx) {
+		this.polyline(["#808080",
+					   x-1,y+height,
+					   x-1,y-1,
+					   x+width,y-1]);
+		this.polyline(["black",
+					   x+width,y-1,
+					   x+width,y+height,
+					   x-1,y+height]);
+		this.box(x, y, width, height,"white",thisCtx);
 	}
-	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled,layernum) {
-		try {
-			let mode = 0;
-			if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
-			if(enabled == 0) ox += 16;
-			if(type == "button") {
-				this.base(x,y,width,height,"black","#808080","#dfdfdf","white",layernum);
+	async button(x, y, width, height, content, ox, oy,active,hover,type,enabled) {
+		let mode = 0;
+		if(typeof enabled == "string") enabled = parseInt(replacePlaceholders(enabled));
+		if(enabled == 0) ox += 16;
+		if(type == "button") {
+			this.base(x,y,width,height,"black","#808080","#dfdfdf","white");
+		}
+		if(type == "flat" || type == "extraflat") { // flat
+			mode = 0;
+			if(type == "flat" && hover == 1) {
+				this.box(x,y,width,height,"#15539e");
+				mode = 2;
 			}
-			if(type == "flat" || type == "extraflat") { // flat
-				mode = 0;
-				if(type == "flat" && hover == 1) {
-					this.box(x,y,width,height,"#15539e",layernum);
-					mode = 2;
-				}
-			}
-			// Draw either an image or some text
-			switch(typeof(content)) {
-				case "object": // probably an image. if it's ever otherwise, this will be changed.
-					this.image({"image":content,"sx":ox,"sy":oy,"width":width,"height":height,"x":x,"y":y,"layernum":layernum});
-					break;
-				case "string":
-					drawChars({"string":content,"x":x,"y":y,"mode":mode,"layernum":layernum});
-					break;
-				default:
-					//debugBox2.innerHTML = typeof(content);
-					break;
-			}
-		} catch(ex) {error(ex)}
+		}
+		// Draw either an image or some text
+		switch(typeof(content)) {
+			case "object": // probably an image. if it's ever otherwise, this will be changed.
+				this.image({"image":content,"sx":ox,"sy":oy,"width":width,"height":height,"x":x,"y":y});
+				break;
+			case "string":
+				drawChars({"string":content,"x":x,"y":y,"mode":mode});
+				break;
+			default:
+				//debugBox2.innerHTML = typeof(content);
+				break;
+		}
 	}
-	async base(x, y, w, h, col1="black",col2="#808080",col3="white",col4="#dfdfdf",layernum) {
-		try {
-			// the coordinates here are whack but it takes so, so long to get them setup that
-			// i don't feel like redo-ing them
-			this.polyline([col1,
-							x+w+1,y, // top right
-							x+w+1,y+h+1, //bottom right
-							x,y+h+1 // bottom left
-							],layernum);
-			this.polyline([col2,
-							x+w,y+1, // top right
-							x+w,y+h, // bottom right
-							x+1,y+h // bottom left
-							],layernum);
-			this.polyline([col3,
-							x+1,y+h-1, // bottom left
-							x+1,y+1, // top left
-							x+w-1,y+1],layernum); // top right
-			this.polyline([col4,
-							x,y+h, // bottom left
-							x,y, // top left
-							x+w,y],layernum); // top right
-			this.box(x+2, y+2, (w)-2, (h)-2, "#b5b5b5",layernum);
-		} catch(ex) {error(ex)}
+	async base(x, y, w, h, col1="black",col2="#808080",col3="white",col4="#dfdfdf") {
+		// the coordinates here are whack but it takes so, so long to get them setup that
+		// i don't feel like redo-ing them
+		this.polyline([col1,
+						x+w+1,y, // top right
+						x+w+1,y+h+1, //bottom right
+						x,y+h+1 // bottom left
+						]);
+		this.polyline([col2,
+						x+w,y+1, // top right
+						x+w,y+h, // bottom right
+						x+1,y+h // bottom left
+						]);
+		this.polyline([col3,
+						x+1,y+h-1, // bottom left
+						x+1,y+1, // top left
+						x+w-1,y+1]); // top right
+		this.polyline([col4,
+						x,y+h, // bottom left
+						x,y, // top left
+						x+w,y]); // top right
+		this.box(x+2, y+2, (w)-2, (h)-2, "#b5b5b5");
 	}
 }
 export const Draw = new DrawClass();
 
 // The function for drawing objects.
-async function draw(o,n) {
+async function draw(o) {
 	// If we haven't run into a fatal error
 	if(!fatalError) {
 		if(o === undefined) {return;} // ¯\_(ツ)_/¯ 
@@ -265,11 +235,11 @@ async function draw(o,n) {
 		switch(o["type"]) {
 			case "window":
 				// gray base
-				Draw.base(xa_n,ya_n,rw,rh,n);
+				Draw.base(xa_n,ya_n,rw,rh);
 				// red gradient
-				Draw.gradient(xa_n+4, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000",n)
+				Draw.gradient(xa_n+4, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000")
 				// title
-				drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3,"layernum":n});
+				drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3});
 				switch(o["win_type"]) {
 					// terminal window
 					// todo: make a keyboard events system and move all of this into the terminal object itself.
@@ -289,9 +259,9 @@ async function draw(o,n) {
 							if(termHeight > 27) {shiftY--;}
 						}
 						// big box
-						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58, n);
-						Draw.box(0,0,box_width,box_height,"white",bigBoxTextCtx,n)
-						drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"maxX":box_width,"ctx":bigBoxTextCtx,n});
+						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-58);
+						Draw.box(0,0,box_width,box_height,"white",bigBoxTextCtx)
+						drawChars({"string":o["texts"][0],"x":4,"y":10+(shiftY*12),"maxX":box_width,"ctx":bigBoxTextCtx});
 						// drawChars({"string":o["texts"][0],"x":xa_n+10,"y":ya_n+35+(shiftY*12),"maxX":rw-24,"minY":ya_n+12,"maxY":ya_n+rh-24});
 						//Draw.image({"image":bigBoxText,"sx":0,"sy":0,"width":longestLine*8,"height":termHeight*16,"x":xa_n+6,"y":ya_n+25});
 						const DIVIDE = 8;
@@ -300,7 +270,7 @@ async function draw(o,n) {
 								async function temp2() {
 									let widthChunk = box_width/DIVIDE;
 									let heightChunk = box_height/DIVIDE;
-									Draw.imageRAW(bigBoxTextCtx.getImageData(x*widthChunk,y*heightChunk,clamp(widthChunk,1,longestLine*8),clamp(heightChunk,1,termHeight*32)),xa_n+6+(x*widthChunk),ya_n+25+(y*heightChunk),n);
+									Draw.imageRAW(bigBoxTextCtx.getImageData(x*widthChunk,y*heightChunk,clamp(widthChunk,1,longestLine*8),clamp(heightChunk,1,termHeight*32)),xa_n+6+(x*widthChunk),ya_n+25+(y*heightChunk));
 								}
 								temp2();
 							}
@@ -308,20 +278,25 @@ async function draw(o,n) {
 						// scrollbar  (todo: make this work)
 						// if(termHeight > 27) Draw.box(xa_p-22,ya_n+35-(rh/(termHeight/shiftY)),16,(o["height"]*1.69/termHeight)*-1,'#b5b5b5');
 						// small box
-						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18,n);
-						await drawChars({"string":o["texts"][1],"x":xa_n+8,"y":ya_p-24,"layernum":n});
+						await Draw.textbox(xa_n+6, ya_p-26, rw-68, 18);
+						await drawChars({"string":o["texts"][1],"x":xa_n+8,"y":ya_p-24});
 						terminalWinID = o["id"];
 						break;
 					case "notecard":
 						let notecard_width = rw-8; let notecard_height = rh-27;
 						let notecardCtx = notecardCanvas.getContext('2d');
-						Draw.box(0,0,64,64,"red",notecardCtx,n);
+						Draw.box(0,0,64,64,"red",notecardCtx);
 						const NOTECARD_CANVAS_DIVIDE = 8;
-						if(o["textbox"]) await Draw.textbox(xa_n+6, ya_n+25, notecard_width-2, notecard_height-2,n);
-						Draw.image({"image":notecardCanvas,"width":notecard_width,"height":notecard_height,"x":xa_n+6,"y":ya_n+25,"layernum":n});
+						if(o["textbox"]) await Draw.textbox(xa_n+6, ya_n+25, notecard_width-2, notecard_height-2);
+						Draw.image({"image":notecardCanvas,"width":notecard_width,"height":notecard_height,"x":xa_n+6,"y":ya_n+25});
+						/*
+						canvas.js:267 Uncaught (in promise) TypeError: Failed to execute 'getImageData' on 'CanvasRenderingContext2D': The provided value is not of type 'ImageDataSettings'.
+    at CanvasRenderingContext2D.getImageData (<anonymous>)
+    at temp2 (canvas.js:267)
+    */
 					case "text":
-						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29,n);
-						await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16,"layernum":n});
+						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29);
+						await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16});
 						break;
 				}
 				break;
@@ -403,10 +378,10 @@ export async function drawGFX() {
 	// for each object...
 	for(let i = 0; i <= objects.length; i++) {
 		// draw it
-		await draw(objects[i],i);
+		await draw(objects[i]);
 	}
 	// The mouse is drawn seperately to ensure it's never below anything.
-	// await mouse();
+	await mouse();
 	// Degrade (and eventually dither) the image
 	await degrade(16);
 	// Finally, draw everything we've drawn to the actual frame
