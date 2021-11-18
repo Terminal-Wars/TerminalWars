@@ -1,5 +1,5 @@
 import {Objects, objects, curObject, mousePos, debugBox2, debugBox3} from './main.js';
-import {drawGFX, width, height, sWidth, sHeight, obWidth, obHeight} from './canvas.js';
+import {width, height, sWidth, sHeight, obWidth, obHeight} from './canvas.js';
 import { command, userID, roomID, privateCommand} from './commands.js';
 import {launch} from './programs.js';
 import {globalEvents} from './commonObjects.js';
@@ -111,7 +111,6 @@ document.addEventListener("mouseup", function(e) {
 		}
 	}
 	winMoveMode = 0;
-	drawGFX(0);
 });
 document.addEventListener("wheel", function(e) {
 	// todo: let programs choose what to do with the scroll wheel, rather then make it specific to the terminal.

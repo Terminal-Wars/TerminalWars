@@ -53,18 +53,16 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  try {
-    //drawGFX();
-    diceUpdate();
-  } catch(ex) {error(ex)};
+  try {drawGFX()} catch(ex) {error(ex)};
   if(!fatalError) requestAnimationFrame(loop);
+}
+async function loop60() {
+  diceUpdate();
 }
 export let curObject = objects[0];
 
 async function frameCounter() {
-  if(frameTime != 0) {
-    debugBox.innerHTML = frameTime+" FPS";
-  }
+  debugBox.innerHTML = frameTime+" FPS";
   resetFrameTime();
 }
 
@@ -79,8 +77,7 @@ pingSite();
 setInterval(pingSite,3000); // ping the site and update it every three seconds.
 // we don't use requestAnimationFrame because this NEEDS to execute once a second
 setInterval(frameCounter, 1000);
-//loop();
-try {drawGFX(0)} catch(ex) {error(ex)};
-setInterval(loop, 3);
-//setInterval(loop60, 1000/15);
+loop();
+//setInterval(loop, 3);
+setInterval(loop60, 1000/15);
 //setInterval(lowerPriorityLoop, 1000/30);
