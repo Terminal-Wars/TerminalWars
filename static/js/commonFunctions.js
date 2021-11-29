@@ -30,3 +30,20 @@ export function replacePlaceholders(value, target) {
 export function broadcast(text, user="", blank=false) {
   socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":user,"text":text,"blank":blank}}));
 }
+export function clamp(num,min,max) {return Math.min(Math.max(num, min),max)}
+
+export function average(arr, len=-1) {
+  let result = 0;
+  if(len == -1) {
+    for(let n in arr) {
+      result += arr[n];
+    }
+    result /= arr.length;
+  } else {
+    for(n in len) {
+      result += arr[n];
+    }
+    result /= len;
+  }
+  return result;
+}

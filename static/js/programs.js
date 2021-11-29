@@ -1,8 +1,7 @@
 import {objects} from './main.js';
+import {testingBG, term_buttons} from '../gfx/images.js';
 
-// relevant images
-export const term_buttons = new Image();
-term_buttons.src = 'static/gfx/term_buttons.webp';
+export let notecardCanvas = document.createElement('canvas');
 
 export async function terminal() {
 	objects.push({"id":objects.length,"type":"window","title":"Terminal","win_type":"terminal","x":400,"y":225,"width":200,"height":200,"z":objects.length+1,
@@ -17,6 +16,10 @@ export async function terminal() {
 			{"type":"button","anchor":"positive","x":-21,"y":-50,"width":16,"height":16,"active":0,"hover":0,"enabled":1,"image":term_buttons,"ox":0,"oy":64,"command":{"p_command":"shiftYBy","arg1":-1}}
 			]
 	});
+}
+
+export async function notecard() {
+	objects.push({"id":objects.length,"type":"window","win_type":"notecard","textbox":true,"title":"Notecard","x":100,"y":225,"width":100,"height":50,"z":objects.length+1})
 }
 
 export async function about() {

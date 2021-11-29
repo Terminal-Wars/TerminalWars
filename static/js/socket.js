@@ -1,5 +1,5 @@
 import {notices} from './main.js';
-import {cO} from './canvas.js';
+import {drawFinal} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 import {delay} from './commonFunctions.js';

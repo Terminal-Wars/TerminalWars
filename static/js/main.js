@@ -1,4 +1,4 @@
-import {drawGFX, frameCount} from './canvas.js';
+import {drawGFX, frameCount, frameTime, resetFrameTime} from './canvas.js';
 import {degrade} from './degrade.js';
 import {drawParticles} from './particles.js';
 
@@ -21,6 +21,9 @@ export let debugBox2 = document.querySelector(".debug2");
 export let debugBox3 = document.querySelector(".debug3");
 export let debugBox4 = document.querySelector(".debug4");
 export let notices = document.querySelector(".notices");
+
+// fatal error
+export let fatalError = 0;
 
 export class ObjectClass {
   amount() {
@@ -50,28 +53,31 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  await drawGFX().then(function() {
-    degrade(16); 
-  });
+  try {
+    drawGFX();
+    requestAnimationFrame(loop);
+  } catch(ex) {
+    document.querySelector('.error').style.display = 'block';
+    document.querySelector('.error span').innerHTML = ex.stack.replace(/\n/g,"<br>",4);
+    fatalError = 1;
+  }
 }
 async function loop60() {
-  await diceUpdate();
+  diceUpdate();
 }
 export let curObject = objects[0];
 
 async function frameCounter() {
-  debugBox.innerHTML = "Objects drawn in the last second: "+frameCount[0];
-  frameCount[0] = 0;
+  debugBox.innerHTML = frameTime+" FPS";
+  resetFrameTime();
 }
 
-async function init() { // redundant, but it's here for compatibility
-  await loadDefaultObjects();
-  await pingSite();
-  await setInterval(pingSite,3000); // ping the site and update it every three seconds.
-  if(window.location.hostname == "localhost") await setInterval(frameCounter, 1000);
-  // todo: make this dynamic or togglable for the final release
-  await setInterval(loop, 5);
-  await setInterval(loop60, 1000/15);
-  //setInterval(lowerPriorityLoop, 1000/30);
-}
-init();
+loadDefaultObjects();
+pingSite();
+setInterval(pingSite,3000); // ping the site and update it every three seconds.
+// we don't use requestAnimationFrame because this NEEDS to execute once a second
+setInterval(frameCounter, 1000);
+loop();
+//setInterval(loop, 3);
+setInterval(loop60, 1000/15);
+//setInterval(lowerPriorityLoop, 1000/30);
