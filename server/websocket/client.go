@@ -62,7 +62,6 @@ const (
 	BroadcastResponse ResponseType = "broadcast"
 	GetResponse       ResponseType = "get"
 	ErrorResponse	  ResponseType = "error"
-	GenericResponse	  ResponseType = "generic"
 )
 
 type Response struct {
@@ -103,12 +102,7 @@ func (c *Client) readPump() {
 		}
 		switch req.Type {
 		case BroadcastRequest:
-			resp := Response{Type: BroadcastResponse, Data: json.RawMessage(message)}
-			p, err := json.Marshal(resp)
-			if err != nil {
-				log.Println("error marshaling json:", err)
-				continue
-			}
+			p := BroadcastRequestFunc(c, req, message)
 			c.hub.broadcast <- p
 		case PutRequest:
 			var data PutRequestData
