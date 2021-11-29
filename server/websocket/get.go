@@ -18,42 +18,38 @@ type GetDataResponse struct {
 	Created int64       `json:"created,omitempty"`
 }
 
-func GetRequestFunc(c *Client, req Request) []byte {
-	var data 		GetRequestData
+func GetRequestFunc(roomID string, blockID string, c *Client) {
 	var resp 		Response
-	var p 			[]byte
 	var errMessage	string
 
-	err := json.Unmarshal(req.Data, &data)
-	if err != nil {
-		errMessage = "malformed json from client: "+err.Error()
-	}
-	if data.BlockID != "" {
-		bd, ok := c.hub.getBlock(data.RoomID, data.BlockID)
+	if blockID != "" {
+		bd, ok := c.hub.getBlock(roomID, blockID)
 		resp = Response{Type: GetResponse, Data: GetDataResponse{
 			OK:      ok,
-			RoomID:  data.RoomID,
-			BlockID: data.BlockID,
+			RoomID:  roomID,
+			BlockID: blockID,
 			Data:    bd.Data,
 			Created: bd.Created,
 		}}
 	} else {
-		d := c.hub.getRoom(data.RoomID)
+		d := c.hub.getRoom(roomID)
 		resp = Response{Type: GetResponse, Data: GetDataResponse{
 			OK:     true,
-			RoomID: data.RoomID,
+			RoomID: roomID,
 			Data:   d,
 		}}
 	}
-	p, err = json.Marshal(resp)
+	p, err := json.Marshal(resp)
 	if err != nil {
 		log.Println("unable to marshal json: ", err)
 	}
 	if errMessage != "" {
-		p, err = json.Marshal(RawResponse{Type: ErrorResponse, Data: errMessage})
+		p, err = json.Marshal(GenericResponse{Type: ErrorResponse, Data: errMessage})
 		if err != nil {
 			log.Println("unable to marshal json: ", err)
 		}
 	}
-	return p
+	go func() {
+	    c.send <- p
+	}()
 }

@@ -98,7 +98,7 @@ func (h *Hub) putData(id blockKey, newdata interface{}) {
 			d.Data = data
 			h.data[id] = d
 		default:
-			log.Println("ioi thats not a map or an array")
+			log.Println("(something other then a map or an array was sent)")
 			return
 		}
 	} else {

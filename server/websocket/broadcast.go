@@ -5,11 +5,11 @@ import (
 	"log"
 )
 
-func BroadcastRequestFunc(c *Client, req Request, message []byte) []byte {
+func BroadcastRequestFunc(message []byte, c *Client) {
 	resp := Response{Type: BroadcastResponse, Data: json.RawMessage(message)}
 	p, err := json.Marshal(resp)
 	if err != nil {
 		log.Println("error marshaling json:", err)
 	}
-	return p
+	c.hub.broadcast <- p
 }

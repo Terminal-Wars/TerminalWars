@@ -40,10 +40,10 @@ export function addUser(user, arr, us=false) {
 		//"actives": arr["actives"]
 	});
 	if(us) ourPlayer = player;
-	socket.send(JSON.stringify({"type":"put",
+	socket.send(JSON.stringify({
+		"type":"createuser",
 		"data": {
 			"roomID": roomID,
-			"blockID": roomID+"_users",
 			"data": [player]
 		}
 	}));
@@ -69,10 +69,7 @@ export async function initActivePlayers() {
 }
 
 export async function initUserAndRoom() {
-	await exampleUser.then(r => addUser(userID, r, true))
-	.then(broadcast("has joined.\n",userID,true))
-	.then(broadcast("℡initActivePlayers"))
-	.then(initActivePlayers());
+	await exampleUser.then(r => addUser(userID, r, true));
 }
 
 export async function initPassives(user) {

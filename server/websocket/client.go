@@ -59,9 +59,10 @@ type PutRequestData struct {
 }
 
 const (
-	BroadcastResponse ResponseType = "broadcast"
-	GetResponse       ResponseType = "get"
-	ErrorResponse	  ResponseType = "error"
+	BroadcastResponse 	ResponseType = "broadcast"
+	GetResponse       	ResponseType = "get"
+	ErrorResponse	  	ResponseType = "error"
+	InitPlayerResponse  ResponseType = "initplayer"
 )
 
 type Response struct {
@@ -69,7 +70,11 @@ type Response struct {
 	Data interface{}  `json:"data"`
 }
 
-type RawResponse struct {
+type NakedResponse struct {
+	Type ResponseType `json:"type"`
+}
+
+type GenericResponse struct {
 	Type ResponseType `json:"type"`
 	Data string		  `json:"message"`
 }
@@ -102,16 +107,30 @@ func (c *Client) readPump() {
 		}
 		switch req.Type {
 		case BroadcastRequest:
-			p := BroadcastRequestFunc(c, req, message)
-			c.hub.broadcast <- p
+			// we don't try to unmarshel this one to test it.
+			BroadcastRequestFunc(message, c)
 		case PutRequest:
 			var data PutRequestData
 			log.Println("put request attempted! refusing!\n\nthe data in question:\n", data)
 		case GetRequest:
-			p := GetRequestFunc(c, req)
-			go func() {
-				c.send <- p
-			}()
+			var data GetRequestData
+			err := json.Unmarshal(req.Data, &data)
+			if err != nil {
+				log.Println("malformed json from client:", err)
+				continue
+			}
+			GetRequestFunc(data.RoomID, data.BlockID, c)
+			//initActivePlayers
+		case CreateUserRequest:
+			var data CreateUserRequestData
+			err := json.Unmarshal(req.Data, &data)
+			if err != nil {
+				log.Println("malformed json from client:", err)
+				continue
+			}
+			CreateUserFunc(data.RoomID, data.Data, c)
+		case InitPlayerRequest:
+			InitPlayerFunc(c)
 		default:
 			log.Println("request with invalid type")
 		}
