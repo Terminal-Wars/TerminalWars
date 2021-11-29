@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi"
-	"github.com/ioixd/opendocs/server/websocket"
+	"github.com/ioixd/terminalwars/server/websocket"
 )
 
 func New() (*Server, error) {

@@ -79,15 +79,17 @@ export async function privateCommand(cmd, arg1="", arg2="", arg3="") {
 		case "active":
 			Objects.destroyAll("dropdown");
 			await exampleUser.then(function(resp) {
-				onActivate(resp[0]["actives"][arg1]["on_activate"][0], arg2);
+				/*onActivate(resp[0]["actives"][arg1]["on_activate"][0], arg2);*/
 			});
 			break;
 		case "userDropdown":
 			dropdown(mousePos["x"],mousePos["y"],"users",activePlayers,"active",arg1,arg2);
 			break;
+			/*
 		case "attack":
 			await Actions.Attack(arg1, arg3, roomID, arg2)
 			break;
+			*/
 		case "shiftYBy":
 			shiftYBy(arg1);
 			break;

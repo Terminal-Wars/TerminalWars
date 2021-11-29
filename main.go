@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ioixd/opendocs/server"
+	"github.com/ioixd/terminalwars/server"
 )
 
 func main() {

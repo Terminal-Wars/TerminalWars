@@ -20,6 +20,16 @@ const (
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512
+
+	BroadcastRequest 	RequestType = "broadcast"
+	PutRequest       	RequestType = "put" 		// deprecated. prints error to console.
+	GetRequest       	RequestType = "get"
+	SetTurnRequest	 	RequestType = "setturn"
+	InitPlayerRequest	RequestType = "initplayer"
+	CalcActiveRequest	RequestType = "calcactive"
+	BattleStartRequest	RequestType = "startbattle"
+	DiceRequest			RequestType = "dice"
+	CreateUserRequest	RequestType = "createuser"
 )
 
 // Client is a middleman between the websocket connection and the hub.
@@ -33,13 +43,9 @@ type Client struct {
 	send chan []byte
 }
 
-type RequestType string
-
-const (
-	BroadcastRequest RequestType = "broadcast"
-	PutRequest       RequestType = "put"
-	GetRequest       RequestType = "get"
-)
+type RequestType 	string
+type ResponseType 	string
+type NakedMessage 	string
 
 type Request struct {
 	Type RequestType     `json:"type"`
@@ -51,16 +57,12 @@ type PutRequestData struct {
 	BlockID string      `json:"blockID"`
 	Data    interface{} `json:"data"`
 }
-type GetRequestData struct {
-	RoomID  string `json:"roomID"`
-	BlockID string `json:"blockID"`
-}
-
-type ResponseType string
 
 const (
 	BroadcastResponse ResponseType = "broadcast"
 	GetResponse       ResponseType = "get"
+	ErrorResponse	  ResponseType = "error"
+	GenericResponse	  ResponseType = "generic"
 )
 
 type Response struct {
@@ -68,12 +70,9 @@ type Response struct {
 	Data interface{}  `json:"data"`
 }
 
-type GetDataResponse struct {
-	OK      bool        `json:"ok"`
-	RoomID  string      `json:"roomID"`
-	BlockID string      `json:"blockID"`
-	Data    interface{} `json:"data,omitempty"`
-	Created int64       `json:"created,omitempty"`
+type RawResponse struct {
+	Type ResponseType `json:"type"`
+	Data string		  `json:"message"`
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -113,43 +112,9 @@ func (c *Client) readPump() {
 			c.hub.broadcast <- p
 		case PutRequest:
 			var data PutRequestData
-			err := json.Unmarshal(req.Data, &data)
-			if err != nil {
-				log.Println("malformed json from client:", err)
-				continue
-			}
-			c.hub.putData(blockKey{data.RoomID, data.BlockID}, data.Data)
+			log.Println("put request attempted! refusing!\n\nthe data in question:\n", data)
 		case GetRequest:
-			var data GetRequestData
-			err := json.Unmarshal(req.Data, &data)
-			if err != nil {
-				log.Println("malformed json from client:", err)
-				continue
-			}
-			var resp Response
-
-			if data.BlockID != "" {
-				bd, ok := c.hub.getBlock(data.RoomID, data.BlockID)
-				resp = Response{Type: GetResponse, Data: GetDataResponse{
-					OK:      ok,
-					RoomID:  data.RoomID,
-					BlockID: data.BlockID,
-					Data:    bd.Data,
-					Created: bd.Created,
-				}}
-			} else {
-				d := c.hub.getRoom(data.RoomID)
-				resp = Response{Type: GetResponse, Data: GetDataResponse{
-					OK:     true,
-					RoomID: data.RoomID,
-					Data:   d,
-				}}
-			}
-			p, err := json.Marshal(resp)
-			if err != nil {
-				log.Println("error marshaling json:", err)
-				continue
-			}
+			p := GetRequestFunc(c, req)
 			go func() {
 				c.send <- p
 			}()

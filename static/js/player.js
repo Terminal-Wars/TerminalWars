@@ -82,6 +82,7 @@ export async function initPassives(user) {
 }
 
 export async function onActivate(active, target, advance=true) {
+	/*
 	for(let n in active) {
 		let cmd = [];
 		let cmd_o = active[n];
@@ -152,6 +153,7 @@ export async function onActivate(active, target, advance=true) {
 		broadcast("℡advanceTurn");
 		broadcast("℡setOurTurn");
 	}
+	*/
 }
 
 // Getting battle specific data.
@@ -182,6 +184,7 @@ export async function getParticipants() {
 export async function startBattle(restart) {
 	let battleStartMessage = "A battle has already started in this room!\n";
 	function start() {
+		/*
 		for (let n in activePlayers) {
 			participants.push(activePlayers[n]["name"]);
 		}
@@ -202,6 +205,7 @@ export async function startBattle(restart) {
 		turn = 0;
 		uploadTurn(turn);
 		setOurTurn();
+		*/
 	}
 	switch(battleStarted) {
 		case -1: // We don't know if it's started, actually.
@@ -222,7 +226,7 @@ export async function startBattle(restart) {
 			break;
 	}
 }
-
+/*
 export async function advanceTurn() {
 	// todo: going through the player list alphabetically works for now, but it should eventually be changed.
 	await getTurn().then(function(r) {
@@ -246,7 +250,7 @@ export async function uploadTurn(turn) {
 		}
 	}));
 }
-
+*/
 export async function setOurTurn() { // whereas advanceTurn() advances the turn counter,
 									 // this updates the "ourTurn" value if it's our turn.
     await Promise.all([getParticipants(),getTurn()]).then(async(p) => {

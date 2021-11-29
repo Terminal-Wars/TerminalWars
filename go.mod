@@ -1,4 +1,4 @@
-module github.com/ioixd/opendocs
+module github.com/ioixd/terminalwars
 
 go 1.17
 

@@ -4,7 +4,7 @@ import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 import {delay} from './commonFunctions.js';
 import {keyboardBuffer} from './keyboard.js';
-import {setOurTurn, advanceTurn, initActivePlayers} from './player.js';
+import {setOurTurn, initActivePlayers} from './player.js';
 
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
 const wsurl = wsproto + "://" + window.location.host + "/socket";
@@ -62,40 +62,32 @@ socket.addEventListener('open', async function (event) {
 
 socket.addEventListener('message', async function (event) {
     let data = JSON.parse(event.data);
-      if(data["type"] == "broadcast") {
+    switch(data["type"]) {
+      case "broadcast":
         // for readability.
         let speaker = data["data"]["data"]["userID"];
         let text = data["data"]["data"]["text"];
-        // ℡ is the character that signifies that this shouldn't be broadcast
-        if(!text.startsWith("℡")) {
-          if(data["data"]["data"]["blank"]) {
-            keyboardBuffer.push(speaker+" "+text);
-          } else {
-            if(speaker == lastSpeaker) {
-              keyboardBuffer.push("\xFF"+text);
-            } else {
-              keyboardBuffer.push("\0\b"+speaker+"\n\xFF"+text);
-              lastSpeaker = speaker;
-            }
-          }
+        if(data["data"]["data"]["blank"]) {
+          keyboardBuffer.push(speaker+" "+text);
         } else {
-          // if the message does start with it, it signifies that a select function should be run.
-          switch(text.replace("℡","",1)) {
-            case "advanceTurn":
-              advanceTurn();
-              break;
-            case "setOurTurn":
-              setOurTurn();
-              break;
-            case "initActivePlayers":
-              initActivePlayers();
-              break;
+          if(speaker == lastSpeaker) {
+            keyboardBuffer.push("\xFF"+text);
+          } else {
+            keyboardBuffer.push("\0\b"+speaker+"\n\xFF"+text);
+            lastSpeaker = speaker;
           }
         }
-      }
-      if(data["type"] == "get") {
+        break;
+      case "get":
         sockerBuffer.push(data);
-      }
+        break;
+      case "setturn":
+        setOurTurn();
+        break;
+      case "initplayer":
+        initActivePlayers();
+        break;
+    }
 });
 
 socket.addEventListener('close', async function (event) {
