@@ -62,7 +62,6 @@ socket.addEventListener('open', async function (event) {
 
 socket.addEventListener('message', async function (event) {
     let data = JSON.parse(event.data);
-    console.log(data["type"]);
     switch(data["type"]) {
       case "broadcast":
         // for readability.

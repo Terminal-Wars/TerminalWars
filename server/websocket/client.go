@@ -107,7 +107,7 @@ func (c *Client) readPump() {
 		}
 		switch req.Type {
 		case BroadcastRequest:
-			// we don't try to unmarshel this one to test it.
+			// we don't try to unmarshal this one to test it.
 			BroadcastRequestFunc(message, c)
 		case PutRequest:
 			var data PutRequestData
@@ -119,8 +119,7 @@ func (c *Client) readPump() {
 				log.Println("malformed json from client:", err)
 				continue
 			}
-			GetRequestFunc(data.RoomID, data.BlockID, c)
-			//initActivePlayers
+			GetRequestFunc(data,c)
 		case CreateUserRequest:
 			var data CreateUserRequestData
 			err := json.Unmarshal(req.Data, &data)
@@ -128,7 +127,7 @@ func (c *Client) readPump() {
 				log.Println("malformed json from client:", err)
 				continue
 			}
-			CreateUserFunc(data.RoomID, data.Data, c)
+			CreateUserFunc(data, c)
 		case CalcActiveRequest:
 			var data CalcActiveRequestData
 			err := json.Unmarshal(req.Data, &data)

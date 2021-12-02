@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -70,7 +69,7 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) putData(id blockKey, newdata map[string]interface{}) {
+func (h *Hub) putData(id blockKey, data map[string]interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	_, ok := h.data[id]
@@ -79,7 +78,7 @@ func (h *Hub) putData(id blockKey, newdata map[string]interface{}) {
 			h.data[id].Data[k] = v
 		}
 	} else {
-		h.data[id] = blockData{newdata, time.Now().UnixMilli()}
+		h.data[id] = blockData{data, time.Now().UnixMilli()}
 	}
 	if _, ok := h.expiry[id.roomID]; !ok {
 		h.expiry[id.roomID] = struct{}{}

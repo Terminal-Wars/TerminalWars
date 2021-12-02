@@ -2,7 +2,7 @@ package websocket
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 )
 
 type GetRequestData struct {
@@ -18,35 +18,31 @@ type GetDataResponse struct {
 	Created int64       `json:"created,omitempty"`
 }
 
-func GetRequestFunc(roomID string, blockID string, c *Client) {
+func GetRequestFunc(class GetRequestData, c *Client) {
 	var resp 		Response
 	var errMessage	string
 
-	if blockID != "" {
-		bd, ok := c.hub.getBlock(roomID, blockID)
+	if class.BlockID != "" {
+		bd, ok := c.hub.getBlock(class.RoomID, class.BlockID)
 		resp = Response{Type: GetResponse, Data: GetDataResponse{
 			OK:      ok,
-			RoomID:  roomID,
-			BlockID: blockID,
+			RoomID:  class.RoomID,
+			BlockID: class.BlockID,
 			Data:    bd.Data,
 			Created: bd.Created,
 		}}
 	} else {
-		d := c.hub.getRoom(roomID)
-		resp = Response{Type: GetResponse, Data: GetDataResponse{
-			OK:     true,
-			RoomID: roomID,
-			Data:   d,
-		}}
+		d := c.hub.getRoom(class.RoomID)
+		fmt.Println(d);
 	}
 	p, err := json.Marshal(resp)
 	if err != nil {
-		log.Println("unable to marshal json: ", err)
+		fmt.Println("unable to marshal json: ", err)
 	}
 	if errMessage != "" {
 		p, err = json.Marshal(GenericResponse{Type: ErrorResponse, Data: errMessage})
 		if err != nil {
-			log.Println("unable to marshal json: ", err)
+			fmt.Println("unable to marshal json: ", err)
 		}
 	}
 	go func() {

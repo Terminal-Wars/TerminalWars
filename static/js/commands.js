@@ -50,7 +50,8 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "list":
 			for (let n in activePlayers) {
 				let p = activePlayers[n];
-				keyboardBuffer.push(p["character"]+" ("+p["name"]+")\n");
+				console.log(p);
+				keyboardBuffer.push(p.get("character")+" ("+p.get("name")+")\n");
 			};
 			break;
 		case "battle":
@@ -66,7 +67,7 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			break;
 		case "debug":
 			if(window.location.hostname == "localhost" || window.location.hostname.startsWith("192.168")) {
-				await Actions.MemoryDump(roomID).then(r => console.log(r));
+				Actions.MemoryDump(roomID);
 			} else {
 				keyboardBuffer.push(invalidMessage);
 			}
