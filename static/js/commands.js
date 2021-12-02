@@ -64,6 +64,13 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 				play();
 			});
 			break;
+		case "debug":
+			if(window.location.hostname == "localhost" || window.location.hostname.startsWith("192.168")) {
+				await Actions.MemoryDump(roomID).then(r => console.log(r));
+			} else {
+				keyboardBuffer.push(invalidMessage);
+			}
+			break;
 		default: 
 			keyboardBuffer.push(invalidMessage);
 			break;
@@ -73,13 +80,13 @@ export async function privateCommand(cmd, arg1="", arg2="", arg3="") {
 	switch(cmd) {
 		case "activeDropdown":
 			await exampleUser.then(function(resp) {
-				dropdown(mousePos["x"],mousePos["y"],"attacks",resp[0]["actives"],"userDropdown","{index}","{name}");
+				dropdown(mousePos["x"],mousePos["y"],"attacks",resp["actives"],"userDropdown","{index}","{name}");
 			});
 			break;
 		case "active":
 			Objects.destroyAll("dropdown");
 			await exampleUser.then(function(resp) {
-				/*onActivate(resp[0]["actives"][arg1]["on_activate"][0], arg2);*/
+				onActivate(resp["actives"][arg1]["name"], arg2);
 			});
 			break;
 		case "userDropdown":
@@ -92,13 +99,6 @@ export async function privateCommand(cmd, arg1="", arg2="", arg3="") {
 			*/
 		case "shiftYBy":
 			shiftYBy(arg1);
-			break;
-		case "debug":
-			if(window.location.hostname == "localhost" || window.location.hostname.startsWith("192.168")) {
-				await Actions.MemoryDump(roomID).then(r => console.log(r));
-			} else {
-				keyboardBuffer.push(invalidMessage);
-			}
 			break;
 	}
 }

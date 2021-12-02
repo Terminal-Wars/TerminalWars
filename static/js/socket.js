@@ -1,4 +1,4 @@
-import {notices} from './main.js';
+import {notices, fatalError, error} from './main.js';
 import {drawFinal} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
@@ -91,7 +91,6 @@ socket.addEventListener('message', async function (event) {
     }
 });
 
-socket.addEventListener('close', async function (event) {
-    cO.remove();
-    notices.innerHTML = "The server was closed. Please wait a moment and then reload the page.";
+socket.addEventListener('close', function (event) {
+    error("The server was closed. Please wait a moment and then reload the page.");
 });

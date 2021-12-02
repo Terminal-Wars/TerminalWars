@@ -1,4 +1,4 @@
-[{
+{
 	"character": "8-BIT",
 	"aggressive": "true",
 	"hp": 20,
@@ -26,7 +26,7 @@
 			"name": "blaster",
 			"prettyname": "Blaster Beams",
 			"bio": "Shoots a burst of laser beams",
-			"instruction": "Rolling a non-damage dealing d20+2. If the d20 connects, roll a 5d10; the difference between your d20 roll and the opponent's defense roll against it is used as a negative modifier to the 5d10's total, with the addition of a 5. The opponent rolls normally to defend the 5d10.",
+			"instruction": "Roll a non-damage dealing d20+2. If the d20 connects, roll a 5d10; the difference between your d20 roll and the opponent's defense roll against it is used as a negative modifier to the 5d10's total, with the addition of a 5. The opponent rolls normally to defend the 5d10.",
 			"cooldown": 2,
 			"self": "false",
 			"on_activate": [
@@ -119,4 +119,4 @@
 			]
 		}
 	]
-}]
+}

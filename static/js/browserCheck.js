@@ -1,4 +1,4 @@
-function error() {
+function browserError() {
 	document.body.innerHTML = `<span style='color: white!important;'><h1>Your browser does not support either async or ES6,</h1><small>(or has a weird unfinished ES6 implementation, in the case of MyPal)</small><p>and as much as I tried, I cannot seem to do ES5 support without breaking ES6 support. If I'm full of shit, or you want more information, <a href="https://github.com/IoIxD/TerminalWars/issues/6" style="color: white">see or comment on this issue.</a>.</p>
 		<p>If using another browser is not an option for you, then chances are you are probably on an older operating system, in which case you have some options.</p>
 		<ul>
@@ -18,7 +18,7 @@ try{
 	// (...or the browser is MyPal, which is blacklisted below) 
 } catch(ex) {
 	// If this fails, display the error message.
-	error();
+	browserError();
 }
 // MyPal is actually blacklisted because it has a really weird error that we can't actually detect.
-if(window.navigator.userAgent.includes("Mypal")) {error();}
+if(window.navigator.userAgent.includes("Mypal")) {browserError();}

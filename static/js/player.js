@@ -24,20 +24,20 @@ class User {
 		this.aggressive = data["aggressive"];
 		this.hp = data["hp"];
 		this.info = data["info"];
-		//this.passives = data["passives"];
-		//this.actives = data["actives"];
+		this.passives = data["passives"];
+		this.actives = data["actives"];
 	}
 }
 
 export function addUser(user, arr, us=false) {
 	let player = new User({
 		"name": user,
-		"character": arr[0]["character"],
-		"aggressive": arr[0]["aggressive"],
-		"hp": arr[0]["hp"],
-		"info": arr[0]["info"]
-		//"passives": arr[0]["passives"]
-		//"actives": arr["actives"]
+		"character": arr["character"],
+		"aggressive": arr["aggressive"],
+		"hp": arr["hp"],
+		"info": arr["info"],
+		"passives": arr["passives"],
+		"actives": arr["actives"]
 	});
 	if(us) ourPlayer = player;
 	socket.send(JSON.stringify({
@@ -74,83 +74,20 @@ export async function initUserAndRoom() {
 
 export async function initPassives(user) {
 	for(n in user["passives"]) {
-		onActivate(user["passives"][n]["on_activate"])
+		onActivate(user["passives"]["on_activate"])
 	}
 }
 
-export async function onActivate(active, target, advance=true) {
-	/*
-	for(let n in active) {
-		let cmd = [];
-		let cmd_o = active[n];
-		for(let val in cmd_o) {
-			// ...replace any placeholder values.
-			if(typeof cmd_o[val] == "string") {
-				cmd[val] = replacePlaceholders(cmd_o[val], target);
-			} else {
-				cmd[val] = cmd_o[val];
-			}
+export async function onActivate(active, target) {
+	socket.send(JSON.stringify({
+		"type":"calcactive",
+		"data": {
+			"roomID": roomID,
+			"name": active,
+			"from": ourPlayer.character,
+			"to": target,
 		}
-		switch(cmd[0]) {
-			case "roll":
-				diceSum = 0;
-				foeDiceSum = 0;
-				let diceAmount = solve(cmd[1]);
-				// amount, max, modifier
-				keyboardBuffer.push("rolling "+cmd[1]+"d"+cmd[2]+"+"+solve(cmd[3])+"("+cmd[3]+")\n")
-				for(let i = 0; i < diceAmount; i++) {
-					await dice(cmd[2],false).then(r => {
-						keyboardBuffer.push("dice roll -> "+r["value"]+"\n");
-						diceSum += r["value"];
-					});
-				}
-				let mod = solve(cmd[3])+solve(ourPlayer["info"]["diceModAttack"] || 0);
-				keyboardBuffer.push("modifer -> "+mod+"\n");
-				diceSum += solve(mod);
-				// todo: know the opponent so that we can factor in their roll type, amount, etc.
-				await dice(20,true).then(r => {foeDiceSum += r["value"]});
-				if(diceSum > foeDiceSum) {
-					keyboardBuffer.push("success, your dice sum: "+diceSum+", foe's dice sum: "+foeDiceSum+"\n");
-					onActivate(cmd[4][0], target, false);
-				} else {
-					keyboardBuffer.push("failure, your dice sum: "+diceSum+", foe's dice sum: "+foeDiceSum+"\n");
-					onActivate(cmd[5][0], target, false);
-				}
-				break;
-			case "attack":
-				command("attack",cmd[1],Math.floor(solve(cmd[2])+1),userID);
-				break;
-			case "bot":
-				addUser(userID+"楩"+activePlayers.length, cmd[1]);
-				initActivePlayers();
-				break;
-			case "add":
-			case "sub":
-				if(cmd[2] != "skip") { // WE'LL DO TEAMS LATER OK
-					if(cmd[0] == "sub") cmd[3] *= 1; // if i can reuse code i will, fuck you
-					if(cmd[1] == userID) {
-						ourPlayer["info"][cmd[2]] += cmd[3];
-						await updateOurUser();
-					} else {
-						// todo: handle modifying other player's values.
-					}
-				}
-				break;
-			case undefined:
-				console.error(cmd);
-				break;
-			default:
-				console.error("Uncaught or unknown command: "+cmd[0]);
-				break;
-		}
-	}
-	// Advance the turn.
-	// todo: when passives are added, make this only apply to actives.
-	if(advance) {
-		broadcast("℡advanceTurn");
-		broadcast("℡setOurTurn");
-	}
-	*/
+	}));
 }
 
 // Getting battle specific data.

@@ -19,7 +19,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from peer.
-	maxMessageSize = 512
+	maxMessageSize = 4096
 
 	BroadcastRequest 	RequestType = "broadcast"
 	PutRequest       	RequestType = "put" 		// deprecated. prints error to console.
@@ -129,6 +129,14 @@ func (c *Client) readPump() {
 				continue
 			}
 			CreateUserFunc(data.RoomID, data.Data, c)
+		case CalcActiveRequest:
+			var data CalcActiveRequestData
+			err := json.Unmarshal(req.Data, &data)
+			if err != nil {
+				log.Println("malformed json from client:", err)
+				continue
+			}
+			CalcActiveFunc(data.RoomID, data.Name, data.From, data.To, c)
 		case InitPlayerRequest:
 			InitPlayerFunc(c)
 		default:

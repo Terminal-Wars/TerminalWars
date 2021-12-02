@@ -56,28 +56,28 @@ async function loop() {
   try {
     drawGFX();
     requestAnimationFrame(loop);
+    diceUpdate();
   } catch(ex) {
-    document.querySelector('.error').style.display = 'block';
-    document.querySelector('.error span').innerHTML = ex.stack.replace(/\n/g,"<br>",4);
-    fatalError = 1;
+    error(ex.stack.replace(/\n/g,"<br>",4));
   }
 }
-async function loop60() {
-  diceUpdate();
-}
+
 export let curObject = objects[0];
 
-async function frameCounter() {
+function frameCounter() {
   debugBox.innerHTML = frameTime+" FPS";
   resetFrameTime();
 }
 
+export function error(message) {
+    document.querySelector('.error').style.display = 'block';
+    document.querySelector('.error span').innerHTML = message;
+    fatalError = 1;
+}
+
 loadDefaultObjects();
 pingSite();
-setInterval(pingSite,3000); // ping the site and update it every three seconds.
+setInterval(pingSite,3000); // ping the site and update the ping value every three seconds.
 // we don't use requestAnimationFrame because this NEEDS to execute once a second
 setInterval(frameCounter, 1000);
 loop();
-//setInterval(loop, 3);
-setInterval(loop60, 1000/15);
-//setInterval(lowerPriorityLoop, 1000/30);
