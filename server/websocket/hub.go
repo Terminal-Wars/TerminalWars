@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -31,7 +32,7 @@ type blockKey struct {
 }
 
 type blockData struct {
-	Data    map[string]interface{}
+	Data    interface{}
 	Created int64
 }
 
@@ -69,16 +70,39 @@ func (h *Hub) Run() {
 	}
 }
 
-func (h *Hub) putData(id blockKey, data map[string]interface{}) {
+func (h *Hub) putData(id blockKey, newdata interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	_, ok := h.data[id]
 	if ok {
-		for k, v := range data {
-			h.data[id].Data[k] = v
+		switch newdata := newdata.(type) {
+		case map[string]interface{}:
+			for k, v := range newdata {
+				h.data[id].Data.(map[string]interface{})[k] = v
+			}
+		case []interface{}:
+			d := h.data[id]
+			data := d.Data.([]interface{})
+		Outer:
+			for _, entry := range newdata {
+				ent := entry.(map[string]interface{})
+				name := ent["name"].(string)
+				for i, oldent := range data {
+					if oldent.(map[string]interface{})["name"].(string) == name {
+						data[i] = ent
+						continue Outer
+					}
+				}
+				data = append(data, ent)
+			}
+			d.Data = data
+			h.data[id] = d
+		default:
+			log.Println("ioi thats not a map or an array")
+			return
 		}
 	} else {
-		h.data[id] = blockData{data, time.Now().UnixMilli()}
+		h.data[id] = blockData{newdata, time.Now().UnixMilli()}
 	}
 	if _, ok := h.expiry[id.roomID]; !ok {
 		h.expiry[id.roomID] = struct{}{}

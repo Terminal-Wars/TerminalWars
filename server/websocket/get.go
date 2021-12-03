@@ -14,7 +14,7 @@ type GetDataResponse struct {
 	OK      bool        `json:"ok"`
 	RoomID  string      `json:"roomID"`
 	BlockID string      `json:"blockID"`
-	Data    map[string]interface{} `json:"data,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
 	Created int64       `json:"created,omitempty"`
 }
 

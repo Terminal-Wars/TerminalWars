@@ -40,12 +40,12 @@ export function addUser(user, arr, us=false) {
 		"actives": arr["actives"]
 	});
 	if(us) ourPlayer = player;
-	console.log(new Map(Object.entries(player)));
 	socket.send(JSON.stringify({
 		"type":"createuser",
 		"data": {
 			"roomID": roomID,
-			"data": new Map(Object.entries(player))
+			//"data": new Map(Object.entries(player))
+			"data": player
 		}
 	}));
 	return 0;
@@ -57,6 +57,7 @@ export async function initActivePlayers() {
 	let activePlayersTemp = [];
 	// Never cache this because it could be run at any point and there could be new players.
 	Actions.GetUsersOnline(roomID).then(r => {
+		console.log(r);
 		for (let n = 0; n < r; n++) {
 			let player = new User(r[n]["data"]["data"][n]);
 			activePlayersTemp.push(player);

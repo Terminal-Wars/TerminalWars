@@ -50,7 +50,6 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "list":
 			for (let n in activePlayers) {
 				let p = activePlayers[n];
-				console.log(p);
 				keyboardBuffer.push(p.get("character")+" ("+p.get("name")+")\n");
 			};
 			break;
