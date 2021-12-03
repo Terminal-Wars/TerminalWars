@@ -18,7 +18,6 @@ export async function reload() {console.error("reload() exists to remind you tha
 export class ActionsClass {
   async BufferReturn() {
       return delay(ping).then(function() {
-        console.log("buffer length: "+sockerBuffer.length)
         buffer = sockerBuffer[0];
         sockerBuffer.shift();
         return buffer;
