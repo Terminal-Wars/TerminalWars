@@ -24,7 +24,7 @@ type CalcActiveResponse struct {
 	To 			string	`json:"to"`
 }
 
-func CalcActiveFunc(roomID string, name string, from string, to string, c *Client) {
+func CalcActiveFunc(class CalcActiveRequestData, c *Client) {
 	// get all the users in the room
 	//bd, _ := c.hub.getBlock(roomID, roomID+"_users")
 	//var player, active map[string]interface{}

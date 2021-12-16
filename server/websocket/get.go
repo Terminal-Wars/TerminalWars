@@ -5,11 +5,6 @@ import (
 	"fmt"
 )
 
-type GetRequestData struct {
-	RoomID  string `json:"roomID"`
-	BlockID string `json:"blockID"`
-}
-
 type GetDataResponse struct {
 	OK      bool        `json:"ok"`
 	RoomID  string      `json:"roomID"`
@@ -21,8 +16,8 @@ type GetDataResponse struct {
 func GetRequestFunc(class GetRequestData, c *Client) {
 	var resp 		Response
 	var errMessage	string
-
-	if class.BlockID != "" {
+	fmt.Println(class);
+	if class.BlockID != "debug" {
 		bd, ok := c.hub.getBlock(class.RoomID, class.BlockID)
 		resp = Response{Type: GetResponse, Data: GetDataResponse{
 			OK:      ok,

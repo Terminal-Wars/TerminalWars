@@ -58,11 +58,18 @@ type PutRequestData struct {
 	Data    interface{} `json:"data"`
 }
 
+type GetRequestData struct {
+	RoomID  string `json:"roomID"`
+	BlockID string `json:"blockID"`
+}
+
 const (
 	BroadcastResponse 	ResponseType = "broadcast"
 	GetResponse       	ResponseType = "get"
-	ErrorResponse	  	ResponseType = "error"
+	UserResponse		ResponseType = "user"
 	InitPlayerResponse  ResponseType = "initplayer"
+	ErrorResponse	  	ResponseType = "error"		
+	UndefinedResponse 	ResponseType = "undefined"	// When a ResponseType isn't even needed.
 )
 
 type Response struct {
@@ -110,15 +117,19 @@ func (c *Client) readPump() {
 			// we don't try to unmarshal this one to test it.
 			BroadcastRequestFunc(message, c)
 		case PutRequest:
+			// generic put requests are so deprecated that they should not be allowed, and any leftovers
+			// should be documented as such.
 			var data PutRequestData
+			json.Unmarshal(req.Data, &data)
 			log.Println("put request attempted! refusing!\n\nthe data in question:\n", data)
 		case GetRequest:
 			var data GetRequestData
-			err := json.Unmarshal(req.Data, &data)
+			err := json.Unmarshal(message, &data)
 			if err != nil {
 				log.Println("malformed json from client:", err)
 				continue
 			}
+			log.Println(data);
 			GetRequestFunc(data,c)
 		case CreateUserRequest:
 			var data CreateUserRequestData
@@ -135,7 +146,7 @@ func (c *Client) readPump() {
 				log.Println("malformed json from client:", err)
 				continue
 			}
-			CalcActiveFunc(data.RoomID, data.Name, data.From, data.To, c)
+			CalcActiveFunc(data, c)
 		case InitPlayerRequest:
 			InitPlayerFunc(c)
 		default:
