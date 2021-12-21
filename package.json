@@ -1,0 +1,23 @@
+{
+  "name": "terminalwars",
+  "version": "1.0.0",
+  "description": "Text-based D&D experience with a focus on simple campaigns.",
+  "scripts": {
+    "start": "node ./server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IoIxD/TerminalWars.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IoIxD/TerminalWars/issues"
+  },
+  "homepage": "https://github.com/IoIxD/TerminalWars#readme",
+  "dependencies": {
+    "http": "^0.0.1-security",
+    "mime": "^3.0.0"
+  }
+}

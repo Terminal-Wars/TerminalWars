@@ -50,7 +50,7 @@ export class ActionsClass {
       return this.BufferReturn();
   }
   async MemoryDump(room) {
-      socket.send(`{"type":"get","data":{"roomID":"${room}"}}`);
+      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"debug"}}`);
       return this.BufferReturn();
   }
 }
