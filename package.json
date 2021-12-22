@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Text-based D&D experience with a focus on simple campaigns.",
   "scripts": {
-    "start": "node ./server/index.js"
+    "start": "nodemon ./server/index.js"
   },
   "repository": {
     "type": "git",

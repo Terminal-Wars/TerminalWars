@@ -1,7 +1,2 @@
-const http = require('./core/http.js');
-const ws = require('./core/http.js');
-
-// HTTP server
-http.httpFunc();
-
-// Websocket server
+require('./core/http.js');
+require('./core/ws.js');

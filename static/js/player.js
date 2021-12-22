@@ -1,5 +1,4 @@
 import {socket, Actions, reload} from './socket.js';
-import {dice} from './commonObjects.js';
 import {delay, solve} from './commonFunctions.js';
 import {command, userID, roomID} from './commands.js';
 import {keyboardBuffer} from './keyboard.js';
@@ -59,7 +58,8 @@ export async function initActivePlayers() {
 	Actions.GetUsersOnline(roomID).then(r => {
 		console.log(r);
 		for (let n = 0; n < r; n++) {
-			let player = new User(r[n]["data"]["data"][n]);
+			console.log(r["data"][n]);
+			let player = new User(r["data"][n]);
 			activePlayersTemp.push(player);
 		}
 		// sort the array alphabetically

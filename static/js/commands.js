@@ -1,7 +1,7 @@
 import {socket, Actions} from './socket.js';
 import {keyboardBuffer} from './keyboard.js';
 import {ping, pingSite} from './ping.js';
-import {dropdown, dice} from './commonObjects.js';
+import {dropdown} from './commonObjects.js';
 import {mousePos, Objects} from './main.js';
 import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
 import {delay} from './commonFunctions.js';

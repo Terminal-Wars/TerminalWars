@@ -7,7 +7,7 @@ import {keyboardBuffer} from './keyboard.js';
 import {setOurTurn, initActivePlayers} from './player.js';
 
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
-const wsurl = wsproto + "://" + window.location.host + "/socket";
+const wsurl = wsproto + "://" + window.location.host.replace(":2191","",1) + ":2192";
 export let socket = new WebSocket(wsurl);
 export let sockerBuffer = []; let buffer, newHealth;
 export let lastSpeaker = "";
@@ -20,6 +20,7 @@ export class ActionsClass {
       return delay(ping).then(function() {
         buffer = sockerBuffer[0];
         sockerBuffer.shift();
+        console.log(buffer);
         return buffer;
       });
   }
@@ -27,30 +28,12 @@ export class ActionsClass {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
       return this.BufferReturn();
   }
-  // TODO: REWRITE THE NEXT THREE FUNCTIONS
-  async GetUserInfo(user, room) {
-      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
-      let buffer = this.BufferReturn();
-  }
-  async Attack(foe, user, room, damage) {
-      //let userinfo = await this.GetUserInfo(foe, room);
-      //newHealth = userinfo["data"]["health"]-damage;
-      //socket.send(`{"type":"put","data":{"roomID":"${room}","blockID":"user_${user}","data":{"health":"${newHealth}"}}}`);
-      //socket.send(`{"type":"broadcast","data":{"userID":"", "roomID":"${room}", "text":"${user} dealt ${damage} damage to ${foe}!\\n"}}`);
-      return 0;
-  }
-  async GetHealth(user, room) {
-      let userinfo = await this.GetUserInfo(user, room);
-      await delay(ping).then(function() {
-        return userinfo["data"]["health"];
-      })
-  }
   async GetBattle(room) {
       socket.send(`{"type": "get","data":{"roomID":"${room}","blockID":"battle"}}`);
       return this.BufferReturn();
   }
   async MemoryDump(room) {
-      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"debug"}}`);
+      socket.send(`{"type":"debug","data":{"roomID":"${room}","blockID":"debug"}}`);
       return this.BufferReturn();
   }
 }
@@ -61,6 +44,7 @@ socket.addEventListener('open', async function (event) {
 });
 
 socket.addEventListener('message', async function (event) {
+    console.log(event.data);
     let data = JSON.parse(event.data);
     switch(data["type"]) {
       case "broadcast":
@@ -87,9 +71,13 @@ socket.addEventListener('message', async function (event) {
       case "initplayer":
         initActivePlayers();
         break;
+      case "dice":
+        if(data["data"]["data"]) {}
+        break;
     }
 });
 
 socket.addEventListener('close', function (event) {
     error("The server was closed. Please wait a moment and then reload the page.");
 });
+
