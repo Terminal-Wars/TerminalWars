@@ -56,11 +56,11 @@ export async function initActivePlayers() {
 	let activePlayersTemp = [];
 	// Never cache this because it could be run at any point and there could be new players.
 	Actions.GetUsersOnline(roomID).then(r => {
-		console.log(r);
-		for (let n = 0; n < r; n++) {
-			console.log(r["data"][n]);
-			let player = new User(r["data"][n]);
-			activePlayersTemp.push(player);
+		for (let n = 0; n < r["data"].length; n++) {
+			Actions.GetUserInfo(roomID, Object.keys(r["data"][n])).then((r) => {
+				let player = new User(r["data"][0]["data"]);
+				activePlayersTemp.push(player);
+			});
 		}
 		// sort the array alphabetically
 		activePlayersTemp.sort();

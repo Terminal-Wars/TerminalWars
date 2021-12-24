@@ -25,6 +25,9 @@ export let notices = document.querySelector(".notices");
 // fatal error
 export let fatalError = 0;
 
+// intervals
+let pingInterval; let fpsInterval; let loop60Interval;
+
 export class ObjectClass {
   amount() {
     return objects.length;
@@ -53,20 +56,39 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  try {
-    drawGFX();
-    requestAnimationFrame(loop);
-    diceUpdate();
-  } catch(ex) {
-    error(ex.stack.replace(/\n/g,"<br>",4));
+  if(!fatalError) {
+    try {
+      drawGFX();
+      requestAnimationFrame(loop);
+    } catch(ex) {
+      error(ex.stack.replace(/\n/g,"<br>",4));
+    }
+  } else {
+    clearInterval(pingInterval);
+  }
+}
+
+async function loop60() {
+  if(!fatalError) {
+    try {
+      diceUpdate();
+     } catch {
+      error(ex.stack.replace(/\n/g,"<br>",4));
+     } 
+  } else {
+    clearInterval(loop60Interval);
   }
 }
 
 export let curObject = objects[0];
 
 function frameCounter() {
-  debugBox.innerHTML = frameTime+" FPS";
-  resetFrameTime();
+  if(!fatalError) {
+    debugBox.innerHTML = frameTime+" FPS";
+    resetFrameTime();
+  } else {
+    clearInterval(fpsInterval);
+  }
 }
 
 export function error(message) {
@@ -77,7 +99,8 @@ export function error(message) {
 
 loadDefaultObjects();
 pingSite();
-setInterval(pingSite,3000); // ping the site and update the ping value every three seconds.
+pingInterval = setInterval(pingSite,3000); // ping the site and update the ping value every three seconds.
 // we don't use requestAnimationFrame because this NEEDS to execute once a second
-setInterval(frameCounter, 1000);
+fpsInterval = setInterval(frameCounter, 1000);
+loop60Interval = setInterval(loop60, 1000/60);
 loop();

@@ -2,6 +2,7 @@ import {notices, fatalError, error} from './main.js';
 import {drawFinal} from './canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
+import {dice} from './commonObjects.js';
 import {delay} from './commonFunctions.js';
 import {keyboardBuffer} from './keyboard.js';
 import {setOurTurn, initActivePlayers} from './player.js';
@@ -20,12 +21,15 @@ export class ActionsClass {
       return delay(ping).then(function() {
         buffer = sockerBuffer[0];
         sockerBuffer.shift();
-        console.log(buffer);
         return buffer;
       });
   }
   async GetUsersOnline(room) {
       socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users"}}`);
+      return this.BufferReturn();
+  }
+  async GetUserInfo(room, user) {
+      socket.send(`{"type":"get","data":{"roomID":"${room}","blockID":"${room}_users_${user}"}}`);
       return this.BufferReturn();
   }
   async GetBattle(room) {
@@ -49,9 +53,9 @@ socket.addEventListener('message', async function (event) {
     switch(data["type"]) {
       case "broadcast":
         // for readability.
-        let speaker = data["data"]["data"]["userID"];
-        let text = data["data"]["data"]["text"];
-        if(data["data"]["data"]["blank"]) {
+        let speaker = data["data"]["userID"];
+        let text = data["data"]["text"];
+        if(data["data"]["blank"]) {
           keyboardBuffer.push(speaker+" "+text);
         } else {
           if(speaker == lastSpeaker) {
@@ -72,7 +76,10 @@ socket.addEventListener('message', async function (event) {
         initActivePlayers();
         break;
       case "dice":
-        if(data["data"]["data"]) {}
+        dice(20, data["data"]["value"], data["data"]["foe"]);
+        break;
+      default:
+        console.error("Unimplemented function: ",data["type"]);
         break;
     }
 });

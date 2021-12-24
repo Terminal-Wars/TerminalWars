@@ -1,6 +1,6 @@
 import {userID, roomID} from './commands.js';
-import {diceSum, foeDiceSum, ourTurn} from './player.js';
 import {socket} from './socket.js';
+
 export async function delay(time, variable=undefined) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {resolve(variable);},time);
@@ -16,12 +16,8 @@ export function solve(str) {
 
 export function replacePlaceholders(value, target) { 
   if(typeof(value) != "string") {return value;} else {
-    value = value.replace("{myRoll}",diceSum,99)
-            .replace("{enemyRoll}",foeDiceSum,99)
-            .replace("{sender}",userID,99)
-            .replace("{me}",userID,99)
-            .replace("{opponent}",target,99)
-            .replace("{ourTurn}",ourTurn,99);
+    value = value.replace("{me}",userID,99)
+                 .replace("{ourTurn}",1,99); // replace this with the ourTurn variable when that's readded
     if(userID != "") value = value.replace("{loggedIn}",1,99);
     else value = value.replace("{loggedIn}",0,99);
     return value;
