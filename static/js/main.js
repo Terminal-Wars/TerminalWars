@@ -28,6 +28,12 @@ export let fatalError = 0;
 // intervals
 let pingInterval; let fpsInterval; let loop60Interval;
 
+// start time
+export const startTime = new Date();
+
+// what is being used to access terminalwars. will eventually be set via an api
+export const shell = "default";
+
 export class ObjectClass {
   amount() {
     return objects.length;

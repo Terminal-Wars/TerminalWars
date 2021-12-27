@@ -2,16 +2,20 @@ import {socket, Actions} from './socket.js';
 import {keyboardBuffer} from '../input/keyboard.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown} from '../core/dropdown.js';
-import {mousePos, Objects, error} from '../main.js';
+import {mousePos, Objects, error, shell} from '../main.js';
 import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from '../player/player.js';
 import {delay} from '../commonFunctions.js';
 import {play, stop, setModule} from '../audio/micromod/interface.js';
 import {shiftYBy} from '../gfx/canvas.js';
-export let userID = ""; export let roomID = "test"; 
+
+import {neofetch} from '../core/programs.js';
+
+export let userID = null; export let roomID = "test"; 
 export let shakeNum = 0; export let usersInRoom;
 
 let invalidMessage = "Invalid or unimplemented command.\n";
 
+// todo: rewrite this so that it returns instead of pushing. this will be useful for the inevitable api.
 export async function command(cmd, arg1="", arg2="", arg3="") {
 	switch(cmd) {
 		case "help":
@@ -50,14 +54,17 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "list":
 			for (let n in activePlayers) {
 				let p = activePlayers[n];
-				console.log(p);
 				keyboardBuffer.push(p["character"]+" ("+p["name"]+")\n");
 			};
 			break;
+		case "neofetch":
+			keyboardBuffer.push(neofetch());
+
+		break;
+		// test commands below
 		case "dice":
 			socket.send(`{"type":"dicetest"}`);
 			break;
-		// test commands below
 		case "battle":
 			arg1 = arg1.replace("restart",true,5)
 			startBattle(arg1);

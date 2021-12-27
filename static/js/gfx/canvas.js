@@ -88,6 +88,7 @@ export let terminalWinID = 0;
 // we need a function to increase and decrease it from this file.
 // todo: clamp function
 export function shiftYBy(num) {shiftY += num;}
+export function appendTermHeight(num) {termHeight += num;}
 
 // reducer for the array function.
 const reducer = (previousValue, currentValue) => previousValue + currentValue;
@@ -235,7 +236,7 @@ async function draw(o) {
 				// gray base
 				Draw.base(xa_n,ya_n,rw,rh);
 				// red gradient
-				Draw.gradient(xa_n+4, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,"#cc0000","#000000")
+				Draw.gradient(xa_n+4, ya_n+3, xa_p+2, ya_n+3,rw-6, 19,o["color1"],o["color2"])
 				// title
 				drawChars({"string":o["title"], "x":o["x"]-(o["title"].length*3), "y":ya_n+6,"mode":3});
 				switch(o["win_type"]) {
@@ -287,11 +288,6 @@ async function draw(o) {
 						const NOTECARD_CANVAS_DIVIDE = 8;
 						if(o["textbox"]) await Draw.textbox(xa_n+6, ya_n+25, notecard_width-2, notecard_height-2);
 						Draw.image({"image":notecardCanvas,"width":notecard_width,"height":notecard_height,"x":xa_n+6,"y":ya_n+25});
-						/*
-						canvas.js:267 Uncaught (in promise) TypeError: Failed to execute 'getImageData' on 'CanvasRenderingContext2D': The provided value is not of type 'ImageDataSettings'.
-    at CanvasRenderingContext2D.getImageData (<anonymous>)
-    at temp2 (canvas.js:267)
-    */
 					case "text":
 						await Draw.textbox(xa_n+6, ya_n+25, rw-10, rh-29);
 						await drawChars({"string":o["text"], "x":xa_n+8,"y":ya_n+27,"maxX":rw-16});
@@ -299,8 +295,8 @@ async function draw(o) {
 				}
 				break;
 				case "desktop":
-					//Draw.image(testingBG,0,0,testingBG.width,testingBG.height,0,0,width,height);
-					Draw.box(0,0,width,height,o["color1"]);
+					Draw.image({"image":testingBG,"sWidth":testingBG.width,"sHeight":testingBG.height,"dWidth":width,"dHeight":height});
+					//Draw.box(0,0,width,height,o["color1"]);
 					//Draw.gradient(0,0,width,height,width,height,o["color1"],o["color2"])
 				break;
 				case "dropdown":
