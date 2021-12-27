@@ -15,7 +15,7 @@ export let participants = []; // for when we only need the names (i.e. when send
 
 export let ourPlayer;
 
-export let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
+export let exampleUser = fetch('static/js/player/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
 class User {
 	constructor(data) {
 		this.name = data["name"];

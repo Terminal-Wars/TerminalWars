@@ -6,7 +6,8 @@ import * as k from './input/keyboard.js';
 import * as m from './input/mouse.js';
 import * as d from './gfx/degrade.js';
 
-import { loadDefaultObjects, diceUpdate } from './commonObjects.js';
+import { loadDefaultObjects } from './core/defaultObjects.js';
+import { diceUpdate } from './battle/dice.js';
 import { pingSite } from './core/ping.js';
 export let objects = []; export let particles = [];
 export let objects_dice = [];

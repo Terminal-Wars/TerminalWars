@@ -2,7 +2,7 @@ import {notices, fatalError, error} from '../main.js';
 import {drawFinal} from '../gfx/canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
-import {dice} from '../commonObjects.js';
+import {dice} from '../battle/dice.js';
 import {delay} from '../commonFunctions.js';
 import {keyboardBuffer} from '../input/keyboard.js';
 import {setOurTurn, initActivePlayers} from '../player/player.js';

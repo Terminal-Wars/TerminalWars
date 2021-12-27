@@ -3,7 +3,6 @@ import { keyboardBuffer } from '../input/keyboard.js';
 import { drawChars } from './charmap.js';
 import { userID, roomID } from '../core/commands.js';
 import { replacePlaceholders, clamp } from '../commonFunctions.js';
-import { globalEvents } from '../commonObjects.js';
 import { degrade} from './degrade.js';
 import { notecardCanvas } from '../core/programs.js';
 import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../../gfx/images.js';

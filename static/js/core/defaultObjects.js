@@ -1,11 +1,6 @@
-import { objects, objects_dice, debugBox2 } from './main.js';
-import {width, height, obWidth, obHeight} from './gfx/canvas.js';
-import {terminal, notecard} from './core/programs.js';
-
-// Global events that should be on every window
-export let globalEvents = [
-	{"type": "button","anchor":"positive","x":0,"y":0,"width":16,"height":16}
-]
+import { objects, objects_dice, debugBox2 } from '../main.js';
+import {width, height, obWidth, obHeight} from '../gfx/canvas.js';
+import {terminal, notecard} from '../core/programs.js';
 
 export async function loadDefaultObjects() {
 	// The desktop background
