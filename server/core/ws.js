@@ -1,8 +1,9 @@
 const wsModule = require('ws');
 
+const a = require('../battle/active.js');
+const b = require('./broadcast.js');
 const c = require('../user/createuser.js');
 const d = require('../battle/dice.js');
-const b = require('./broadcast.js');
 
 let clients = new Map();
 let memory = new Map();
@@ -26,7 +27,7 @@ ws_s.on('connection', (ws) => {
 				case "createuser": 		c.createUser(md); 								break;
 				case "dicetest": 		d.sendDice();									break;
 				case "broadcast": 		b.broadcast(md);								break;
-
+				case "calcactive": 		a.calcActive(md);								break;
 				case "setturn":
 				case "initplayer":
 					ws.send(JSON.parse(`{"type": "${message.type}""}`));

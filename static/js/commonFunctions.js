@@ -23,6 +23,7 @@ export function replacePlaceholders(value, target) {
     return value;
   }
 }
+
 export function broadcast(text, user="", blank=false) {
   socket.send(JSON.stringify({"type":"broadcast","data": {"roomID":roomID,"userID":user,"text":text,"blank":blank}}));
 }

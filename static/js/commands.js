@@ -2,7 +2,7 @@ import {socket, Actions} from './socket.js';
 import {keyboardBuffer} from './keyboard.js';
 import {ping, pingSite} from './ping.js';
 import {dropdown} from './commonObjects.js';
-import {mousePos, Objects} from './main.js';
+import {mousePos, Objects, error} from './main.js';
 import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
 import {delay} from './commonFunctions.js';
 import {play, stop, setModule} from './micromod/interface.js';
@@ -71,6 +71,14 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			break;
 		case "debug":
 			Actions.MemoryDump(roomID);
+			break;
+		case "stop":
+			socket.close();
+			break;
+		case "active":
+			await exampleUser.then(function(resp) {
+				onActivate(resp["actives"][arg1 || 0]["on_activate"][0], arg2);
+			});
 			break;
 		default: 
 			keyboardBuffer.push(invalidMessage);

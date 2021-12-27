@@ -81,13 +81,15 @@ export async function initPassives(user) {
 }
 
 export async function onActivate(active, target) {
+	let from = "ioi";
+	if(ourPlayer != undefined) from = ourPlayer.character;
 	socket.send(JSON.stringify({
 		"type":"calcactive",
 		"data": {
 			"roomID": roomID,
-			"name": active,
-			"from": ourPlayer.character,
-			"to": target,
+			"active": active,
+			"from": from,
+			"to": target || "all",
 		}
 	}));
 }
