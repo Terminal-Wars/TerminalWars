@@ -1,5 +1,5 @@
-import {userID, roomID} from './commands.js';
-import {socket} from './socket.js';
+import {userID, roomID} from './core/ommands.js';
+import {socket} from './core/socket.js';
 
 export async function delay(time, variable=undefined) {
   return new Promise(function(resolve, reject) {

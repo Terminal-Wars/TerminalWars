@@ -1,12 +1,12 @@
 import {socket, Actions} from './socket.js';
-import {keyboardBuffer} from './keyboard.js';
+import {keyboardBuffer} from '../input/keyboard.js';
 import {ping, pingSite} from './ping.js';
-import {dropdown} from './commonObjects.js';
-import {mousePos, Objects, error} from './main.js';
-import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
-import {delay} from './commonFunctions.js';
-import {play, stop, setModule} from './micromod/interface.js';
-import {shiftYBy} from './canvas.js';
+import {dropdown} from '../commonObjects.js';
+import {mousePos, Objects, error} from '../main.js';
+import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from '../player/player.js';
+import {delay} from '../commonFunctions.js';
+import {play, stop, setModule} from '../audio/micromod/interface.js';
+import {shiftYBy} from '../gfx/canvas.js';
 export let userID = ""; export let roomID = "test"; 
 export let shakeNum = 0; export let usersInRoom;
 

@@ -1,9 +1,9 @@
-import { objects, objects_dice, debugBox2 } from './main.js';
-import { ping } from './ping.js';
-import {width, height, obWidth, obHeight} from './canvas.js';
-import {keyboardBuffer} from './keyboard.js';
+import { objects, objects_dice, debugBox2 } from './core/main.js';
+import { ping } from './core/ping.js';
+import {width, height, obWidth, obHeight} from './gfx/canvas.js';
+import {keyboardBuffer} from './input/keyboard.js';
 import {delay} from './commonFunctions.js';
-import {terminal, notecard} from './programs.js';
+import {terminal, notecard} from './core/programs.js';
 
 // Global events that should be on every window
 export let globalEvents = [

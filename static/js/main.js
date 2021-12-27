@@ -1,14 +1,14 @@
-import {drawGFX, frameCount, frameTime, resetFrameTime} from './canvas.js';
+import {drawGFX, frameCount, frameTime, resetFrameTime} from './gfx/canvas.js';
 import {degrade} from './degrade.js';
 import {drawParticles} from './particles.js';
 
 // initialize the event handlers in the these files
-import * as k from './keyboard.js';
-import * as m from './mouse.js';
-import * as d from './degrade.js';
+import * as k from './input/keyboard.js';
+import * as m from './input/mouse.js';
+import * as d from './gfx/degrade.js';
 
 import { loadDefaultObjects, diceUpdate } from './commonObjects.js';
-import { pingSite } from './ping.js';
+import { pingSite } from './core/ping.js';
 export let objects = []; export let particles = [];
 export let objects_dice = [];
 // this should be in mouse.js but for some reason that literally cannot be imported anywhere except here,

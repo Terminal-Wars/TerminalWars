@@ -1,11 +1,11 @@
-import {notices, fatalError, error} from './main.js';
-import {drawFinal} from './canvas.js';
+import {notices, fatalError, error} from '../main.js';
+import {drawFinal} from '../gfx/canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
-import {dice} from './commonObjects.js';
-import {delay} from './commonFunctions.js';
-import {keyboardBuffer} from './keyboard.js';
-import {setOurTurn, initActivePlayers} from './player.js';
+import {dice} from '../commonObjects.js';
+import {delay} from '../commonFunctions.js';
+import {keyboardBuffer} from '../input/keyboard.js';
+import {setOurTurn, initActivePlayers} from '../player/player.js';
 
 let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
 const wsurl = wsproto + "://" + window.location.host.replace(":2191","",1) + ":2192";

@@ -1,13 +1,13 @@
-import { objects, objects_dice, debugBox, debugBox2, debugBox3,debugBox4, notices, mousePos } from './main.js';
-import { keyboardBuffer } from './keyboard.js';
+import { objects, objects_dice, debugBox, debugBox2, debugBox3,debugBox4, notices, mousePos } from '../core/main.js';
+import { keyboardBuffer } from '../input/keyboard.js';
 import { drawChars } from './charmap.js';
-import { userID, roomID } from './commands.js';
-import { replacePlaceholders, clamp } from './commonFunctions.js';
-import { globalEvents } from './commonObjects.js';
+import { userID, roomID } from '../core/commands.js';
+import { replacePlaceholders, clamp } from '../commonFunctions.js';
+import { globalEvents } from '../commonObjects.js';
 import { degrade} from './degrade.js';
-import { notecardCanvas } from './programs.js';
-import { fatalError } from './main.js';
-import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../gfx/images.js';
+import { notecardCanvas } from '../core/programs.js';
+import { fatalError } from '../main.js';
+import { diceblock, dice_font, cursor, testingBG, sad_poopotron } from '../../gfx/images.js';
 
 // The rendering method, which is WebGL by default.
 export let renderType = "2d";

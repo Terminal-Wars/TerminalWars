@@ -1,8 +1,8 @@
-import {objects, Objects, curObject} from './main.js';
-import {socket} from './socket.js';
-import {command, userID, roomID} from './commands.js';
-import {shiftYBy, terminalWinID} from './canvas.js';
-import {broadcast} from './commonFunctions.js';
+import {objects, Objects, curObject} from '../main.js';
+import {socket} from '../core/socket.js';
+import {command, userID, roomID} from '../core/commands.js';
+import {shiftYBy, terminalWinID} from '../gfx/canvas.js';
+import {broadcast} from '../commonFunctions.js';
 
 export let keyboardBuffer = [];
 export let savedLines = [""];

@@ -1,9 +1,9 @@
-import {socket, Actions, reload} from './socket.js';
-import {delay, solve} from './commonFunctions.js';
-import {command, userID, roomID} from './commands.js';
-import {keyboardBuffer} from './keyboard.js';
-import {ping} from './ping.js';
-import {replacePlaceholders, broadcast} from './commonFunctions.js';
+import {socket, Actions, reload} from '../core/socket.js';
+import {delay, solve} from '../commonFunctions.js';
+import {command, userID, roomID} from '../core/commands.js';
+import {keyboardBuffer} from '../input/keyboard.js';
+import {ping} from '../core/ping.js';
+import {replacePlaceholders, broadcast} from '../commonFunctions.js';
 
 export let diceSum = 0; export let foeDiceSum = 0;
 export let turn = -1; // Cached value for whoever's turn it is.
