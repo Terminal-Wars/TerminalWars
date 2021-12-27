@@ -1,8 +1,7 @@
-import {Objects, objects, curObject, mousePos, debugBox2, debugBox3} from './main.js';
-import {width, height, sWidth, sHeight, obWidth, obHeight} from './canvas.js';
-import { command, userID, roomID, privateCommand} from './commands.js';
-import {launch} from './programs.js';
-import {globalEvents} from './commonObjects.js';
+import {Objects, objects, curObject, mousePos, debugBox2, debugBox3} from '../main.js';
+import {width, height, sWidth, sHeight, obWidth, obHeight} from '../gfx/canvas.js';
+import { command, userID, roomID, privateCommand} from '../core/commands.js';
+import {launch} from '../core/programs.js';
 // The mouse position for other files to use.
 let mousePosHeld = [{"x":0,"y":0}];
 // mouse variables
@@ -31,7 +30,7 @@ async function windowUpdate(val) {
 				// Handle movement of windows via their title bar.
 				if(s["type"] == "window" && mousePosHeld["y"] >= s["y"]-s["height"] && mousePosHeld["y"] <= s["y"]-s["height"]+22) {winMoveMode = 1}
 				// Now we handle any events in the window.
-				async function eventUpdate() {for(let i in (s["events"] && globalEvents)) {
+				async function eventUpdate() {for(let i in s["events"]) {
 					if(val == "active") {tmpArray = mousePosHeld} else {tmpArray = mousePos};
 					let e = s["events"][i];
 					// Bit of a bizarre way of doing things, but it's less messy.

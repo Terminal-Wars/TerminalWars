@@ -1,10 +1,10 @@
-import {objects} from './main.js';
-import {testingBG, term_buttons} from '../gfx/images.js';
+import {objects} from '../main.js';
+import {testingBG, term_buttons} from '../../gfx/images.js';
 
 export let notecardCanvas = document.createElement('canvas');
 
 export async function terminal() {
-	objects.push({"id":objects.length,"type":"window","title":"Terminal","win_type":"terminal","x":400,"y":225,"width":200,"height":200,"z":objects.length+1,
+	objects.push({"id":objects.length,"type":"window","title":"Terminal","win_type":"terminal","x":400,"y":400,"width":200,"height":200,"z":objects.length+1,
 		"texts":{0: "", 1: ""}, "event_num":5,
 		"events": [{"type":"button","anchor": "positive","x":-58,"y":-25,"width":16,"height":16,"active":0,"hover":0,"enabled":"{ourTurn}","image":term_buttons,"ox":0,"oy":0,
 			"command":{"p_command": "activeDropdown"}},

@@ -1,14 +1,14 @@
-import {drawGFX, frameCount, frameTime, resetFrameTime} from './canvas.js';
-import {degrade} from './degrade.js';
-import {drawParticles} from './particles.js';
+import {drawGFX, frameCount, frameTime, resetFrameTime} from './gfx/canvas.js';
+import {drawParticles} from './gfx/particles.js';
 
 // initialize the event handlers in the these files
-import * as k from './keyboard.js';
-import * as m from './mouse.js';
-import * as d from './degrade.js';
+import * as k from './input/keyboard.js';
+import * as m from './input/mouse.js';
+import * as d from './gfx/degrade.js';
 
-import { loadDefaultObjects, diceUpdate } from './commonObjects.js';
-import { pingSite } from './ping.js';
+import { loadDefaultObjects } from './core/defaultObjects.js';
+import { diceUpdate } from './battle/dice.js';
+import { pingSite } from './core/ping.js';
 export let objects = []; export let particles = [];
 export let objects_dice = [];
 // this should be in mouse.js but for some reason that literally cannot be imported anywhere except here,
@@ -24,6 +24,9 @@ export let notices = document.querySelector(".notices");
 
 // fatal error
 export let fatalError = 0;
+
+// intervals
+let pingInterval; let fpsInterval; let loop60Interval;
 
 export class ObjectClass {
   amount() {
@@ -53,20 +56,39 @@ export class ObjectClass {
 export const Objects = new ObjectClass;
 
 async function loop() {
-  try {
-    drawGFX();
-    requestAnimationFrame(loop);
-    diceUpdate();
-  } catch(ex) {
-    error(ex.stack.replace(/\n/g,"<br>",4));
+  if(!fatalError) {
+    try {
+      drawGFX();
+      requestAnimationFrame(loop);
+    } catch(ex) {
+      error(ex.stack.replace(/\n/g,"<br>",4));
+    }
+  } else {
+    clearInterval(pingInterval);
+  }
+}
+
+async function loop60() {
+  if(!fatalError) {
+    try {
+      diceUpdate();
+     } catch {
+      error(ex.stack.replace(/\n/g,"<br>",4));
+     } 
+  } else {
+    clearInterval(loop60Interval);
   }
 }
 
 export let curObject = objects[0];
 
 function frameCounter() {
-  debugBox.innerHTML = frameTime+" FPS";
-  resetFrameTime();
+  if(!fatalError) {
+    debugBox.innerHTML = frameTime+" FPS";
+    resetFrameTime();
+  } else {
+    clearInterval(fpsInterval);
+  }
 }
 
 export function error(message) {
@@ -77,7 +99,8 @@ export function error(message) {
 
 loadDefaultObjects();
 pingSite();
-setInterval(pingSite,3000); // ping the site and update the ping value every three seconds.
+pingInterval = setInterval(pingSite,3000); // ping the site and update the ping value every three seconds.
 // we don't use requestAnimationFrame because this NEEDS to execute once a second
-setInterval(frameCounter, 1000);
+fpsInterval = setInterval(frameCounter, 1000);
+loop60Interval = setInterval(loop60, 1000/60);
 loop();

@@ -1,12 +1,12 @@
 import {socket, Actions} from './socket.js';
-import {keyboardBuffer} from './keyboard.js';
+import {keyboardBuffer} from '../input/keyboard.js';
 import {ping, pingSite} from './ping.js';
-import {dropdown, dice} from './commonObjects.js';
-import {mousePos, Objects} from './main.js';
-import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from './player.js';
-import {delay} from './commonFunctions.js';
-import {play, stop, setModule} from './micromod/interface.js';
-import {shiftYBy} from './canvas.js';
+import {dropdown} from '../core/dropdown.js';
+import {mousePos, Objects, error} from '../main.js';
+import {onActivate, initUserAndRoom, activePlayers, exampleUser, startBattle} from '../player/player.js';
+import {delay} from '../commonFunctions.js';
+import {play, stop, setModule} from '../audio/micromod/interface.js';
+import {shiftYBy} from '../gfx/canvas.js';
 export let userID = ""; export let roomID = "test"; 
 export let shakeNum = 0; export let usersInRoom;
 
@@ -50,9 +50,14 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 		case "list":
 			for (let n in activePlayers) {
 				let p = activePlayers[n];
-				keyboardBuffer.push(p.get("character")+" ("+p.get("name")+")\n");
+				console.log(p);
+				keyboardBuffer.push(p["character"]+" ("+p["name"]+")\n");
 			};
 			break;
+		case "dice":
+			socket.send(`{"type":"dicetest"}`);
+			break;
+		// test commands below
 		case "battle":
 			arg1 = arg1.replace("restart",true,5)
 			startBattle(arg1);
@@ -65,11 +70,10 @@ export async function command(cmd, arg1="", arg2="", arg3="") {
 			});
 			break;
 		case "debug":
-			if(window.location.hostname == "localhost" || window.location.hostname.startsWith("192.168")) {
-				Actions.MemoryDump(roomID);
-			} else {
-				keyboardBuffer.push(invalidMessage);
-			}
+			Actions.MemoryDump(roomID);
+			break;
+		case "stop":
+			socket.close();
 			break;
 		default: 
 			keyboardBuffer.push(invalidMessage);
@@ -86,7 +90,7 @@ export async function privateCommand(cmd, arg1="", arg2="", arg3="") {
 		case "active":
 			Objects.destroyAll("dropdown");
 			await exampleUser.then(function(resp) {
-				onActivate(resp["actives"][arg1]["name"], arg2);
+				onActivate(resp["actives"][arg1 || 0]["on_activate"][0], arg2);
 			});
 			break;
 		case "userDropdown":

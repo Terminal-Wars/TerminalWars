@@ -1,11 +1,13 @@
-import {objects, Objects, curObject} from './main.js';
-import {socket} from './socket.js';
-import {command, userID, roomID} from './commands.js';
-import {shiftYBy, terminalWinID} from './canvas.js';
-import {broadcast} from './commonFunctions.js';
+import {objects, Objects, curObject} from '../main.js';
+import {socket} from '../core/socket.js';
+import {command, userID, roomID} from '../core/commands.js';
+import {shiftYBy, terminalWinID} from '../gfx/canvas.js';
+import {broadcast} from '../commonFunctions.js';
+
 export let keyboardBuffer = [];
 export let savedLines = [""];
 export let savedLineNum = 0;
+
 document.addEventListener("keydown", async function(e) {
 	// On Firefox, doing a forward slash causes the search menu to come up
 	if(e.key == "/") e.preventDefault();
@@ -22,7 +24,7 @@ document.addEventListener("keydown", async function(e) {
 					} else {
 						if(roomID == "") {keyboardBuffer.push("You haven't joined a room. Use /join to set one.\n");}
 						if(userID == "") {keyboardBuffer.push("You haven't chosen a username. Use /nick to set one.\n");}
-						if(userID != "" && roomID != "") {socket.send(`{"type":"broadcast","data":{"userID":"${userID}", "roomID":"${roomID}", "text":"${curObject["texts"][1]}\\n"}}`);}
+						if(userID != "" && roomID != "") {broadcast(curObject["texts"][1], userID, false)}
 					}
 					savedLines.push(curObject["texts"][1]);
 					curObject["texts"][1] = curObject["texts"][1].replace(/^(.*)$/, "");

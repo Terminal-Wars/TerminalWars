@@ -1,4 +1,4 @@
-import { particles } from './main.js';
+import { particles } from '../main.js';
 import { ctx } from './canvas.js';
 import { drawChars } from './charmap.js';
 

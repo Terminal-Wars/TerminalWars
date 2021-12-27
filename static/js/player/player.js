@@ -1,10 +1,9 @@
-import {socket, Actions, reload} from './socket.js';
-import {dice} from './commonObjects.js';
-import {delay, solve} from './commonFunctions.js';
-import {command, userID, roomID} from './commands.js';
-import {keyboardBuffer} from './keyboard.js';
-import {ping} from './ping.js';
-import {replacePlaceholders, broadcast} from './commonFunctions.js';
+import {socket, Actions, reload} from '../core/socket.js';
+import {delay, solve} from '../commonFunctions.js';
+import {command, userID, roomID} from '../core/commands.js';
+import {keyboardBuffer} from '../input/keyboard.js';
+import {ping} from '../core/ping.js';
+import {replacePlaceholders, broadcast} from '../commonFunctions.js';
 
 export let diceSum = 0; export let foeDiceSum = 0;
 export let turn = -1; // Cached value for whoever's turn it is.
@@ -16,7 +15,7 @@ export let participants = []; // for when we only need the names (i.e. when send
 
 export let ourPlayer;
 
-export let exampleUser = fetch('static/js/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
+export let exampleUser = fetch('static/js/player/testPlayer.json').then(resp => resp.text()).then(resp => JSON.parse(resp));
 class User {
 	constructor(data) {
 		this.name = data["name"];
@@ -57,10 +56,11 @@ export async function initActivePlayers() {
 	let activePlayersTemp = [];
 	// Never cache this because it could be run at any point and there could be new players.
 	Actions.GetUsersOnline(roomID).then(r => {
-		console.log(r);
-		for (let n = 0; n < r; n++) {
-			let player = new User(r[n]["data"]["data"][n]);
-			activePlayersTemp.push(player);
+		for (let n = 0; n < r["data"].length; n++) {
+			Actions.GetUserInfo(roomID, Object.keys(r["data"][n])).then((r) => {
+				let player = new User(r["data"][0]["data"]);
+				activePlayersTemp.push(player);
+			});
 		}
 		// sort the array alphabetically
 		activePlayersTemp.sort();
@@ -81,13 +81,15 @@ export async function initPassives(user) {
 }
 
 export async function onActivate(active, target) {
+	let from = "ioi";
+	if(ourPlayer != undefined) from = ourPlayer.character;
 	socket.send(JSON.stringify({
 		"type":"calcactive",
 		"data": {
 			"roomID": roomID,
-			"name": active,
-			"from": ourPlayer.character,
-			"to": target,
+			"active": active,
+			"from": from,
+			"to": target || "all",
 		}
 	}));
 }
