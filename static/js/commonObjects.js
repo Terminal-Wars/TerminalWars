@@ -1,4 +1,4 @@
-import { objects, objects_dice, debugBox2 } from './core/main.js';
+import { objects, objects_dice, debugBox2 } from './main.js';
 import { ping } from './core/ping.js';
 import {width, height, obWidth, obHeight} from './gfx/canvas.js';
 import {keyboardBuffer} from './input/keyboard.js';
@@ -65,12 +65,8 @@ export async function dice(max, finalval, foe=false) {
 		let rand_pos = Math.round(Math.random() * 200) - 100;
 		// impromptu function so that we can use it asynchronously
 		let finalDie = 0;
-		async function dicePush() { 
-			let id = objects_dice.length;
-			objects_dice.push({"id":id,"type":"dice","x":rand_pos,"y":0,"animStep":1,"value":0,"opacity":1,"max":max,"finalval":finalval,"foe":foe});
-			return objects_dice[id];
-		};
-		return await dicePush().then(r => delay(2500, r));
+		let id = objects_dice.length;
+		objects_dice.push({"id":id,"type":"dice","x":rand_pos,"y":0,"animStep":1,"value":0,"opacity":1,"max":max,"finalval":finalval,"foe":foe});
 	/*} else {
 		let img = document.createElement('img');
 		img.style.position = 'absolute'; img.style.zIndex = document.body.length*22;
@@ -86,7 +82,7 @@ export async function dice(max, finalval, foe=false) {
 export async function diceUpdate() {
 	for(let n in objects_dice) {
 		let o = objects_dice[n];
-		const time = 60;
+		const time = 30;
 		let initY = o["y"];
 		// animation steps
 		if((o["animStep"] > 0 && o["animStep"] <= time/2-1) || (o["animStep"] >= time/2+1 && o["animStep"] <= time)) o["animStep"]++;

@@ -1,6 +1,6 @@
 import {ctx, ctxFinal, width, height, renderType} from './canvas.js';
-import {fatalError} from './main.js';
-import {average} from './commonFunctions.js';
+import {fatalError} from '../main.js';
+import {average} from '../commonFunctions.js';
 export async function degradeChunk(x,y,width,height,depth) {
 	if(renderType == "2d") {
 		let colorBuffer = [];

@@ -1,8 +1,8 @@
-import {Objects, objects, curObject, mousePos, debugBox2, debugBox3} from './main.js';
-import {width, height, sWidth, sHeight, obWidth, obHeight} from './canvas.js';
-import { command, userID, roomID, privateCommand} from './commands.js';
-import {launch} from './programs.js';
-import {globalEvents} from './commonObjects.js';
+import {Objects, objects, curObject, mousePos, debugBox2, debugBox3} from '../main.js';
+import {width, height, sWidth, sHeight, obWidth, obHeight} from '../gfx/canvas.js';
+import { command, userID, roomID, privateCommand} from '../core/commands.js';
+import {launch} from '../core/programs.js';
+import {globalEvents} from '../commonObjects.js';
 // The mouse position for other files to use.
 let mousePosHeld = [{"x":0,"y":0}];
 // mouse variables

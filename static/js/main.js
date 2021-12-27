@@ -1,6 +1,5 @@
 import {drawGFX, frameCount, frameTime, resetFrameTime} from './gfx/canvas.js';
-import {degrade} from './degrade.js';
-import {drawParticles} from './particles.js';
+import {drawParticles} from './gfx/particles.js';
 
 // initialize the event handlers in the these files
 import * as k from './input/keyboard.js';

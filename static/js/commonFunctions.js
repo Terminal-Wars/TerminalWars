@@ -1,4 +1,4 @@
-import {userID, roomID} from './core/ommands.js';
+import {userID, roomID} from './core/commands.js';
 import {socket} from './core/socket.js';
 
 export async function delay(time, variable=undefined) {

@@ -1,5 +1,5 @@
 import {objects} from '../main.js';
-import {testingBG, term_buttons} from '../gfx/images.js';
+import {testingBG, term_buttons} from '../../gfx/images.js';
 
 export let notecardCanvas = document.createElement('canvas');
 

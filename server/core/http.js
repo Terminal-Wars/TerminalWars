@@ -11,10 +11,23 @@ http.createServer(function(req, res) {
 		case "/favicon.ico": 	fileName = "./static/gfx/logo.ico"; break;
 		default: 				fileName = "."+req.url; break;
 	}
-	fs.access(fileName, (err) => {
-		if(err) {
-			res.writeHead(404);
-			res.end("Resource does not exist.");
+
+	fs.stat(fileName, (err, stats) => {
+		if(err || fileName.startsWith("./server")) {
+				res.writeHead(404);
+				res.end("Resource does not exist.");
+		}
+		else if(stats.isDirectory()) {
+			fs.readdir(fileName, (err, files) => {
+				if(err) {
+					res.writeHead(500);
+					res.end(err);
+				} else {
+					res.writeHead(200);
+					for(let n in files) res.write(files[n]+"\n");
+					res.end();
+				}
+			})
 		} else {
 			res.writeHead(200, {'Content-Type': mime.getType(fileName)});
 			const file = fs.createReadStream(fileName);
