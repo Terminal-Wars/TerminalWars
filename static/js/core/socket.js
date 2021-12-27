@@ -1,5 +1,5 @@
 import {notices, fatalError, error} from '../main.js';
-import {drawFinal} from '../gfx/canvas.js';
+import {drawFinal, appendTermHeight} from '../gfx/canvas.js';
 import {userID, roomID} from './commands.js';
 import {ping} from './ping.js';
 import {dice} from '../battle/dice.js';
@@ -61,6 +61,7 @@ socket.addEventListener('message', async function (event) {
             keyboardBuffer.push("\xFF"+text);
           } else {
             keyboardBuffer.push("\0\b"+speaker+"\n\xFF"+text);
+            appendTermHeight(1);
             lastSpeaker = speaker;
           }
         }
