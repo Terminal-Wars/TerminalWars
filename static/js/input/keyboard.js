@@ -12,7 +12,6 @@ document.addEventListener("keydown", async function(e) {
 	// On Firefox, doing a forward slash causes the search menu to come up
 	if(e.key == "/") e.preventDefault();
 	if(typeof curObject == "undefined") {Objects.setCurrent(Objects.highestZ());}
-	//if(curObject["win_type"] == "desktop") {Objects.setCurrent(Objects.highestZ());}
 	switch(curObject["win_type"]) {
 		// Terminal actions
 		case "terminal":
@@ -22,9 +21,10 @@ document.addEventListener("keydown", async function(e) {
 						let cv = curObject["texts"][1].replace("/","").split(" ");
 						command(cv[0], cv[1]);
 					} else {
-						if(roomID == "") {keyboardBuffer.push("You haven't joined a room. Use /join to set one.\n");}
-						if(userID == "") {keyboardBuffer.push("You haven't chosen a username. Use /nick to set one.\n");}
-						if(userID != "" && roomID != "") {broadcast(curObject["texts"][1], userID, false)}
+						// todo: a more sophisticated system that lets each window handle keyboard inputs differently
+						if(roomID == null) {keyboardBuffer.push("You haven't joined a room. Use /join to set one.\n");}
+						if(userID == null) {keyboardBuffer.push("You haven't chosen a username. Use /nick to set one.\n");}
+						if(userID != null && roomID != null) {broadcast(curObject["texts"][1], userID, false)}
 					}
 					savedLines.push(curObject["texts"][1]);
 					curObject["texts"][1] = curObject["texts"][1].replace(/^(.*)$/, "");

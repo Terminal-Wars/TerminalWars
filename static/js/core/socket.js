@@ -7,7 +7,8 @@ import {delay} from '../commonFunctions.js';
 import {keyboardBuffer} from '../input/keyboard.js';
 import {setOurTurn, initActivePlayers} from '../player/player.js';
 
-let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
+//let wsproto = window.location.protocol == "https:" ? "wss" : "ws";
+let wsproto = "ws"; 
 const wsurl = wsproto + "://" + window.location.host.replace(":2191","",1) + ":2192";
 export let socket = new WebSocket(wsurl);
 export let sockerBuffer = []; let buffer, newHealth;
