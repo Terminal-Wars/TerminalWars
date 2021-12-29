@@ -63,12 +63,6 @@ drawFinal.style.width = fWidth+"px"; drawFinal.style.maxWidth = fWidth+"px";
 drawFinal.style.height = fHeight+"px"; drawFinal.style.maxHeight = fHeight+"px";
 //canvas.style.maxWidth = window.innerWidth+"px"; canvas.style.maxHeight = Sheight+"px";
 
-// The cached screen, for avoiding redrawing things we don't need to.
-export let cachedImage = [];
-
-// Any images we need
-// todo: make a seperate .json file with all of these in it and just use arrays instead.
-
 // X and Y anchors, seperate from the ones from within the switch case in the drawGFX function.
 let xa, ya = 0;
 

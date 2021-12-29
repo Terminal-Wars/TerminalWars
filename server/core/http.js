@@ -1,9 +1,10 @@
 const http = require('http');
 const fs = require('fs');
 const mime = require('mime');
+const w = require('./ws.js');
+const u = require('url');
 
-console.log("HTTP server started");
-http.createServer(function(req, res) {
+const server = http.createServer(function(req, res) {
 	let fileName;
 	switch(req.url) {
 		case "/": 				fileName = "./templates/game.html"; break;
@@ -39,4 +40,17 @@ http.createServer(function(req, res) {
 			});
 		}
 	});
-}).listen(2191);
+});
+server.on('upgrade', function upgrade(req, socket, head) {
+	const { pathname } = u.parse(req.url);
+	if(pathname === "/socket") {
+		w.ws_s.handleUpgrade(req, socket, head, function done(ws) {
+			w.ws_s.emit('connection', ws, req);
+		})
+	} else {
+    	socket.destroy();
+  	}
+});
+server.listen(2191);
+
+module.exports = server;

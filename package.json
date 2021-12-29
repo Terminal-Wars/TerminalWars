@@ -18,6 +18,7 @@
   "homepage": "https://github.com/IoIxD/TerminalWars#readme",
   "dependencies": {
     "http": "^0.0.1-security",
+    "https": "^1.0.0",
     "mime": "^3.0.0",
     "ws": "^8.4.0"
   }

@@ -4,12 +4,12 @@ const a = require('../battle/active.js');
 const b = require('./broadcast.js');
 const c = require('../user/createuser.js');
 const d = require('../battle/dice.js');
-
+const h = require('./http.js');
 let clients = new Map();
 let memory = new Map();
 
 console.log("Websocket server started");
-const ws_s = new wsModule.Server({port: 2192});
+const ws_s = new wsModule.Server({ "server": h.server, noServer: true });
 
 ws_s.on('connection', (ws) => {
 	clients.set(ws, Date.now());
